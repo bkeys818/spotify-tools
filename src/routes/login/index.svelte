@@ -1,19 +1,30 @@
 <script context="module" lang="ts">
 	import type { Load } from './__types';
 	export const load: Load = ({ url }) => {
-		const scopes = url.searchParams.get('scopes')?.split(' ');
+		const scopes = url.searchParams.get('scopes')?.split(' ') ?? [];
 		return { props: { scopes } };
 	};
 </script>
 
 <script lang="ts">
 	import { createAuthorizeURL } from '$lib/spotify';
+	import { serialize, parse } from 'cookie';
+	import { base } from '$app/paths';
 
-	export const scopes: string[] = [];
+	export let scopes: string[];
+
+	function authorize() {
+		let allScopes = scopes;
+		const cookies = parse(document.cookie);
+		if (cookies.scopes) allScopes.push(...cookies.scopes.split(' '));
+		document.cookie = serialize('authorized_scopes', allScopes.join(' '), { maxAge: 3600, path: base });
+		location.href = createAuthorizeURL(scopes);
+	}
 </script>
 
 <!-- Spotify Logo -->
 <p>In order to use our tools, we need limited access to your Spotify account.</p>
-<button class="bg-gray-200 outline-1 px-3 py-2 rounded-lg" on:click={() => {
-	location.href = createAuthorizeURL(scopes)
-}}>Authorize</button>
+<button
+	class="bg-gray-200 outline-1 px-3 py-2 rounded-lg"
+	on:click={authorize}>Authorize</button
+>

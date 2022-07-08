@@ -2,13 +2,12 @@ import { serialize } from 'cookie';
 import { base } from '$app/paths';
 
 export function navigateToLogin(scopes: string[]) {
-	document.cookie = serialize('active_module', location.pathname, {
-		expires: new Date(Date.now() + 360_000)
-	});
+	const path = base + '/login';
+	document.cookie = serialize('active_module', location.pathname, { maxAge: 120, path });
 	location.href =
 		location.origin +
-		base +
-		'/login?' +
+		path +
+		'?' +
 		new URLSearchParams({
 			scopes: scopes.join(' ')
 		}).toString();
