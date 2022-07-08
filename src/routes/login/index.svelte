@@ -15,5 +15,5 @@
 <!-- Spotify Logo -->
 <p>In order to use our tools, we need limited access to your Spotify account.</p>
 <button class="bg-gray-200 outline-1 px-3 py-2 rounded-lg" on:click={() => {
-	createAuthorizeURL(scopes)
+	location.href = createAuthorizeURL(scopes)
 }}>Authorize</button>

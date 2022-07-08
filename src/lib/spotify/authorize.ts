@@ -1,8 +1,7 @@
 import { credential } from '.';
 
 export function createAuthorizeURL(scopes: string[]) {
-	location.href =
-		'https://accounts.spotify.com/authorize?' +
+	return 'https://accounts.spotify.com/authorize?' +
 		new URLSearchParams({
 			response_type: 'code',
 			client_id: credential.clientId,
