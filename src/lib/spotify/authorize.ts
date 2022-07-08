@@ -12,7 +12,7 @@ export function createAuthorizeURL(scopes: string[]) {
 		}).toString();
 }
 
-export async function getAccessToken(code: string) {
+export async function getAccessToken(code: string): Promise<AccessToken> {
 	// check state
 	const { VITE_CLIENT_SECRET } = import.meta.env;
 	const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -36,4 +36,11 @@ export async function getAccessToken(code: string) {
 	} else {
 		throw new Error(`Failed to authorize Spotify! Status text: '${response.statusText}'.`);
 	}
+}
+
+interface AccessToken {
+	readonly access_token: string
+	readonly token_type: 'Bearer'
+	readonly expires_in: number
+	readonly refresh_token: string
 }
