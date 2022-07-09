@@ -12,7 +12,7 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		paths: {
-			base: '/spotify-tools'
+			base: '/spotify'
 		}
 	}
 };
