@@ -14,10 +14,14 @@ export const post: RequestHandler = async ({ request }) => {
 			description: 'Created at "benkeys.com/spotify/tools".'
 		})
 	]);
-	await spotify.addTracksToPlaylist(
-		playlist.body.id,
-		tracks.map((track) => track.track.uri)
-	);
+
+	const maxTracks = 100;
+	for (let i = 0; i < tracks.length; i += maxTracks) {
+		await spotify.addTracksToPlaylist(
+			playlist.body.id,
+			tracks.slice(i, i + maxTracks).map((track) => track.track.uri)
+		);
+	}
 
 	return {
 		status: 200,
