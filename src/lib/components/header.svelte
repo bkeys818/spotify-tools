@@ -7,10 +7,6 @@
 				<p class="text-2xl font-extrabold tracking-tight text-white">Spotify Tools</p>
 			</div>
 			<div class="absolute inset-y-0 right-0 flex items-center">
-				<a
-					class="text-lg font-medium text-gray-100 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md"
-					href="./">Log In</a
-				>
 			</div>
 		</div>
 	</div>

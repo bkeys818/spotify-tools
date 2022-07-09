@@ -10,7 +10,7 @@
 </script>
 
 <script lang="ts">
-	import { navigateToLogin } from '../login/_link';
+	import { navigateToAuthorize } from '../authorize/_link';
 	export let isAuthenticated: boolean;
 </script>
 
@@ -24,6 +24,6 @@
 	class="bg-gray-200 outline-1 disabled:bg-gray-600 px-3 py-2 rounded-lg"
 	disabled={isAuthenticated}
 	on:click={() => {
-		navigateToLogin(requredScopes);
+		navigateToAuthorize(requredScopes);
 	}}>Authenticate</button
 >
