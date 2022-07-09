@@ -2,7 +2,7 @@ import type { RequestHandler } from './__types/callback';
 import { getAccessToken } from '$lib/spotify';
 import { base } from '$app/paths';
 import { parse } from 'cookie';
-import * as seriazlizeCookie from '../../_serialize-cookies'
+import * as seriazlizeCookie from '../_cookie'
 
 export const get: RequestHandler = async ({ url, request }) => {
 	const code = url.searchParams.get('code');
