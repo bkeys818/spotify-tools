@@ -8,16 +8,13 @@
 
 <script lang="ts">
 	import { createAuthorizeURL } from '$lib/spotify';
-	import { serialize, parse } from 'cookie';
+	import * as cookie from '../_cookie';
 	import { base } from '$app/paths';
 
 	export let scopes: string[];
 
 	function authorize() {
-		let allScopes = scopes;
-		const cookies = parse(document.cookie);
-		if (cookies.scopes) allScopes.push(...cookies.scopes.split(' '));
-		document.cookie = serialize('authorized_scopes', allScopes.join(' '), { maxAge: 3600, path: base });
+		document.cookie = cookie.spotifyScopes.serialize(scopes, document.cookie)
 		location.href = createAuthorizeURL(scopes);
 	}
 </script>

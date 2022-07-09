@@ -2,7 +2,7 @@ import type { RequestHandler } from './__types/callback';
 import { getAccessToken } from '$lib/spotify';
 import { base } from '$app/paths';
 import { parse } from 'cookie';
-import * as seriazlizeCookie from '../_cookie'
+import * as cookie from '../_cookie'
 
 export const get: RequestHandler = async ({ url, request }) => {
 	const code = url.searchParams.get('code');
@@ -22,8 +22,8 @@ export const get: RequestHandler = async ({ url, request }) => {
 		status: 307,
 		headers: {
 			'set-cookie': [
-				seriazlizeCookie.spotifyRefreshToken(response),
-				seriazlizeCookie.spotifyAccessToken(response)
+				cookie.spotifyRefreshToken.serialize(response.refresh_token),
+				cookie.spotifyAccessToken.serialize(response)
 			],
 			location: cookies.active_module ?? url.origin + base
 		}

@@ -1,14 +1,68 @@
-import { parse, serialize, type CookieSerializeOptions } from 'cookie';
-import type { AccessTokenResponse, RefreshTokenResponse } from '$lib/spotify';
+import cookie from 'cookie';
 import { base } from '$app/paths';
+import type { AccessTokenResponse } from '$lib/spotify';
 
-const cookieOptions: CookieSerializeOptions = { path: base };
+export const spotifyRefreshToken = createContext('spotify_refresh_token', {
+	path: base,
+	maxAge: 7776000
+});
 
-export const spotifyRefreshToken = (response: RefreshTokenResponse) =>
-	serialize('spotify_refresh_token', response.refresh_token, { ...cookieOptions, maxAge: 7776000 });
-
-export const spotifyAccessToken = (response: AccessTokenResponse) =>
-	serialize('spotify_access_token', response.access_token, {
-		...cookieOptions,
+export const spotifyAccessToken = createContext(
+	'spotify_access_token',
+	(response: AccessTokenResponse) => ({
+		value: response.access_token,
+		path: base,
 		maxAge: response.expires_in
-	});
+	})
+);
+
+export const spotifyScopes = createContext(
+	'spotify_scopes',
+	(scopes: string[], cookieStr: Document['cookie']) => {
+		let allScopes = scopes;
+		const cookies = cookie.parse(cookieStr);
+		if (cookies.scopes) allScopes.push(...cookies.scopes.split(' '));
+		return { value: allScopes.join(' '), maxAge: 3600, path: base };
+	}
+);
+
+export const activeToolPath = createContext('active_tool_path', {
+	maxAge: 120,
+	path: base + '/authorize'
+});
+
+function createContext(
+	name: string,
+	serialize?: cookie.CookieSerializeOptions,
+	parse?: cookie.CookieParseOptions
+): {
+	serialize: (value: string) => ReturnType<typeof cookie.serialize>;
+	parse: () => ReturnType<typeof cookie.parse>;
+};
+function createContext<P extends any[]>(
+	name: string,
+	serialize?: (...params: P) => cookie.CookieSerializeOptions & { value: string },
+	parse?: cookie.CookieParseOptions
+): {
+	serialize: (...params: P) => ReturnType<typeof cookie.serialize>;
+	parse: () => ReturnType<typeof cookie.parse>;
+};
+function createContext<P extends any[]>(
+	name: string,
+	serialize?:
+		| cookie.CookieSerializeOptions
+		| ((...params: P) => cookie.CookieSerializeOptions & { value: string }),
+	parse?: cookie.CookieParseOptions
+) {
+	return {
+		serialize:
+			typeof serialize == 'function'
+				? (...params: P) =>
+						() => {
+							const { value, ...options } = serialize(...params);
+							return cookie.serialize(name, value, options);
+						}
+				: (value: string) => cookie.serialize(name, value, serialize),
+		parse: () => cookie.parse(name, parse)
+	};
+}

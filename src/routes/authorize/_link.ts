@@ -1,13 +1,11 @@
-import { serialize } from 'cookie';
+import * as cookie from '../_cookie';
 import { base } from '$app/paths';
 
 export function navigateToAuthorize(scopes: string[]) {
-	const path = base + '/authorize';
-	document.cookie = serialize('active_module', location.pathname, { maxAge: 120, path });
+	document.cookie = cookie.activeToolPath.serialize(location.pathname);
 	location.href =
 		location.origin +
-		path +
-		'?' +
+		base + '/authorize?' +
 		new URLSearchParams({
 			scopes: scopes.join(' ')
 		}).toString();
