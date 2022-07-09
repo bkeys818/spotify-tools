@@ -12,6 +12,7 @@
 <script lang="ts">
 	import { navigateToAuthorize } from '../authorize/_link';
 	export let isAuthenticated: boolean;
+	let playlist: string | undefined = undefined;
 </script>
 
 <!-- <h2>Public "Liked Songs" Playlist</h2>
@@ -27,3 +28,17 @@
 		navigateToAuthorize(requredScopes);
 	}}>Authenticate</button
 >
+<button
+	class="bg-gray-200 outline-1 disabled:bg-gray-600 px-3 py-2 rounded-lg"
+	disabled={!isAuthenticated}
+	on:click={() => {
+		console.log('clicked');
+		fetch('./public-liked-songs-playlist', { method: 'POST', headers: { 'accept': 'application/json' } })
+			.then(res => res.json())
+			.then(json => { playlist = json.playlist })
+			.catch(console.error);
+	}}>Create Playlist</button
+>
+{#if playlist}
+	<a href={playlist}>New Playlist!</a>
+{/if}

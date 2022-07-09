@@ -2,6 +2,8 @@ import cookie from 'cookie';
 import { base } from '$app/paths';
 import type { AccessTokenResponse } from '$lib/spotify';
 
+export const parse = cookie.parse;
+
 export const spotifyRefreshToken = createContext('spotify_refresh_token', {
 	path: base,
 	maxAge: 7776000
@@ -37,7 +39,7 @@ function createContext(
 	parse?: cookie.CookieParseOptions
 ): {
 	serialize: (value: string) => ReturnType<typeof cookie.serialize>;
-	parse: () => ReturnType<typeof cookie.parse>;
+	parse: (value: string) => string | undefined;
 };
 function createContext<P extends any[]>(
 	name: string,
@@ -45,7 +47,7 @@ function createContext<P extends any[]>(
 	parse?: cookie.CookieParseOptions
 ): {
 	serialize: (...params: P) => ReturnType<typeof cookie.serialize>;
-	parse: () => ReturnType<typeof cookie.parse>;
+	parse: (value: string) => string | undefined;
 };
 function createContext<P extends any[]>(
 	name: string,
@@ -57,12 +59,11 @@ function createContext<P extends any[]>(
 	return {
 		serialize:
 			typeof serialize == 'function'
-				? (...params: P) =>
-						() => {
-							const { value, ...options } = serialize(...params);
-							return cookie.serialize(name, value, options);
-						}
+				? (...params: P) => {
+						const { value, ...options } = serialize(...params);
+						return cookie.serialize(name, value, options);
+				  }
 				: (value: string) => cookie.serialize(name, value, serialize),
-		parse: () => cookie.parse(name, parse)
+		parse: (value: string) => cookie.parse(value, parse)[name] as string | undefined
 	};
 }
