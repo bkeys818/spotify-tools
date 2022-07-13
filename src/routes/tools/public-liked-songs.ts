@@ -1,19 +1,23 @@
 import type { RequestHandler } from './__types/public-liked-songs';
 import * as cookie from '../_cookie';
 import SpotifyWebApi from 'spotify-web-api-node';
+import { setDataFor } from '$lib/firebase/database'
 
 export const post: RequestHandler = async ({ request }) => {
 	const accessToken = cookie.spotifyAccessToken.parse(request.headers.get('cookie') ?? '');
 	if (!accessToken) return { status: 401 };
 
 	const spotify = new SpotifyWebApi({ accessToken });
-	const [tracks, playlist] = await Promise.all([
+	const [user, tracks, playlist] = await Promise.all([
+		spotify.getMe(),
 		getAllMySavedTracks(spotify),
 		spotify.createPlaylist('Liked Songs (Public)', {
 			public: true,
 			description: 'Created at "benkeys.com/spotify/tools".'
 		})
 	]);
+
+	setDataFor('public-liked-songs', user.body.id, { playlist_id: playlist.body.id })
 
 	const maxTracks = 100;
 	for (let i = 0; i < tracks.length; i += maxTracks) {
