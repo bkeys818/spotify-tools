@@ -1,4 +1,4 @@
-import type { RequestHandler } from './__types/public-liked-songs-playlist';
+import type { RequestHandler } from './__types/public-liked-songs';
 import * as cookie from '../_cookie';
 import SpotifyWebApi from 'spotify-web-api-node';
 
