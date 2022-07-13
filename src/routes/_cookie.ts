@@ -28,7 +28,7 @@ export const spotifyScopes = createContext(
 	}
 );
 
-export const activeToolPath = createContext('active_tool_path', {
+export const directedFromPath = createContext('directed_from_path', {
 	maxAge: 120,
 	path: base + '/authorize'
 });
@@ -38,8 +38,8 @@ function createContext(
 	serialize?: cookie.CookieSerializeOptions,
 	parse?: cookie.CookieParseOptions
 ): {
-	serialize: (value: string) => ReturnType<typeof cookie.serialize>;
-	parse: (value: string) => string | undefined;
+	serialize: (value: string | null) => ReturnType<typeof cookie.serialize>;
+	parse: (value: string | null) => string | undefined;
 };
 function createContext<P extends any[]>(
 	name: string,
@@ -47,7 +47,7 @@ function createContext<P extends any[]>(
 	parse?: cookie.CookieParseOptions
 ): {
 	serialize: (...params: P) => ReturnType<typeof cookie.serialize>;
-	parse: (value: string) => string | undefined;
+	parse: (value: string | null) => string | undefined;
 };
 function createContext<P extends any[]>(
 	name: string,
@@ -64,6 +64,7 @@ function createContext<P extends any[]>(
 						return cookie.serialize(name, value, options);
 				  }
 				: (value: string) => cookie.serialize(name, value, serialize),
-		parse: (value: string) => cookie.parse(value, parse)[name] as string | undefined
+		parse: (value: string | null) =>
+			value ? (cookie.parse(value, parse)[name] as string | undefined) : undefined
 	};
 }

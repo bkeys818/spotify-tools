@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
 	import { sessionIsAuthorized } from '$lib/spotify';
-	import type { Load } from './__types/public-liked-songs-playlist';
+	import type { Load } from './__types/public-liked-songs';
 	const requredScopes = ['user-library-read', 'playlist-modify-public'];
 	export const load: Load = ({ session }) => ({
 		props: {
@@ -33,7 +33,7 @@
 	disabled={!isAuthenticated}
 	on:click={() => {
 		console.log('clicked');
-		fetch('./public-liked-songs-playlist', { method: 'POST', headers: { 'accept': 'application/json' } })
+		fetch('./public-liked-songs', { method: 'POST', headers: { 'accept': 'application/json' } })
 			.then(res => res.json())
 			.then(json => { playlist = json.playlist })
 			.catch(console.error);
