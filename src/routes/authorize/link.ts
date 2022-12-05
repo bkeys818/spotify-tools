@@ -1,4 +1,4 @@
-import * as cookie from '../_cookie';
+import * as cookie from '../cookie';
 import { base } from '$app/paths';
 
 export function navigateToAuthorize(scopes: string[]) {

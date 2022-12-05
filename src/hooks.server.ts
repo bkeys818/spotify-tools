@@ -1,7 +1,7 @@
 import type { Handle, GetSession } from '@sveltejs/kit';
 import { refreshAccessToken } from '$lib/spotify';
 import { parse } from 'cookie';
-import * as cookie from './routes/_cookie';
+import * as cookie from './routes/cookie';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const cookies = parse(event.request.headers.get('cookie') ?? '');
