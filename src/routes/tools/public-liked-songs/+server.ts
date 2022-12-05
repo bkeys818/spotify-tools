@@ -1,8 +1,9 @@
-import type { RequestHandler } from './__types/public-liked-songs';
-import * as cookie from '../_cookie';
+import type { RequestHandler } from './$types';
+import * as cookie from '../../cookie';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { setDataFor } from '$lib/firebase/database'
 
+// FIXME
 export const post: RequestHandler = async ({ request }) => {
 	const accessToken = cookie.spotifyAccessToken.parse(request.headers.get('cookie') ?? '');
 	if (!accessToken) return { status: 401 };

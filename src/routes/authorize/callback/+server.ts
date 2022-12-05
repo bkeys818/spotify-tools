@@ -1,7 +1,7 @@
-import type { RequestHandler } from './__types/callback';
+import type { RequestHandler } from '../../../../.svelte-kit/types/src/routes/authorize/__types/callback';
 import { getAccessToken } from '$lib/spotify';
 import { base } from '$app/paths';
-import * as cookie from '../_cookie'
+import * as cookie from '../../cookie'
 import { setDataFor } from '$lib/firebase/database'
 import spotifyWebApi from 'spotify-web-api-node'
 
