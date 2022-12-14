@@ -14,13 +14,13 @@ export function createAuthorizeURL(scopes: string[]) {
 }
 
 function tokenRequest(body: [string, string][]) {
-	const { VITE_CLIENT_SECRET } = import.meta.env;
+	const { CLIENT_SECRET } = import.meta.env;
 	return fetch('https://accounts.spotify.com/api/token', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',
 			Authorization:
-				'Basic ' + Buffer.from(credential.clientId + ':' + VITE_CLIENT_SECRET).toString('base64')
+				'Basic ' + Buffer.from(credential.clientId + ':' + CLIENT_SECRET).toString('base64')
 		},
 		body: body.map((a) => a.join('=')).join('&')
 	});
