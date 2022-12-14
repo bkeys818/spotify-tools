@@ -6,5 +6,5 @@ export const load: PageLoad = ({  }) => ({
         // FIXME
         // isAuthenticated: sessionIsAuthorized(session, ['user-library-read', 'playlist-modify-public'])
     },
-    isAuthenticated: true
+    isAuthenticated: false
 });
