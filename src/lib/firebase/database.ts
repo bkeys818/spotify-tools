@@ -1,9 +1,10 @@
 import { app } from '.';
 import { getFirestore, connectFirestoreEmulator, setDoc, doc } from 'firebase/firestore';
+import { dev } from '$app/environment'
 
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
-if (import.meta.env.DEV) connectFirestoreEmulator(db, 'localhost', 8080);
+if (dev) connectFirestoreEmulator(db, 'localhost', 8080);
 
 export function setDataFor<T extends keyof Tools>(tool: T, userId: string, data: Partial<Tools[T]>) {
 	return setDoc(doc(db, tool, userId), data, { merge: true });

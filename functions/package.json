@@ -4,6 +4,7 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
+    "dev": "npm run build && firebase use dev && firebase emulators:start",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
@@ -15,7 +16,7 @@
   "main": "lib/index.js",
   "dependencies": {
     "firebase-admin": "^10.2.0",
-    "firebase-functions": "^3.21.0",
+    "firebase-functions": "^4.1.1",
     "spotify-web-api-node": "^5.0.2"
   },
   "devDependencies": {
