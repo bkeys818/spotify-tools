@@ -3,10 +3,5 @@ import { base } from '$app/paths';
 
 export function navigateToAuthorize(scopes: string[]) {
 	document.cookie = cookie.directedFromPath.serialize(location.pathname);
-	location.href =
-		base +
-		'/authorize?' +
-		new URLSearchParams({
-			scopes: scopes.join(' ')
-		}).toString();
+	location.href = base + '/authorize?scopes=' + encodeURIComponent(scopes.join(' '));
 }
