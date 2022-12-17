@@ -4,15 +4,15 @@
 	import { directedFromPath } from '../cookie'
 	import { error } from '@sveltejs/kit';
 	import { authorizeTool } from '$lib/firebase/functions'
-	import type { PageData } from './$types'
-	export let data: PageData
 
 	onMount(async () => {
-		if (data.code) {
+		const searchParams = getSearchParams()
+		// check scope
+		if (searchParams.code) {
 			const toolPath = directedFromPath.parse(document.cookie)
 			if (toolPath) {
 				const tool = toolPath.slice(toolPath.lastIndexOf('/') + 1)
-				await authorizeTool({ code: data.code, tool })
+				await authorizeTool({ code: searchParams.code, tool })
 				location.href = toolPath
 			}
 			else throw error(404, `I'm lost! Where did you come from?`)
@@ -20,14 +20,17 @@
 	})
 
 	function authorize() {
-		const scopes: string[] = []
-		if (location.search) {
-			for (const param of location.search.split('&')) {
-				const [key, value] = param.split('=')
-				if (key == 'scopes') scopes.push(...value.split(' '))
-			}
-		}
+		const searchParams = getSearchParams()
+		const scopes: string[] = (searchParams.scopes ?? '').split(' ')
 		location.href = createAuthorizeURL(scopes);
+	}
+
+	function getSearchParams() {
+		return location.search
+			.slice(1)
+			.split('&')
+			.map((v) => v.split('='))
+			.reduce((pre: Partial<Record<string,string>>, [key, value]) => ({ ...pre, [key]: value }), {});
 	}
 </script>
 
