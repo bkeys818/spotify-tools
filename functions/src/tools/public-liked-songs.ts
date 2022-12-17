@@ -1,24 +1,35 @@
 import { handleResponse } from '../global';
 import SpotifyWebApi from 'spotify-web-api-node';
 
-export async function update(
-	ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>
-) {
-	// get data from document
-	const doc = await ref.get();
-	const data = doc.data();
-	if (!data) return;
-	const { playlist_id, refresh_token } = data;
+export interface Data {
+	refresh_token: string
+	playlist_id?: string
+}
 
-	// authorize
-	const spotify = new SpotifyWebApi({
-		clientId: process.env.SPOTIFY_CLIENT_ID,
-		clientSecret: process.env.SPOTIFY_CLIENT_SECRET
-	});
-	spotify.setRefreshToken(refresh_token);
-	const { access_token } = await handleResponse(() => spotify.refreshAccessToken());
-	spotify.setAccessToken(access_token);
+export async function create(refresh_token: string) {
+	const spotify = await authorize(refresh_token);
+	const [playlists, user] = await Promise.all([
+		getAllPlaylist(spotify),
+		handleResponse(() => spotify.getMe())
+	]);
+	const playlistName = name(user.display_name);
+	for (const playlist of playlists) {
+		if (playlist.name == playlistName) return playlist.id;
+	}
+	// if playlist doesn't exist
+	const playlist = await handleResponse(() =>
+		spotify.createPlaylist(playlistName, {
+			description: description(),
+			public: true
+		})
+	);
+	return playlist.id;
+}
 
+export async function update(refresh_token: string, playlist_id: string) {
+	const spotify = await authorize(refresh_token);
+
+	// TODO: remove playlist_id if doesn't work
 	const [playlistTracks, savedTracks] = await Promise.all([
 		getPlaylistTracks(spotify, playlist_id),
 		getSavedTracks(spotify)
@@ -45,6 +56,26 @@ export async function update(
 	await Promise.all(updateMethods.map(handleResponse));
 }
 
+function name(userName: string = 'User') {
+	return userName + "'s Liked Songs";
+}
+function description() {
+	const date = new Date().toLocaleDateString('en-US');
+	return `Created at "benkeys.com/spotify/tools".\nLast updated on ${date}.`;
+}
+
+/** This function must be run somewhere with access to `SPOTIFY_CLIENT_ID` & `SPOTIFY_CLIENT_SECRET`. */
+async function authorize(refresh_token: string) {
+	const spotify = new SpotifyWebApi({
+		clientId: process.env.SPOTIFY_CLIENT_ID,
+		clientSecret: process.env.SPOTIFY_CLIENT_SECRET
+	});
+	spotify.setRefreshToken(refresh_token);
+	const { access_token } = await handleResponse(() => spotify.refreshAccessToken());
+	spotify.setAccessToken(access_token);
+	return spotify;
+}
+
 async function getPlaylistTracks(spotify: SpotifyWebApi, playlistId: string) {
 	const items: SpotifyApi.PlaylistTrackObject[] = [];
 	let total = 1;
@@ -64,14 +95,25 @@ async function getPlaylistTracks(spotify: SpotifyWebApi, playlistId: string) {
 }
 
 async function getSavedTracks(spotify: SpotifyWebApi) {
-	const items: SpotifyApi.SavedTrackObject[] = [];
-	let total = 1;
-	while (items.length < total) {
-		const response = await handleResponse(() =>
-			spotify.getMySavedTracks({ limit: 50, offset: items.length })
-		);
-		total = response.total;
-		items.push(...response.items);
-	}
+	const limit = 50;
+	const { items, total } = await handleResponse(() => spotify.getMySavedTracks({ limit }));
+	let reqN = [...Array(Math.ceil(total / limit)).keys()]; // number of request that need to be run
+	reqN.shift(); // first request has already been run
+	const responses = await Promise.all(
+		reqN.map((i) => handleResponse(() => spotify.getMySavedTracks({ limit, offset: limit * i })))
+	);
+	items.push(...responses.flatMap((res) => res.items));
 	return items.map((item) => item.track);
+}
+
+async function getAllPlaylist(spotify: SpotifyWebApi) {
+	const limit = 50;
+	const { items, total } = await handleResponse(() => spotify.getUserPlaylists({ limit }));
+	let reqN = [...Array(Math.ceil(total / limit)).keys()]; // number of request that need to be run
+	reqN.shift(); // first request has already been run
+	const responses = await Promise.all(
+		reqN.map((i) => handleResponse(() => spotify.getUserPlaylists({ limit, offset: limit * i })))
+	);
+	items.push(...responses.flatMap((res) => res.items));
+	return items;
 }
