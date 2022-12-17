@@ -10,10 +10,7 @@ const config = {
 	}),
 
 	kit: {
-		adapter: adapter(),
-		paths: {
-			base: '/spotify'
-		}
+		adapter: adapter()
 	}
 };
 
