@@ -1,7 +1,7 @@
-import { handleResponse } from './global';
+import { handleResponse } from '../global';
 import SpotifyWebApi from 'spotify-web-api-node';
 
-export async function updatePublicLikedSongs(
+export async function update(
 	ref: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>
 ) {
 	// get data from document
