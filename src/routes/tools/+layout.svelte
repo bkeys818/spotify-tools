@@ -1,6 +1,24 @@
-<script>
+<script lang="ts">
 	import { page } from '$app/stores';
-	import { createAuthorizeURL } from '$lib/spotify';
+	import { navigateToAuthorize } from '../authorize/link';
+	import { onMount } from 'svelte';
+	import { authorizeTool } from '$lib/firebase/functions'
+
+	onMount(async () => {
+		const searchParams = getSearchParams()
+		if (searchParams.code) {
+			const tool = location.pathname.slice(location.pathname.lastIndexOf('/') + 1)
+			await authorizeTool({ code: searchParams.code, tool })
+		}
+	})
+
+	function getSearchParams() {
+		return location.search
+			.slice(1)
+			.split('&')
+			.map((v) => v.split('='))
+			.reduce((pre: Partial<Record<string,string>>, [key, value]) => ({ ...pre, [key]: value }), {});
+	}
 </script>
 
 <svelte:head>
@@ -16,7 +34,7 @@
 	<button
 		class="bg-gray-200 outline-1 px-3 py-2 rounded-lg"
 		on:click={() => {
-			location.href = createAuthorizeURL($page.data.scopes);
+			navigateToAuthorize($page.data.scopes);
 		}}>Authorize</button
 	>
 {/if}
