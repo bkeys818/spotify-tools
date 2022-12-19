@@ -13,6 +13,7 @@ export const updateAllPublicLikedSongs = functions
 				const data = doc.data() as publicLikedSongs.Data;
 				if (data.playlist_id)
 					return await publicLikedSongs.update(data.refresh_token, data.playlist_id);
+				else return
 			})
 		);
 	});
