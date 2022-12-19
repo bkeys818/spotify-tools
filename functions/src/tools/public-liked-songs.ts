@@ -2,8 +2,8 @@ import { handleResponse } from '../global';
 import SpotifyWebApi from 'spotify-web-api-node';
 
 export interface Data {
-	refresh_token: string
-	playlist_id?: string
+	refresh_token: string;
+	playlist_id?: string;
 }
 
 export async function create(refresh_token: string) {
@@ -44,16 +44,21 @@ export async function update(refresh_token: string, playlist_id: string) {
 
 	const updateMethods: Parameters<typeof handleResponse>[0][] = [];
 	if (removedTracks.length > 0)
-		updateMethods.push(() => spotify.removeTracksFromPlaylist(playlist_id, removedTracks));
+		forEvery(removedTracks, 100, (tracks) => {
+			updateMethods.push(() => spotify.removeTracksFromPlaylist(playlist_id, tracks));
+		});
 	if (addedTracks.length > 0)
-		updateMethods.push(() =>
-			spotify.addTracksToPlaylist(
-				playlist_id,
-				addedTracks.map((track) => track.uri)
-			)
-		);
+		forEvery(addedTracks, 100, (tracks) => {
+			updateMethods.push(() =>
+				spotify.addTracksToPlaylist(
+					playlist_id,
+					tracks.map((track) => track.uri)
+				)
+			);
+		});
 
 	await Promise.all(updateMethods.map(handleResponse));
+	return playlist_id;
 }
 
 function name(userName: string = 'User') {
@@ -116,4 +121,10 @@ async function getAllPlaylist(spotify: SpotifyWebApi) {
 	);
 	items.push(...responses.flatMap((res) => res.items));
 	return items;
+}
+
+async function forEvery<T>(items: T[], limit: number, method: (items: T[]) => void) {
+	for (let i = 0; i < items.length; i += limit) {
+		method(items.slice(i, i + limit));
+	}
 }
