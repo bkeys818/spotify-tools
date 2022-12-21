@@ -1,5 +1,5 @@
 <script lang="ts">
-	export let borderWidth: number = 6
+	export let borderWidth = 6
 </script>
 
 <div class="spin-ring">

@@ -61,7 +61,7 @@ export async function update(refresh_token: string, playlist_id: string) {
 	return playlist_id
 }
 
-function name(userName: string = 'User') {
+function name(userName = 'User') {
 	return userName + "'s Liked Songs"
 }
 function description() {
@@ -102,7 +102,7 @@ async function getPlaylistTracks(spotify: SpotifyWebApi, playlistId: string) {
 async function getSavedTracks(spotify: SpotifyWebApi) {
 	const limit = 50
 	const { items, total } = await handleResponse(() => spotify.getMySavedTracks({ limit }))
-	let reqN = [...Array(Math.ceil(total / limit)).keys()] // number of request that need to be run
+	const reqN = [...Array(Math.ceil(total / limit)).keys()] // number of request that need to be run
 	reqN.shift() // first request has already been run
 	const responses = await Promise.all(
 		reqN.map(i => handleResponse(() => spotify.getMySavedTracks({ limit, offset: limit * i })))
@@ -114,7 +114,7 @@ async function getSavedTracks(spotify: SpotifyWebApi) {
 async function getAllPlaylist(spotify: SpotifyWebApi) {
 	const limit = 50
 	const { items, total } = await handleResponse(() => spotify.getUserPlaylists({ limit }))
-	let reqN = [...Array(Math.ceil(total / limit)).keys()] // number of request that need to be run
+	const reqN = [...Array(Math.ceil(total / limit)).keys()] // number of request that need to be run
 	reqN.shift() // first request has already been run
 	const responses = await Promise.all(
 		reqN.map(i => handleResponse(() => spotify.getUserPlaylists({ limit, offset: limit * i })))

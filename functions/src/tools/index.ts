@@ -4,8 +4,8 @@ export async function createPublicLikedSongs(
 	ref: FirebaseFirestore.DocumentReference<publicLikedSongs.Data>
 ) {
 	const doc = await ref.get()
-	let { refresh_token, playlist_id } = doc.data() as publicLikedSongs.Data
+	const data = doc.data() as publicLikedSongs.Data
 
-	if (!playlist_id) playlist_id = await publicLikedSongs.create(refresh_token)
-	return await publicLikedSongs.update(refresh_token, playlist_id)
+	if (!data.playlist_id) data.playlist_id = await publicLikedSongs.create(data.refresh_token)
+	return await publicLikedSongs.update(data.refresh_token, data.playlist_id)
 }

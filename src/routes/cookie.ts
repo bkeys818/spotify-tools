@@ -21,7 +21,7 @@ export const spotifyAccessToken = createContext(
 export const spotifyScopes = createContext(
 	'spotify_scopes',
 	(scopes: string[], cookieStr: Document['cookie']) => {
-		let allScopes = scopes
+		const allScopes = scopes
 		const cookies = cookie.parse(cookieStr)
 		if (cookies.scopes) allScopes.push(...cookies.scopes.split(' '))
 		return { value: allScopes.join(' '), maxAge: 3600, path: base }
@@ -41,7 +41,7 @@ function createContext(
 	serialize: (value: string | null) => ReturnType<typeof cookie.serialize>
 	parse: (value: string | null) => string | undefined
 }
-function createContext<P extends any[]>(
+function createContext<P extends unknown[]>(
 	name: string,
 	serialize?: (...params: P) => cookie.CookieSerializeOptions & { value: string },
 	parse?: cookie.CookieParseOptions
@@ -49,7 +49,7 @@ function createContext<P extends any[]>(
 	serialize: (...params: P) => ReturnType<typeof cookie.serialize>
 	parse: (value: string | null) => string | undefined
 }
-function createContext<P extends any[]>(
+function createContext<P extends unknown[]>(
 	name: string,
 	serialize?:
 		| cookie.CookieSerializeOptions
