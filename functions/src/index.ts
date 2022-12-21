@@ -1,13 +1,30 @@
-import * as admin from 'firebase-admin';
-admin.initializeApp();
-import * as functions from 'firebase-functions';
-import { db } from './global';
-import { updatePublicLikedSongs } from './public-liked-songs';
+import * as admin from 'firebase-admin'
+admin.initializeApp()
+import * as functions from 'firebase-functions'
+import * as authorize from './authorize'
+import * as toolFunctions from './tools'
+import * as scheduledToolFunctions from './tools/scheduled'
 
-export const updatePublicLikedSongsPlaylists = functions
+const toolFunctionKeys: Record<string, keyof typeof toolFunctions> = {
+	'public-liked-songs': 'createPublicLikedSongs'
+}
+
+type Result = Awaited<
+	ReturnType<typeof toolFunctions[typeof toolFunctionKeys[keyof typeof toolFunctionKeys]]>
+>
+export const authorizeTool = functions
 	.runWith({ secrets: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'] })
-	.pubsub.schedule('0 0 * * *')
-	.onRun(async () => {
-		const docRefs = await db.collection('public-liked-songs').listDocuments();
-		return await Promise.all(docRefs.map(updatePublicLikedSongs));
-	});
+	.https.onCall(
+		async (data: {
+			tool: string
+			code: string
+			origin: string
+		}): Promise<Result | undefined> => {
+			const ref = await authorize.authorizeTool(data.tool, data.code, data.origin)
+			if (data.tool in toolFunctionKeys) {
+				return toolFunctions[toolFunctionKeys[data.tool]](ref)
+			} else return
+		}
+	)
+
+export const toolsScheduled = scheduledToolFunctions

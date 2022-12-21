@@ -1,33 +1,33 @@
 name: Deploy Hosting
 
 on:
-  push:
-    branches: ['main']
-    paths:
-      - 'src/**'
-      - 'static/**'
-      - 'firebase.*'
-      - 'package.json'
-      - 'yarn.lock'
-      - 'svelte.config.js'
-      - 'postcss.config.cjs'
-      - 'tailwind.config.cjs'
-      - 'tsconfig.json'
+    push:
+        branches: ['main']
+        paths:
+            - 'src/**'
+            - 'static/**'
+            - 'firebase.*'
+            - 'package.json'
+            - 'yarn.lock'
+            - 'svelte.config.js'
+            - 'postcss.config.cjs'
+            - 'tailwind.config.cjs'
+            - 'tsconfig.json'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install modules
-        run: yarn
-      - name: Create .env
-        uses: SpicyPizza/create-envfile@v1.3
-        with:
-          file_name: .env.production
-          fail_on_empty: true
-          envkey_PUBLIC_CLIENT_ID: ${{ secrets.CLIENT_ID }}
-      - name: Build frontend
-        run: yarn build
-      - name: Publish frontend
-        run: yarn deploy
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Install modules
+              run: yarn
+            - name: Create .env
+              uses: SpicyPizza/create-envfile@v1.3
+              with:
+                  file_name: .env.production
+                  fail_on_empty: true
+                  envkey_PUBLIC_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+            - name: Build frontend
+              run: yarn build
+            - name: Publish frontend
+              run: yarn deploy

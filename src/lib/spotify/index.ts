@@ -1,10 +1,20 @@
-import { base } from '$app/paths'
+import { PUBLIC_CLIENT_ID } from '$env/static/public'
 
-const { VITE_CLIENT_ID, VITE_ORIGIN } = import.meta.env
-
-export const credential = {
-    redirectUri: VITE_ORIGIN + base + '/authorize/callback',
-    clientId: VITE_CLIENT_ID
+export function createAuthorizeURL(scopes: string[], origin: string) {
+	return (
+		'https://accounts.spotify.com/authorize?' +
+		new URLSearchParams({
+			response_type: 'code',
+			client_id: PUBLIC_CLIENT_ID,
+			scope: scopes.join(' '),
+			redirect_uri: origin + '/authorize'
+			// state: getState()
+		}).toString()
+	)
 }
 
-export * from './authorize'
+export interface AccessTokenResponse {
+	readonly access_token: string
+	readonly token_type: 'Bearer'
+	readonly expires_in: number
+}
