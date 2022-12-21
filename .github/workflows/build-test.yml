@@ -1,0 +1,40 @@
+name: Test Build
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build_fontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install modules
+        run: yarn
+      - name: Create .env
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          file_name: .env.production
+          fail_on_empty: true
+          envkey_PUBLIC_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      - name: Build frontend
+        run: yarn build
+
+  build_functions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install modules
+        run: |
+          cd functions
+          yarn
+      - name: Build functions
+        run: |
+          cd functions
+          yarn build
