@@ -13,7 +13,7 @@
 		// check state
 		if (code) {
 			const tool = location.pathname.slice(location.pathname.lastIndexOf('/') + 1);
-			backendResponse = authorizeTool({ code, tool });
+			backendResponse = authorizeTool({ code, tool, origin: location.origin });
 			history.replaceState({}, document.title, location.pathname);
 		}
 	});

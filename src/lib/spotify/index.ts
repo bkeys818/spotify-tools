@@ -12,3 +12,9 @@ export function createAuthorizeURL(scopes: string[], origin: string) {
 		}).toString()
 	);
 }
+
+export interface AccessTokenResponse {
+	readonly access_token: string;
+	readonly token_type: 'Bearer';
+	readonly expires_in: number;
+}

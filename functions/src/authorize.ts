@@ -2,12 +2,12 @@ import { handleResponse } from './global';
 import SpotifyWebApi from 'spotify-web-api-node';
 import { db } from './global';
 
-export async function authorizeTool(tool: string, code: string) {
+export async function authorizeTool(tool: string, code: string, origin: string) {
 	const spotify = new SpotifyWebApi({
 		clientId: process.env.SPOTIFY_CLIENT_ID,
 		clientSecret: process.env.SPOTIFY_CLIENT_SECRET
 	});
-	spotify.setRedirectURI(process.env.SPOTIFY_REDIRECT_URI as string);
+	spotify.setRedirectURI(origin + '/authorize');
 	const { refresh_token, access_token } = await handleResponse(() =>
 		spotify.authorizationCodeGrant(code)
 	);

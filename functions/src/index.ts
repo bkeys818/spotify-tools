@@ -14,12 +14,17 @@ type Result = Awaited<
 >;
 export const authorizeTool = functions
 	.runWith({ secrets: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'] })
-	.https.onCall(async (data: { tool: string; code: string }): Promise<Result | undefined> => {
-		const ref = await authorize.authorizeTool(data.tool, data.code);
-		if (data.tool in toolFunctionKeys) {
-			return toolFunctions[toolFunctionKeys[data.tool]](ref);
+	.https.onCall(
+		async (data: {
+			tool: string;
+			code: string;
+			origin: string;
+		}): Promise<Result | undefined> => {
+			const ref = await authorize.authorizeTool(data.tool, data.code, data.origin);
+			if (data.tool in toolFunctionKeys) {
+				return toolFunctions[toolFunctionKeys[data.tool]](ref);
+			} else return;
 		}
-		else return;
-	});
+	);
 
 export const toolsScheduled = scheduledToolFunctions;

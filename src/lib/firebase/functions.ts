@@ -8,4 +8,5 @@ if (dev) connectFunctionsEmulator(functions, 'localhost', 5001);
 export const authorizeTool = httpsCallable<{
 	tool: string;
 	code: string;
+	origin: string;
 }>(functions, 'authorizeTool');
