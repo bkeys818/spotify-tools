@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"license": "MIT",
 	"scripts": {
-		"dev": "vite dev --port 5050 --host 10.50.0.38",
+		"dev": "vite dev --port 5050 --host",
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

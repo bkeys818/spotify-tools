@@ -3,11 +3,11 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "serve": "npm run build && firebase emulators:start --only functions",
-    "dev": "npm run build && firebase use dev && firebase emulators:start",
-    "shell": "npm run build && firebase functions:shell",
-    "start": "npm run shell",
-    "deploy": "firebase deploy --only functions",
+    "serve": "yarn build && firebase emulators:start --only functions,firestore,pubsub -P dev",
+    "dev": "yarn build && firebase emulators:start --only functions,firestore,pubsub --inspect-functions -P dev",
+    "shell": "yarn build && firebase functions:shell -P dev",
+    "start": "yarn shell",
+    "deploy": "firebase deploy --only functions -P prod",
     "logs": "firebase functions:log"
   },
   "engines": {
