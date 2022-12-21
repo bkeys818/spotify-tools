@@ -1,4 +1,4 @@
-import { PUBLIC_CLIENT_ID } from '$env/static/public';
+import { PUBLIC_CLIENT_ID } from '$env/static/public'
 
 export function createAuthorizeURL(scopes: string[], origin: string) {
 	return (
@@ -10,11 +10,11 @@ export function createAuthorizeURL(scopes: string[], origin: string) {
 			redirect_uri: origin + '/authorize'
 			// state: getState()
 		}).toString()
-	);
+	)
 }
 
 export interface AccessTokenResponse {
-	readonly access_token: string;
-	readonly token_type: 'Bearer';
-	readonly expires_in: number;
+	readonly access_token: string
+	readonly token_type: 'Bearer'
+	readonly expires_in: number
 }

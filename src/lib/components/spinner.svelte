@@ -1,11 +1,11 @@
 <script lang="ts">
-	export let borderWidth: number = 6;
+	export let borderWidth: number = 6
 </script>
 
 <div class="spin-ring">
-    {#each Array(4) as _}
-        <div style="--border-width: {borderWidth}px" />
-    {/each}
+	{#each Array(4) as _}
+		<div style="--border-width: {borderWidth}px" />
+	{/each}
 </div>
 
 <style>
@@ -35,7 +35,7 @@
 		border-top-color: calc(var(--border-width) / 2) solid #7fc4d1;
 		border-right-color: calc(var(--border-width) / 2) solid #7fc4d1;
 		border-radius: 50%;
-		animation: spin-ring 3s cubic-bezier(0.40, 0.05, 0.6, 0.95) infinite;
+		animation: spin-ring 3s cubic-bezier(0.4, 0.05, 0.6, 0.95) infinite;
 		/* border-color: #fff transparent transparent transparent; */
 	}
 	.spin-ring div:nth-child(1) {

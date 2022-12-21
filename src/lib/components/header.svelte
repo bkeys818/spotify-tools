@@ -6,8 +6,7 @@
 			>
 				<p class="text-2xl font-extrabold tracking-tight text-white">Spotify Tools</p>
 			</div>
-			<div class="absolute inset-y-0 right-0 flex items-center">
-			</div>
+			<div class="absolute inset-y-0 right-0 flex items-center" />
 		</div>
 	</div>
 </nav>

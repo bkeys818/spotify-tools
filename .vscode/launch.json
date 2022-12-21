@@ -14,19 +14,13 @@
 		{
 			"name": "Launch Firebase Functions Emulator",
 			"type": "node",
-            "runtimeVersion": "16",
+			"runtimeVersion": "16",
 			"request": "launch",
-			"runtimeArgs": [
-                "/usr/local/bin/firebase",
-                "functions:shell"
-            ],
+			"runtimeArgs": ["/usr/local/bin/firebase", "functions:shell"],
 			"cwd": "${workspaceFolder}/functions",
 			"outFiles": ["${workspaceFolder}/functions/lib/**/*.js"],
 			"sourceMaps": true,
-			"skipFiles": [
-				"<node_internals>/**",
-				"**/node_modules/**"
-			],
+			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
 			"console": "integratedTerminal",
 			"preLaunchTask": "npm: build - functions"
 		}
