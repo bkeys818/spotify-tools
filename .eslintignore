@@ -7,6 +7,10 @@ node_modules
 .env.*
 !.env.example
 
+# Functions
+functions/lib/
+functions/typings/
+
 # Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml
 package-lock.json
