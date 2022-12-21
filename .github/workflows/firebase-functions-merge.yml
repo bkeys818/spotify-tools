@@ -6,7 +6,7 @@ name: Firebase function deploy
 # events but only for the master branch
 on:
     push:
-        branches: [master]
+        branches: [main]
         paths:
             - 'functions/src'
             - 'functions/package.json'
