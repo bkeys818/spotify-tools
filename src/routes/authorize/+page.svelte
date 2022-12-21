@@ -14,7 +14,7 @@
 			} else throw error(404, `I'm lost! Where did you come from?`);
 		} else {
 			const scopes: string[] = (searchParams.scopes ?? '').split(' ');
-			location.href = createAuthorizeURL(scopes);
+			location.href = createAuthorizeURL(scopes, location.origin);
 		}
 	});
 	function getSearchParams() {
