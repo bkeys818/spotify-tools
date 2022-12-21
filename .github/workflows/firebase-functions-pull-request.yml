@@ -1,25 +1,10 @@
-name: Test Build
+name: Test Firebase Functions on PR
 
 on:
     pull_request:
         branches: ['main']
 
 jobs:
-    build_fontend:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-            - name: Install modules
-              run: yarn
-            - name: Create .env
-              uses: SpicyPizza/create-envfile@v1.3
-              with:
-                  file_name: .env.production
-                  fail_on_empty: true
-                  envkey_PUBLIC_CLIENT_ID: ${{ secrets.CLIENT_ID }}
-            - name: Build frontend
-              run: yarn build
-
     build_functions:
         runs-on: ubuntu-latest
         strategy:

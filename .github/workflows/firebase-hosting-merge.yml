@@ -11,10 +11,18 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
-            - run: yarn && yarn build
+            - run: yarn
+            - name: Create .env
+              uses: SpicyPizza/create-envfile@v1.3
+              with:
+                  file_name: .env.production
+                  fail_on_empty: true
+                  envkey_PUBLIC_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+            - name: Build
+              run: yarn build
             - uses: FirebaseExtended/action-hosting-deploy@v0
               with:
                   repoToken: '${{ secrets.GITHUB_TOKEN }}'
-                  firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BEN_KEYS_SPOTIFY_TOOLS_DEV }}'
+                  firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BEN_KEYS_SPOTIFY_TOOLS }}'
                   channelId: live
-                  projectId: ben-keys-spotify-tools-dev
+                  projectId: ben-keys-spotify-tools
