@@ -8,7 +8,7 @@ on:
     push:
         branches: [main]
         paths:
-            - 'functions/src'
+            - 'functions/src/**/*'
             - 'functions/package.json'
             - 'functions/yarn.lock'
             - 'functions/tsconfig.json'
