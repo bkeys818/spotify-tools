@@ -1,7 +1,6 @@
-import { directedFromPath } from '$lib/cookie'
-import { base } from '$app/paths'
+import * as cookie from '$lib/cookie' 
 
 export function navigateToAuthorize(scopes: string[]) {
-	document.cookie = directedFromPath.serialize(location.pathname)
-	location.href = base + '/authorize?scopes=' + encodeURIComponent(scopes.join(' '))
+	cookie.set('directed_from_path', location.pathname)
+	location.href = '/authorize?scopes=' + encodeURIComponent(scopes.join(' '))
 }
