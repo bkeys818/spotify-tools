@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createAuthorizeURL } from '$lib/spotify'
 	import { onMount } from 'svelte'
-	import { directedFromPath } from '../cookie'
+	import { directedFromPath } from '$lib/cookie'
 	import { error } from '@sveltejs/kit'
 
 	onMount(async () => {
