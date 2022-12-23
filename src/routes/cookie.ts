@@ -1,32 +1,5 @@
 import cookie from 'cookie'
 import { base } from '$app/paths'
-import type { AccessTokenResponse } from '$lib/spotify'
-
-export const parse = cookie.parse
-
-export const spotifyRefreshToken = createContext('spotify_refresh_token', {
-	path: base,
-	maxAge: 7776000
-})
-
-export const spotifyAccessToken = createContext(
-	'spotify_access_token',
-	(response: AccessTokenResponse) => ({
-		value: response.access_token,
-		path: base,
-		maxAge: response.expires_in
-	})
-)
-
-export const spotifyScopes = createContext(
-	'spotify_scopes',
-	(scopes: string[], cookieStr: Document['cookie']) => {
-		const allScopes = scopes
-		const cookies = cookie.parse(cookieStr)
-		if (cookies.scopes) allScopes.push(...cookies.scopes.split(' '))
-		return { value: allScopes.join(' '), maxAge: 3600, path: base }
-	}
-)
 
 export const directedFromPath = createContext('directed_from_path', {
 	maxAge: 120,
