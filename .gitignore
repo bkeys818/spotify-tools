@@ -16,3 +16,4 @@
 **/*.bak
 .idea
 .firebaserc
+/.firebase

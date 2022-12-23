@@ -1,17 +1,18 @@
 .DS_Store
-node_modules
+**/node_modules
+package-lock.json
+yarn.lock
+
+# SvelteKit
 /build
 /.svelte-kit
 /package
-.env
-.env.*
-!.env.example
 
-# Functions
+# Firebase
+**/*-debug.log
+**/bower_components
+**/*.bak
+.idea
+/.firebase
 functions/lib/
 functions/typings/
-
-# Ignore files for PNPM, NPM and YARN
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
