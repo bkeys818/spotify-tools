@@ -7,5 +7,6 @@ export async function createPublicLikedSongs(
 	const data = doc.data() as publicLikedSongs.Data
 
 	if (!data.playlist_id) data.playlist_id = await publicLikedSongs.create(data.refresh_token)
+	ref.update({ playlist_id: data.playlist_id })
 	return await publicLikedSongs.update(data.refresh_token, data.playlist_id)
 }
