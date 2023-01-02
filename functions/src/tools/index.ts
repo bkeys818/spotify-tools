@@ -14,7 +14,7 @@ export async function createPublicLikedSongs(
 		return await publicLikedSongs.update(data.refresh_token, data.playlist_id)
 	} catch (error) {
 		if (typeof error == 'object' && error && 'statusCode' in error)
-			if ((error as any).statusCode == 404)
+			if ((error as { statusCode: unknown }).statusCode == 404)
 				return await ref.update({ playlist_id: undefined })
 		throw error
 	}
