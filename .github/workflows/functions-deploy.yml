@@ -1,0 +1,40 @@
+name: Deploy Functions
+
+on:
+    push:
+        branches: main
+        paths:
+            - 'src/**'
+            - 'public/**'
+            - 'firebase.json'
+            - 'svelte.config.js'
+            - 'vite.config.js'
+            - 'postcss.config.cjs'
+            - 'tailwind.config.cjs'
+            - 'tsconfig.json'
+            - 'yarn.lock'
+
+jobs:
+    build:
+        uses: ./.github/workflows/functions-build.yml
+
+    deploy:
+        name: Deploy functions
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Install dependencies
+              run: yarn --cwd ./functions/
+            - name: Download Artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: functions-build
+                  path: build
+            - name: Deploy functions
+              uses: w9jds/firebase-action@master
+              with:
+                  args: deploy --only functions --message \"${{ github.event.head_commit.message }}\"
+              env:
+                  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+                  PROJECT_ID: ben-keys-spotify-tools
