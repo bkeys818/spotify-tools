@@ -1,0 +1,42 @@
+name: Deploy Frontend
+
+on:
+    push:
+        branches: main
+        paths:
+            - 'src/**'
+            - 'public/**'
+            - 'firebase.json'
+            - 'svelte.config.js'
+            - 'vite.config.js'
+            - 'postcss.config.cjs'
+            - 'tailwind.config.cjs'
+            - 'tsconfig.json'
+            - 'yarn.lock'
+
+jobs:
+    build:
+        uses: ./.github/workflows/frontend-build.yml
+        secrets:
+            CLIENT_ID: ${{ secrets.CLIENT_ID }}
+
+    deploy:
+        name: Deploy frontend
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Install dependencies
+              run: yarn
+            - name: Download Artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: frontend-build
+                  path: build
+            - name: Deploy frontend
+              uses: w9jds/firebase-action@master
+              with:
+                  args: deploy --only hosting --message \"${{ github.event.head_commit.message }}\"
+              env:
+                  GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+                  PROJECT_ID: ben-keys-spotify-tools
