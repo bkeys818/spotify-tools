@@ -29,7 +29,6 @@ export async function create(refresh_token: string) {
 export async function update(refresh_token: string, playlist_id: string) {
 	const spotify = await authorize(refresh_token)
 
-	// TODO: remove playlist_id if doesn't work
 	const [playlistTracks, savedTracks] = await Promise.all([
 		getPlaylistTracks(spotify, playlist_id),
 		getSavedTracks(spotify)
