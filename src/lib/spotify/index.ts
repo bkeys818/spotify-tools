@@ -23,6 +23,6 @@ export interface AccessTokenResponse {
 function createState(length = 18) {
 	const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~'.split('')
 	let str = ''
-	for (var i = 0; i < length; i++) str += chars[Math.floor(Math.random() * chars.length)]
+	for (let i = 0; i < length; i++) str += chars[Math.floor(Math.random() * chars.length)]
 	return str
 }
