@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { authorize } from '$lib/spotify'
-	import * as cookie from '$lib/cookie'
+	import { setCookie } from '$lib/cookie'
 	import { onMount } from 'svelte'
 	import { authorizeTool } from '$lib/firebase/functions'
 	import Spinner from '$lib/components/spinner.svelte'
@@ -42,7 +42,7 @@
 		<button
 			class="bg-gray-200 outline-1 px-3 py-2 rounded-lg"
 			on:click={() => {
-				cookie.set('directed_from_path', location.pathname)
+				setCookie('directed_from_path', location.pathname)
 				authorize('user-library-read playlist-modify-public')
 			}}>Authorize</button
 		>

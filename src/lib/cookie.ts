@@ -1,16 +1,14 @@
 import cookie from 'cookie'
 
-type Keys = 'directed_from_path' | 'state'
-
-export function getAll(): Partial<Record<Keys, string>> {
+export function getAllCookies(): Partial<Record<keyof typeof setOptions, string>> {
 	return cookie.parse(document.cookie)
 }
 
-export function set(key: Keys, value: string) {
+export function setCookie(key: keyof typeof setOptions, value: string) {
 	document.cookie = cookie.serialize(key, value, setOptions[key])
 }
 
-const setOptions: Partial<Record<Keys, cookie.CookieSerializeOptions>> = {
+const setOptions: Partial<Record<string, cookie.CookieSerializeOptions>> = {
 	directed_from_path: { maxAge: 120, path: '/authorize' },
 	state: { maxAge: 120, path: '/authorize' }
 }
