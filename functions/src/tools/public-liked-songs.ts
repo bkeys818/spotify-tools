@@ -11,9 +11,11 @@ interface Document {
 
 export const createPublicLikedSongs = functions
 	.runWith({ secrets: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'] })
-	.https.onCall(async (data: Data) => {
-		const { refresh_token, user_id } = await getRefreshToken(data.code, data.origin)
-		const ref = db.collection('public-liked-songs').doc(user_id)
+	.https.onCall(async (data: Data, context) => {
+		if (!context.auth)
+			throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated.')
+		const refresh_token = await getRefreshToken(data.code, data.origin)
+		const ref = db.collection('public-liked-songs').doc(context.auth.uid)
 		let doc = await ref.get()
 		if (doc.exists) await ref.update({ refresh_token })
 		else await ref.create({ refresh_token })
