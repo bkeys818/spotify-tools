@@ -1,11 +1,14 @@
 <script lang="ts">
+	import type { PageData } from './$types'
 	import { authorize } from '$lib/spotify'
 	import { setCookie } from '$lib/cookie'
 	import { onMount } from 'svelte'
 	import { createPublicLikedSongs } from '$lib/firebase/functions'
+	import { user } from '$lib/stores'
 	import Spinner from '$lib/components/spinner.svelte'
 	import SpotifyEmbed from '$lib/components/spotify-embed.svelte'
 
+	export let data: PageData
 	let backendResponse: ReturnType<typeof createPublicLikedSongs> | undefined
 
 	onMount(async () => {
@@ -35,7 +38,7 @@
 			<p>Oh No! Something went wrong</p>
 			<p>{error}</p>
 		{/await}
-	{:else}
+	{:else if $user}
 		<div />
 		<!-- Spotify Logo -->
 		<button
@@ -46,5 +49,8 @@
 			}}>Authorize</button
 		>
 		<p>In order to use our tools, we need limited access to your Spotify account.</p>
+	{:else}
+		<a href={data.loginUrl} class="bg-gray-200 outline-1 px-3 py-2 rounded-lg">Login</a>
+		<p>Log in to use our tools</p>
 	{/if}
 </div>
