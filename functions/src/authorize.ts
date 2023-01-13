@@ -7,7 +7,9 @@ export async function getRefreshToken(code: string, origin: string) {
 		clientSecret: process.env.SPOTIFY_CLIENT_SECRET
 	})
 	spotify.setRedirectURI(origin + '/authorize')
-	const { refresh_token, access_token } = await handleResponse(() => spotify.authorizationCodeGrant(code))
+	const { refresh_token, access_token } = await handleResponse(() =>
+		spotify.authorizationCodeGrant(code)
+	)
 	spotify.setAccessToken(access_token)
 	const { id } = await handleResponse(() => spotify.getMe())
 	return { refresh_token, user_id: id }
