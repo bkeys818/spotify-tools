@@ -4,15 +4,8 @@ on:
     push:
         branches: main
         paths:
-            - 'src/**'
-            - 'public/**'
-            - 'firebase.json'
-            - 'svelte.config.js'
-            - 'vite.config.js'
-            - 'postcss.config.cjs'
-            - 'tailwind.config.cjs'
-            - 'tsconfig.json'
-            - 'yarn.lock'
+            - 'functions/**'
+            - 'firebase.*'
 
 jobs:
     build:
