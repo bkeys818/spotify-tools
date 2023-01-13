@@ -1,7 +1,3 @@
-import * as admin from 'firebase-admin'
-
-export const db = admin.firestore()
-
 export function handleResponse<T>(call: () => Promise<Response<T>>): Promise<T> {
 	return call()
 		.catch(error => {
@@ -16,9 +12,14 @@ export function handleResponse<T>(call: () => Promise<Response<T>>): Promise<T> 
 			}
 		})
 }
-
 interface Response<T> {
 	body: T
 	headers: Record<string, string>
 	statusCode: number
+}
+
+export async function forEvery<T>(items: T[], limit: number, method: (items: T[]) => void) {
+	for (let i = 0; i < items.length; i += limit) {
+		method(items.slice(i, i + limit))
+	}
 }

@@ -1,9 +1,9 @@
 import { PUBLIC_CLIENT_ID } from '$env/static/public'
-import * as cookie from '$lib/cookie'
+import { setCookie } from '$lib/cookie'
 
 export function authorize(scopes?: string) {
 	const state = createState()
-	cookie.set('state', state)
+	setCookie('state', state)
 	const params = new URLSearchParams({
 		response_type: 'code',
 		client_id: PUBLIC_CLIENT_ID,

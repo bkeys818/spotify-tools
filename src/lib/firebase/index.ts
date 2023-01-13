@@ -1,5 +1,5 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app'
+import { dev } from '$app/environment'
 
 // Firebase configuration
 const firebaseConfig = {
@@ -22,4 +22,4 @@ const devConfig = {
 }
 
 // Initialize Firebase
-export const app = initializeApp(import.meta.env.PROD ? firebaseConfig : devConfig)
+export const app = initializeApp(dev ? devConfig : firebaseConfig)

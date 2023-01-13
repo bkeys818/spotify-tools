@@ -1,12 +1,61 @@
-import { handleResponse } from '../global'
+import * as functions from 'firebase-functions'
+import { getRefreshToken } from '../authorize'
+import { db } from '../firestore'
+import { handleResponse, forEvery } from '../utils'
 import SpotifyWebApi from 'spotify-web-api-node'
 
-export interface Data {
+interface Document {
 	refresh_token: string
 	playlist_id?: string
 }
 
-export async function create(refresh_token: string) {
+export const createPublicLikedSongs = functions
+	.runWith({ secrets: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'] })
+	.https.onCall(async (data: Data, context) => {
+		if (!context.auth)
+			throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated.')
+		const refresh_token = await getRefreshToken(data.code, data.origin)
+		const ref = db.collection('public-liked-songs').doc(context.auth.uid)
+		let doc = await ref.get()
+		if (doc.exists) await ref.update({ refresh_token })
+		else await ref.create({ refresh_token })
+
+		doc = await ref.get()
+		const docData = doc.data() as Document
+		if (!docData.playlist_id) {
+			docData.playlist_id = await create(docData.refresh_token)
+			await ref.update({ playlist_id: docData.playlist_id })
+		}
+		try {
+			return await update(docData.refresh_token, docData.playlist_id)
+		} catch (error) {
+			if (typeof error == 'object' && error && 'statusCode' in error)
+				if ((error as { statusCode: unknown }).statusCode == 404)
+					return await ref.update({ playlist_id: undefined })
+			throw error
+		}
+	})
+interface Data {
+	code: string
+	origin: string
+}
+
+export const syncPublicLikedSongs = functions
+	.runWith({ secrets: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'] })
+	.pubsub.schedule('0 0 * * *')
+	.onRun(async () => {
+		const docRefs = await db.collection('public-liked-songs').listDocuments()
+		return await Promise.all(
+			docRefs.map(async ref => {
+				const doc = await ref.get()
+				const data = doc.data() as Document
+				if (data.playlist_id) return await update(data.refresh_token, data.playlist_id)
+				else return
+			})
+		)
+	})
+
+async function create(refresh_token: string) {
 	const spotify = await authorize(refresh_token)
 	const [playlists, user] = await Promise.all([
 		getAllPlaylist(spotify),
@@ -26,7 +75,7 @@ export async function create(refresh_token: string) {
 	return playlist.id
 }
 
-export async function update(refresh_token: string, playlist_id: string) {
+async function update(refresh_token: string, playlist_id: string) {
 	const spotify = await authorize(refresh_token)
 
 	const [playlistTracks, savedTracks] = await Promise.all([
@@ -120,10 +169,4 @@ async function getAllPlaylist(spotify: SpotifyWebApi) {
 	)
 	items.push(...responses.flatMap(res => res.items))
 	return items
-}
-
-async function forEvery<T>(items: T[], limit: number, method: (items: T[]) => void) {
-	for (let i = 0; i < items.length; i += limit) {
-		method(items.slice(i, i + limit))
-	}
 }
