@@ -39,10 +39,9 @@
 			<p>{error}</p>
 		{/await}
 	{:else if $user}
-		<div />
 		<!-- Spotify Logo -->
 		<button
-			class="bg-gray-200 outline-1 px-3 py-2 rounded-lg"
+			class='btn-primary'
 			on:click={() => {
 				setCookie('directed_from_path', location.pathname)
 				authorize('user-library-read playlist-modify-public')
@@ -50,7 +49,7 @@
 		>
 		<p>In order to use our tools, we need limited access to your Spotify account.</p>
 	{:else}
-		<a href={data.loginUrl} class="bg-gray-200 outline-1 px-3 py-2 rounded-lg">Login</a>
+		<a href={data.loginUrl} class="btn-primary">Login</a>
 		<p>Log in to use our tools</p>
 	{/if}
 </div>

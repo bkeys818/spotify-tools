@@ -26,6 +26,6 @@
 {:else}
 	<div>
 		Email: <input type="email" bind:value={email} />
-		<input type="button" value="login" on:click={sendEmailTo} />
+		<button class="btn-primary" on:click={sendEmailTo} />
 	</div>
 {/if}

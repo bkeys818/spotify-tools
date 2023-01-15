@@ -38,9 +38,8 @@
 {:else}
 	<div>
 		Email: <input type="email" bind:value={emailText} />
-		<input
-			type="button"
-			value="login"
+		<button
+			class="btn-primary"
 			on:click={() => {
 				email = emailText
 			}}
