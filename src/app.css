@@ -3,16 +3,33 @@
 @tailwind utilities;
 
 @layer components {
-    .btn-primary, .btn-secondary {
-        @apply min-w-[124px] text-xs uppercase rounded-full py-2 px-8 font-medium tracking-wide;
-        transition-property: background-color, color, box-shadow;
-        transition-duration: .3s;
+	h1,
+	h2,
+	h3,
+	h4 {
+		@apply text-center;
+	}
+	h1 {
+		@apply text-4xl font-extralight text-gray-900 tracking-[.0125] mb-2;
+	}
+    h4 {
+        @apply text-xl text-gray-600;
     }
-    .btn-primary {
-        @apply bg-spotify-green-500 text-spotify-white hover:bg-spotify-green-400
-    }
-    .btn-secondary {
-        @apply bg-transparent text-spotify-gray-600 hover:bg-spotify-gray-600 hover:text-spotify-white;
-        box-shadow: 0 0 0 2px inset #616467;
-    }
-} 
+
+	header:not(.no-style) {
+		@apply py-4 lg:py-6;
+	}
+
+	.btn-primary,
+	.btn-secondary {
+		@apply min-w-[124px] text-xs uppercase rounded-full py-2 px-8 font-medium tracking-wide;
+		transition-property: background-color, color, box-shadow;
+		transition-duration: 0.3s;
+	}
+	.btn-primary {
+		@apply bg-spotify-green-500 text-spotify-white;
+	.btn-secondary {
+		@apply bg-transparent text-spotify-gray-600;
+		box-shadow: 0 0 0 2px inset #616467;
+	}
+}
