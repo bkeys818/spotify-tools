@@ -1,12 +1,14 @@
 <script lang="ts">
+	import EmailForm from '$lib/components/EmailForm.svelte'
 	import { sendSignInLinkToEmail } from 'firebase/auth'
 	import { auth } from '$lib/firebase/auth'
 	import { setCookie } from '$lib/cookie'
 
-	let email: string
-	let sendingEmail: ReturnType<typeof sendSignInLinkToEmail> | undefined
+	let submittedEmail: string
+	let sendingEmail: ReturnType<typeof sendSignInLinkToEmail> | undefined = undefined
 
-	function sendEmailTo() {
+	function sendEmailTo(email: string) {
+		submittedEmail = email
 		const url = new URL(location.origin + location.pathname + '/callback')
 		const query = new URLSearchParams(location.search.slice(1))
 		const redirect = query.get('redirect')
@@ -16,16 +18,13 @@
 	}
 </script>
 
+<EmailForm onSumbit={sendEmailTo} disabled={sendingEmail ? true : false} />
+
 {#if sendingEmail}
 	{#await sendingEmail then}
-		<p>Sign in link sent to {email}.</p>
+		<p class="mt-4 text-center">Sign in link sent to {submittedEmail}.</p>
 	{:catch error}
-		<p>Something went wrong: {error.message}</p>
+		<p class="mt-4 text-center">Something went wrong: {error.message}</p>
 		{@debug error}
 	{/await}
-{:else}
-	<div>
-		Email: <input type="email" bind:value={email} />
-		<input type="button" value="login" on:click={sendEmailTo} />
-	</div>
 {/if}
