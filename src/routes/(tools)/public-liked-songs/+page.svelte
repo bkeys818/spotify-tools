@@ -21,7 +21,7 @@
 	})
 </script>
 
-<div class="my-4">
+<div class="my-4 text-center">
 	{#if backendResponse}
 		{#await backendResponse}
 			<Spinner />
@@ -35,7 +35,7 @@
 				/>
 			{/if}
 		{:catch error}
-			<p>Oh No! Something went wrong</p>
+			<h4>Oh No! Something went wrong</h4>
 			<p>{error}</p>
 		{/await}
 	{:else if $user}
@@ -47,7 +47,9 @@
 				authorize('user-library-read playlist-modify-public')
 			}}>Authorize</button
 		>
-		<p>In order to use our tools, we need limited access to your Spotify account.</p>
+		<p class="mt-4">
+			In order to use our tools, we need limited access to your Spotify account.
+		</p>
 	{:else}
 		<a href={data.loginUrl} class="btn-primary">Login</a>
 		<p>Log in to use our tools</p>

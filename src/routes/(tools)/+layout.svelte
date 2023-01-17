@@ -9,6 +9,6 @@
 
 <header>
 	<h1>{$page.data.title}</h1>
-	<h4>{$page.data.desc}</h4>
+	<h3>{$page.data.desc}</h3>
 </header>
 <slot />

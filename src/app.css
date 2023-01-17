@@ -2,24 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/*** Typography ***/
+/* prettier-ignore */
 @layer components {
-	h1,
-	h2,
-	h3,
-	h4 {
-		@apply text-center;
+	h1, h2, h4, h5, p {
+		@apply text-gray-900
 	}
-	h1 {
-		@apply text-4xl font-extralight text-gray-900 tracking-[.0125] mb-2;
+	h3, h6 {
+		@apply text-gray-600
 	}
-    h4 {
-        @apply text-xl text-gray-600;
-    }
+
+	h1, h2, h3 {
+		@apply text-center mb-2.5
+	}
+	h4, h5, h6, p {
+		@apply mb-1.5
+	}
+
+	h1 { @apply text-4xl font-extralight tracking-[.0125] };
+	h2 { @apply text-2xl };
+	h3 { @apply text-xl };
+	h4 { @apply text-xl };
+	h5 { @apply text-base };
+	h6 { @apply text-sm };
+	p { @apply text-base };
+	p.p2 { @apply text-sm };
 
 	header:not(.no-style) {
 		@apply py-4 lg:py-6;
 	}
+}
 
+@layer components {
 	.btn-primary,
 	.btn-secondary {
 		@apply min-w-[124px] text-xs uppercase rounded-full py-2 px-8 font-medium tracking-wide;
@@ -30,7 +44,7 @@
 		@apply bg-spotify-green-500 text-spotify-white;
 	}
 	.btn-primary:not(:disabled) {
-		@apply  hover:bg-spotify-green-400;
+		@apply hover:bg-spotify-green-400;
 	}
 	.btn-secondary {
 		@apply bg-transparent text-spotify-gray-600;
