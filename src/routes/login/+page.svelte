@@ -1,5 +1,5 @@
 <script lang="ts">
-	import EmailForm from '$lib/components/EmailForm.svelte';
+	import EmailForm from '$lib/components/EmailForm.svelte'
 	import { sendSignInLinkToEmail } from 'firebase/auth'
 	import { auth } from '$lib/firebase/auth'
 	import { setCookie } from '$lib/cookie'
@@ -22,9 +22,9 @@
 
 {#if sendingEmail}
 	{#await sendingEmail then}
-		<p class='mt-4 text-center'>Sign in link sent to {submittedEmail}.</p>
+		<p class="mt-4 text-center">Sign in link sent to {submittedEmail}.</p>
 	{:catch error}
-		<p class='mt-4 text-center'>Something went wrong: {error.message}</p>
+		<p class="mt-4 text-center">Something went wrong: {error.message}</p>
 		{@debug error}
 	{/await}
 {/if}

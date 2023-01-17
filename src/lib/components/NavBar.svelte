@@ -12,9 +12,9 @@
 		<a class="text-2xl font-extralight" href="/">Spotify Tools</a>
 		<div class="flex justify-end flex-grow gap-3">
 			{#if $user}
-				<button class='hover:underline' on:click={signOut}>Sign Out</button>
+				<button class="hover:underline" on:click={signOut}>Sign Out</button>
 			{:else if $user === null}
-				<button class='hover:underline' on:click={goToLogin}>Login</button>
+				<button class="hover:underline" on:click={goToLogin}>Login</button>
 			{/if}
 		</div>
 	</div>

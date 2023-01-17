@@ -1,1 +1,1 @@
-export * as publicLikedSongs from './public-liked-songs';
+export * as publicLikedSongs from './public-liked-songs'

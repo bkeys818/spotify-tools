@@ -12,9 +12,9 @@ module.exports = {
 				'spotify-black': '#191414',
 				'spotify-gray': {
 					200: '#C1C3C6',
-					600: '#616467',
+					600: '#616467'
 				}
 			}
-		},
+		}
 	}
 }

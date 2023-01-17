@@ -1,13 +1,10 @@
 <script lang="ts">
 	export let onSumbit: (email: string) => void
-	export let disabled: boolean = false
+	export let disabled = false
 	let email: string
 </script>
 
-<form
-	action="javascript:void(0);"
-	class="container w-fit mx-auto"
->
+<form action="javascript:void(0);" class="container w-fit mx-auto">
 	<div class="mb-6 w-fit mx-auto">
 		<label for="email" class="block text-spotify-gray-600 text-sm font-bold mb-2">Email</label>
 		<input

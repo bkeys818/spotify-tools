@@ -13,8 +13,8 @@
 <ul>
 	{#each toolsArray as tool}
 		<li>
-			<a href={tool.path} class='block container'>
-				<h2 class='text-left' >{tool.title}</h2>
+			<a href={tool.path} class="block container">
+				<h2 class="text-left">{tool.title}</h2>
 				<h4>{tool.desc}</h4>
 			</a>
 		</li>

@@ -41,7 +41,7 @@
 	{:else if $user}
 		<!-- Spotify Logo -->
 		<button
-			class='btn-primary'
+			class="btn-primary"
 			on:click={() => {
 				setCookie('directed_from_path', location.pathname)
 				authorize('user-library-read playlist-modify-public')

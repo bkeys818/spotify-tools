@@ -6,7 +6,6 @@
 	<title>{$page.data.title}</title>
 </svelte:head>
 
-
 <header>
 	<h1>{$page.data.title}</h1>
 	<h3>{$page.data.desc}</h3>

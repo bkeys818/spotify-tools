@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import EmailForm from '$lib/components/EmailForm.svelte';
+	import EmailForm from '$lib/components/EmailForm.svelte'
 	import { signInWithEmailLink, isSignInWithEmailLink } from 'firebase/auth'
 	import { auth } from '$lib/firebase/auth'
 	import { getAllCookies } from '$lib/cookie'
@@ -36,6 +36,10 @@
 		{@debug error}
 	{/await}
 {:else}
-	<EmailForm onSumbit={value => { email = value }} />
-	<p class='mt-4 text-center'>Just making sure it's it you!</p>
+	<EmailForm
+		onSumbit={value => {
+			email = value
+		}}
+	/>
+	<p class="mt-4 text-center">Just making sure it's it you!</p>
 {/if}
