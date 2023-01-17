@@ -6,7 +6,7 @@
 
 <form
 	action="javascript:void(0);"
-	class="w-fit mx-auto p-4 bg-slate-50 border-[1px] border-gray-300 rounded-md"
+	class="container w-fit mx-auto"
 >
 	<div class="mb-6 w-fit mx-auto">
 		<label for="email" class="block text-spotify-gray-600 text-sm font-bold mb-2">Email</label>
