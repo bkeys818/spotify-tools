@@ -106,6 +106,9 @@ async function update(refresh_token: string, playlist_id: string) {
 		})
 
 	await Promise.all(updateMethods.map(handleResponse))
+	await handleResponse(() =>
+		spotify.changePlaylistDetails(playlist_id, { description: description() })
+	)
 	return playlist_id
 }
 
@@ -114,7 +117,7 @@ function name(userName = 'User') {
 }
 function description() {
 	const date = new Date().toLocaleDateString('en-US')
-	return `Created at "benkeys.com/spotify/tools".\nLast updated on ${date}.`
+	return `Created at "https://spotify-tools/benkeys.com".\nLast updated on ${date}.`
 }
 
 /** This function must be run somewhere with access to `SPOTIFY_CLIENT_ID` & `SPOTIFY_CLIENT_SECRET`. */
