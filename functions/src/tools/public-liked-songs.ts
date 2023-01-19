@@ -90,22 +90,18 @@ async function update(refresh_token: string, playlist_id: string) {
 		track => !playlistTracks.some(playlistTrack => playlistTrack.id === track.id)
 	)
 
-	const updateMethods: Parameters<typeof handleResponse>[0][] = []
 	if (removedTracks.length > 0)
-		forEvery(removedTracks, 100, tracks => {
-			updateMethods.push(() => spotify.removeTracksFromPlaylist(playlist_id, tracks))
-		})
+		await forEvery(removedTracks, 100, tracks =>
+			spotify.removeTracksFromPlaylist(playlist_id, tracks)
+		)
 	if (addedTracks.length > 0)
-		forEvery(addedTracks, 100, tracks => {
-			updateMethods.push(() =>
-				spotify.addTracksToPlaylist(
-					playlist_id,
-					tracks.map(track => track.uri)
-				)
+		await forEvery(addedTracks, 100, tracks =>
+			spotify.addTracksToPlaylist(
+				playlist_id,
+				tracks.map(track => track.uri)
 			)
-		})
+		)
 
-	await Promise.all(updateMethods.map(handleResponse))
 	await handleResponse(() =>
 		spotify.changePlaylistDetails(playlist_id, { description: description() })
 	)
@@ -133,18 +129,20 @@ async function authorize(refresh_token: string) {
 }
 
 async function getPlaylistTracks(spotify: SpotifyWebApi, playlistId: string) {
-	const items: SpotifyApi.PlaylistTrackObject[] = []
-	let total = 1
-	while (items.length < total) {
-		const response = await handleResponse(() =>
-			spotify.getPlaylistTracks(playlistId, {
-				limit: 50,
-				offset: items.length
-			})
+	const limit = 50
+	const { items, total } = await handleResponse(() =>
+		spotify.getPlaylistTracks(playlistId, { limit })
+	)
+	const reqN = [...Array(Math.ceil(total / limit)).keys()] // number of request that need to be run
+	reqN.shift() // first request has already been run
+	const responses = await Promise.all(
+		reqN.map(i =>
+			handleResponse(() =>
+				spotify.getPlaylistTracks(playlistId, { limit, offset: limit * i })
+			)
 		)
-		total = response.total
-		items.push(...response.items)
-	}
+	)
+	items.push(...responses.flatMap(res => res.items))
 	return items
 		.map(item => item.track)
 		.filter((item): item is SpotifyApi.TrackObjectFull => Boolean(item))

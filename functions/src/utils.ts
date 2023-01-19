@@ -18,8 +18,8 @@ interface Response<T> {
 	statusCode: number
 }
 
-export async function forEvery<T>(items: T[], limit: number, method: (items: T[]) => void) {
+export async function forEvery<T>(items: T[], limit: number, method: (items: T[]) => Promise<any>) {
 	for (let i = 0; i < items.length; i += limit) {
-		method(items.slice(i, i + limit))
+		await method(items.slice(i, i + limit))
 	}
 }
