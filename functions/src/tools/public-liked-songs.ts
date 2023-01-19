@@ -3,6 +3,7 @@ import { getRefreshToken } from '../authorize'
 import { db } from '../firestore'
 import { handleResponse, forEvery } from '../utils'
 import SpotifyWebApi from 'spotify-web-api-node'
+import { secrets } from '../env'
 
 interface Document {
 	refresh_token: string
@@ -10,7 +11,7 @@ interface Document {
 }
 
 export const createPublicLikedSongs = functions
-	.runWith({ secrets: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'] })
+	.runWith({ secrets })
 	.https.onCall(async (data: Data, context) => {
 		if (!context.auth)
 			throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated.')
@@ -41,7 +42,7 @@ interface Data {
 }
 
 export const syncPublicLikedSongs = functions
-	.runWith({ secrets: ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'] })
+	.runWith({ secrets })
 	.pubsub.schedule('0 0 * * *')
 	.onRun(async () => {
 		const docRefs = await db.collection('public-liked-songs').listDocuments()
