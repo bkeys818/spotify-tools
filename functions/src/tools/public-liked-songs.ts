@@ -86,9 +86,9 @@ async function update(refresh_token: string, playlist_id: string) {
 	const removedTracks = playlistTracks.filter(
 		track => !savedTracks.some(savedTrack => savedTrack.id === track.id)
 	)
-	const addedTracks = savedTracks.filter(
-		track => !playlistTracks.some(playlistTrack => playlistTrack.id === track.id)
-	).reverse()
+	const addedTracks = savedTracks
+		.filter(track => !playlistTracks.some(playlistTrack => playlistTrack.id === track.id))
+		.reverse()
 
 	if (removedTracks.length > 0)
 		await forEvery(removedTracks, 100, tracks =>
