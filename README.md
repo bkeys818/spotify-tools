@@ -1,38 +1,33 @@
-# create-svelte
+# Spotify Tools
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+> A site with tools to use alongside Spotify.
 
-## Creating a project
+[![Deploy Frontend](https://github.com/bkeys818/spotify-tools/actions/workflows/frontend-deploy.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/frontend-deploy.yml)
+[![Deploy Functions](https://github.com/bkeys818/spotify-tools/actions/workflows/functions-deploy.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/functions-deploy.yml)
+[![Check Formatting](https://github.com/bkeys818/spotify-tools/actions/workflows/check-format.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/check-format.yml)
 
-If you're seeing this, you've probably already done this step. Congrats!
+# Contribution Guidelines
 
-```bash
-# create a new project in the current directory
-npm init svelte
+Please ensure your pull request adheres to the following guidelines:
 
-# create a new project in my-app
-npm init svelte my-app
-```
+-   Keep descriptions short and simple, but descriptive.
+-   Use [Gitmoji](https://github.com/carloscuesta/gitmoji) for commits.
+-   Format your code correctly (`yarn lint`).
 
-## Developing
+## Project Setup
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+This site is build using [SvelteKit](https://kit.svelte.dev) and [Firebase](https://firebase.google.com).
 
-```bash
-npm run dev
+To test Firebase related functionality, do the following:
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+-   Install [firebase-tools](https://www.npmjs.com/package/firebase-tools) globally.
+-   Create a new firebase project for development.
+-   Set up a Firebase deploy targets named `dev` ([tutorial](https://firebase.google.com/docs/cli/targets#set_up_deploy_targets_for_your_firebase_resources)).
+-   Replace the [`devConfig`](https://github.com/bkeys818/spotify-tools/blob/main/src/lib/firebase/index.ts#L15) with your development project configuration.
+-   Create a `firebase`.
 
-## Building
+To test Spotify related functionality, do the following:
 
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+-   Create a [Spotify API project](https://developer.spotify.com/dashboard/login) for development.
+-   Create a `.env.development.local` file containing all [`ImportMetaEnv`](https://github.com/bkeys818/spotify-tools/blob/main/src/env.d.ts) properties.
+-   Set any necessary [Cloud Secrets](https://firebase.google.com/docs/functions/config-env#secret-manager).
