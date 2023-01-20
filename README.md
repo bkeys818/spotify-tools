@@ -30,4 +30,4 @@ To test Spotify related functionality, do the following:
 
 -   Create a [Spotify API project](https://developer.spotify.com/dashboard/login) for development.
 -   Create a `.env.development.local` file containing all [`ImportMetaEnv`](https://github.com/bkeys818/spotify-tools/blob/main/src/env.d.ts) properties.
--   Set any necessary [Cloud Secrets](https://firebase.google.com/docs/functions/config-env#secret-manager).
+-   Set secrets with [Cloud Secrets](https://firebase.google.com/docs/functions/config-env#secret-manager) for the valus listed in [`functions/src/env.ts`](https://github.com/bkeys818/spotify-tools/blob/main/functions/src/env.ts).
