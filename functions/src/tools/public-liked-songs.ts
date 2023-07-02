@@ -30,9 +30,12 @@ export const createPublicLikedSongs = functions
 		try {
 			return await update(docData.refresh_token, docData.playlist_id)
 		} catch (error) {
-			if (typeof error == 'object' && error && 'statusCode' in error)
-				if ((error as { statusCode: unknown }).statusCode == 404)
-					return await ref.update({ playlist_id: undefined })
+			let msg = 'Spotify Error'
+			functions.logger.warn(error)
+			if (typeof error == 'object' && error && 'statusCode' in error) {
+				if ('message' in error && typeof error.message == 'string') msg = error.message
+				throw new functions.https.HttpsError('unknown', msg, error)
+			}
 			throw error
 		}
 	})
@@ -93,13 +96,15 @@ async function update(refresh_token: string, playlist_id: string) {
 
 	if (removedTracks.length > 0)
 		await forEvery(removedTracks, 100, tracks =>
-			spotify.removeTracksFromPlaylist(playlist_id, tracks)
+			handleResponse(() => spotify.removeTracksFromPlaylist(playlist_id, tracks))
 		)
 	if (addedTracks.length > 0)
 		await forEvery(addedTracks, 100, tracks =>
-			spotify.addTracksToPlaylist(
-				playlist_id,
-				tracks.map(track => track.uri)
+			handleResponse(() =>
+				spotify.addTracksToPlaylist(
+					playlist_id,
+					tracks.map(track => track.uri)
+				)
 			)
 		)
 

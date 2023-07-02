@@ -1,16 +1,14 @@
-export function handleResponse<T>(call: () => Promise<Response<T>>): Promise<T> {
-	return call()
-		.catch(error => {
-			throw `Spotify Error: ${error}`
-		})
-		.then(res => {
-			if (res.statusCode < 300) {
-				return res.body
-			} else {
-				// handle error
-				throw `Spotify Error: ${res.statusCode}`
-			}
-		})
+export async function handleResponse<T>(call: () => Promise<Response<T>>): Promise<T> {
+	try {
+		const res = await call()
+		if (res.statusCode < 300) {
+			return res.body
+		} else {
+			throw res
+		}
+	} catch (error) {
+		throw error
+	}
 }
 interface Response<T> {
 	body: T
