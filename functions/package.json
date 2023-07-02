@@ -5,7 +5,8 @@
 		"build:watch": "tsc --watch",
 		"serve": "yarn build && firebase emulators:start --only functions,firestore,pubsub -P dev",
 		"dev": "yarn build && firebase emulators:start --only functions,firestore,pubsub --inspect-functions -P dev",
-		"shell": "yarn build && firebase functions:shell -P dev",
+		"shell-prep": "yarn build && firebase emulators:start --only firestore,pubsub -P dev",
+		"shell": "yarn build && firebase functions:shell -P dev --inspect-functions",
 		"start": "yarn shell",
 		"deploy": "firebase deploy --only functions -P prod",
 		"logs": "firebase functions:log"

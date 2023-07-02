@@ -23,6 +23,16 @@
 			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
 			"console": "integratedTerminal",
 			"preLaunchTask": "npm: build - functions"
+		},
+		{
+			"name": "Attach Firebase Functions Emulator",
+			"type": "node",
+			"request": "attach",
+			"sourceMaps": true,
+			"outFiles": ["${workspaceFolder}/functions/lib/**/*.js"],
+			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+			"cwd": "${workspaceFolder}/functions",
+			"port": 9229
 		}
 	]
 }
