@@ -288,6 +288,14 @@
   resolved "https://registry.npmjs.org/@types/mime/-/mime-3.0.1.tgz"
   integrity sha512-Y4XFY5VJAuw0FgAqPNd6NNoV44jbq9Bz2L7Rh/J6jLTiHBSBJa9fxqQIvkIld4GsoDOcCbvzOUAbLPsSKKg+uA==
 
+"@types/node-fetch@^2.6.4":
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.6.4.tgz#1bc3a26de814f6bf466b25aeb1473fa1afe6a660"
+  integrity sha512-1ZX9fcN4Rvkvgv4E6PAY5WXUFWFcRWxZa3EW83UjycOB9ljJCedb2CupIP4RZMEwF/M3eTcCihbBRgwtGbg5Rg==
+  dependencies:
+    "@types/node" "*"
+    form-data "^3.0.0"
+
 "@types/node@*":
   version "18.11.15"
   resolved "https://registry.npmjs.org/@types/node/-/node-18.11.15.tgz"
@@ -320,6 +328,11 @@
   version "0.0.16"
   resolved "https://registry.npmjs.org/@types/spotify-api/-/spotify-api-0.0.16.tgz"
   integrity sha512-5tzZ8cJe2Wv5zjhBLXi7gJObp/kzuG10FwMKPqNtmG9HFWlXKvqBhd0Z+T5Oa0yhkSX1u8Y+bBUhUEPmZpGpDQ==
+
+"@types/spotify-api@^0.0.22":
+  version "0.0.22"
+  resolved "https://registry.yarnpkg.com/@types/spotify-api/-/spotify-api-0.0.22.tgz#762707c4ad323e9d1c4e75e85742ad50e1666942"
+  integrity sha512-oZLKiI6Fck/BGd0QdmIdJCY351xQfRkfpx2Q23jIntL3YQx85vScYuFJMK81/NoSK9m7HYOl2DW4A9WomDuJOA==
 
 "@types/spotify-web-api-node@^5.0.7":
   version "5.0.7"
