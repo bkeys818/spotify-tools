@@ -1,21 +1,3 @@
-export async function handleResponse<T>(call: () => Promise<Response<T>>): Promise<T> {
-	try {
-		const res = await call()
-		if (res.statusCode < 300) {
-			return res.body
-		} else {
-			throw res
-		}
-	} catch (error) {
-		throw error
-	}
-}
-interface Response<T> {
-	body: T
-	headers: Record<string, string>
-	statusCode: number
-}
-
 export async function forEvery<T>(
 	items: T[],
 	limit: number,
@@ -24,4 +6,13 @@ export async function forEvery<T>(
 	for (let i = 0; i < items.length; i += limit) {
 		await method(items.slice(i, i + limit))
 	}
+}
+
+export function isObjWith<K extends string>(value: unknown, ...keys: K[]): value is { [k in K]: any } {
+	if (typeof value == 'object' && value) {
+		for (const key of keys)
+			if (!(key in value)) return false
+		return true
+	}
+	return false;
 }
