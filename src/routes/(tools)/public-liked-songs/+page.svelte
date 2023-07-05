@@ -6,6 +6,7 @@
 	import LoginButton from '$lib/components/LoginButton.svelte'
 	import Spinner from '$lib/components/spinner.svelte'
 	import SpotifyEmbed from '$lib/components/spotify-embed.svelte'
+	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 
 	let backendResponse: ReturnType<typeof createPublicLikedSongs> | undefined
 
@@ -33,8 +34,7 @@
 				/>
 			{/if}
 		{:catch error}
-			<h4>Oh No! Something went wrong</h4>
-			<p>{error}</p>
+			<ErrorMsg {error} />
 		{/await}
 	{:else if $user}
 		<AuthorizeButton />
