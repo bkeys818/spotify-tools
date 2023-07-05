@@ -113,13 +113,13 @@ async function update(spotify: Spotify, playlistId: string) {
 		spotify.getPlaylistTracks(playlistId),
 		spotify.getMySavedTracks()
 	])
-	const playlistTrackIds = playlistTracks
-		.map(item => item.track?.id)
+	const playlistTrackUris = playlistTracks
+		.map(item => item.track?.uri)
 		.filter((v): v is string => v !== undefined)
-	const savedTrackIds = savedTracks.map(item => item.track.id)
+	const savedTrackUris = savedTracks.map(item => item.track.uri)
 
-	const removedTrackIds = playlistTrackIds.filter(id => !savedTrackIds.includes(id))
-	const addedTrackIds = savedTrackIds.filter(id => !playlistTrackIds.includes(id)).reverse()
+	const removedTrackIds = playlistTrackUris.filter(id => !savedTrackUris.includes(id))
+	const addedTrackIds = savedTrackUris.filter(id => !playlistTrackUris.includes(id)).reverse()
 
 	if (removedTrackIds.length > 0)
 		await forEvery(removedTrackIds, 100, ids => spotify.removeTracksToPlaylist(playlistId, ids))
