@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions'
 import { db } from '../firestore'
-import { Spotify, PlaylistDeletedError } from '../spotify'
+import { Spotify } from '../spotify'
 import { forEvery } from '../utils'
 import { secrets } from '../env'
 
@@ -36,10 +36,12 @@ export const createPublicLikedSongs = functions
 			docData = doc.data() as Document
 		}
 
+		const user = await spotify.getMe()
+
 		// Don't have playlist id
 		if (!docData.playlist_id) {
 			// check to see if playlist already exists
-			const [playlists, user] = await Promise.all([spotify.getMyPlaylists(), spotify.getMe()])
+			const playlists = await spotify.getMyPlaylists()
 			const playlistName = name(user.display_name)
 			for (const playlist of playlists) {
 				if (playlist.name == playlistName) docData.playlist_id = playlist.id
@@ -56,16 +58,17 @@ export const createPublicLikedSongs = functions
 			await ref.update({ playlist_id: docData.playlist_id })
 		}
 
+		if (!(await spotify.usersFollowPlaylist(docData.playlist_id, [user.id]))[0]) {
+			await ref.delete()
+			throw new functions.https.HttpsError(
+				'not-found',
+				'You may have deleted the synced playlist. Refresh to restore it.'
+			)
+		}
+
 		try {
 			return await update(spotify, docData.playlist_id)
 		} catch (error) {
-			if (error instanceof PlaylistDeletedError) {
-				await ref.delete()
-				throw new functions.https.HttpsError(
-					'not-found',
-					'Synced playlist was deleted. Refresh to Create a new one.'
-				)
-			}
 			let msg = 'Spotify Error'
 			functions.logger.warn(error)
 			if (typeof error == 'object' && error && 'statusCode' in error) {
@@ -96,15 +99,11 @@ export const syncPublicLikedSongs = functions
 				})
 				await spotify.refreshAccessToken()
 				if (data.playlist_id) {
-					try {
-						return await update(spotify, data.playlist_id)
-					} catch (error) {
-						if (error instanceof PlaylistDeletedError)
-							return await ref.delete()
-						else throw error
-					}
-				}
-				else return
+					const user = await spotify.getMe()
+					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
+						return await ref.delete()
+					else return await update(spotify, data.playlist_id)
+				} else return await ref.delete()
 			})
 		)
 	})

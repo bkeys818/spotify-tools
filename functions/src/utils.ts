@@ -7,12 +7,3 @@ export async function forEvery<T>(
 		await method(items.slice(i, i + limit))
 	}
 }
-
-export function isObjWith<K extends string>(value: unknown, ...keys: K[]): value is { [k in K]: any } {
-	if (typeof value == 'object' && value) {
-		for (const key of keys)
-			if (!(key in value)) return false
-		return true
-	}
-	return false;
-}

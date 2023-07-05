@@ -1,8 +1,5 @@
-import { handleRepsonse, PlaylistDeletedError } from './error'
+import { handleRepsonse } from './error'
 import fetch, { BodyInit } from 'node-fetch'
-import { isObjWith } from '../utils'
-
-export { PlaylistDeletedError }
 
 export class Spotify {
 	private credentials: Credentials
@@ -119,20 +116,18 @@ export class Spotify {
 	}
 
 	createPlaylist(userId: string, details: PlaylistDetails) {
-		return this.request<SpotifyApi.PlaylistObjectFull>(`users/${userId}/playlists`, 'POST', details)
+		return this.request<SpotifyApi.PlaylistObjectFull>(
+			`users/${userId}/playlists`,
+			'POST',
+			details
+		)
 	}
 
-	async changePlaylistDetails(playlistId: string, details: Partial<PlaylistDetails>) {
-		try {
-			return await this.request<void>('playlists/' + playlistId, 'PUT', details)
-		} catch (error) {
-			if (isObjWith(error, 'status') && error.status == 403)
-				throw new PlaylistDeletedError()
-		}
+	changePlaylistDetails(playlistId: string, details: Partial<PlaylistDetails>) {
+		return this.request<void>('playlists/' + playlistId, 'PUT', details)
 	}
 
 	getPlaylistTracks(playlistId: string) {
-
 		return this.requestAll<SpotifyApi.PlaylistTrackObject>(`playlists/${playlistId}/tracks`)
 	}
 
@@ -150,6 +145,12 @@ export class Spotify {
 			'DELETE',
 			{ uris }
 		)
+	}
+
+	usersFollowPlaylist(playlistId: string, userIds: string[]) {
+		return this.request<boolean[]>(`playlists/${playlistId}/followers/contains`, 'GET', {
+			ids: userIds.join()
+		})
 	}
 }
 
