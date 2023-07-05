@@ -13,6 +13,7 @@ on:
             - 'tailwind.config.cjs'
             - 'tsconfig.json'
             - 'yarn.lock'
+            - '.github/workflows/frontend-build.yml'
     workflow_call:
         secrets:
             CLIENT_ID:
