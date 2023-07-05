@@ -35,7 +35,9 @@ jobs:
                   name: frontend-build
                   path: build
             - name: Get commit message
-              run: echo "commit_msg=${${{ github.event.head_commit.message }}%%$'\n'*}" >> "$GITHUB_ENV"
+              run: |
+                  MSG="${{ github.event.head_commit.message }}"
+                  echo "commit_msg=${MSG%%$'\n'*}" >> "$GITHUB_ENV"
             - name: Deploy frontend
               uses: w9jds/firebase-action@master
               with:
