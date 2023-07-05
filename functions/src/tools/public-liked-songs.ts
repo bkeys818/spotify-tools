@@ -113,30 +113,18 @@ async function update(spotify: Spotify, playlistId: string) {
 		spotify.getPlaylistTracks(playlistId),
 		spotify.getMySavedTracks()
 	])
+	const playlistTrackIds = playlistTracks
+		.map(item => item.track?.id)
+		.filter((v): v is string => v !== undefined)
+	const savedTrackIds = savedTracks.map(item => item.track.id)
 
-	const removedTracks = playlistTracks.filter(
-		item => item.track && !savedTracks.some(savedItem => savedItem.track.id === item.track!.id)
-	)
-	const addedTracks = savedTracks
-		.filter(
-			item => !playlistTracks.some(playlistItem => playlistItem.track?.id === item.track.id)
-		)
-		.reverse()
+	const removedTrackIds = playlistTrackIds.filter(id => !savedTrackIds.includes(id))
+	const addedTrackIds = savedTrackIds.filter(id => !playlistTrackIds.includes(id)).reverse()
 
-	if (removedTracks.length > 0)
-		await forEvery(removedTracks, 100, items =>
-			spotify.removeTracksToPlaylist(
-				playlistId,
-				items.map(i => i.track!.uri)
-			)
-		)
-	if (addedTracks.length > 0)
-		await forEvery(addedTracks, 100, items =>
-			spotify.addTracksToPlaylist(
-				playlistId,
-				items.map(i => i.track.uri)
-			)
-		)
+	if (removedTrackIds.length > 0)
+		await forEvery(removedTrackIds, 100, ids => spotify.removeTracksToPlaylist(playlistId, ids))
+	if (addedTrackIds.length > 0)
+		await forEvery(addedTrackIds, 100, ids => spotify.addTracksToPlaylist(playlistId, ids))
 
 	await spotify.changePlaylistDetails(playlistId, { description: description() })
 

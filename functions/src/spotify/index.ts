@@ -47,7 +47,7 @@ export class Spotify {
 		let url = 'https://api.spotify.com/v1/' + endpoint
 		let body: BodyInit
 		if (method == 'GET' && params) {
-			for (const key in params) if (params[key]) params[key] = params[key]!.toString()
+			for (const key in params) if (params[key]) params[key] = params[key]?.toString()
 			url += '?' + new URLSearchParams(params as Record<string, string>).toString()
 		} else if (params) {
 			body = JSON.stringify(params)
@@ -97,7 +97,7 @@ export class Spotify {
 		if (!this.credentials.refreshToken)
 			throw new Error('Missing refresh token. Please authenticate first.')
 		const token = await this.authRequest<AccessToken>({
-			refresh_token: this.credentials.refreshToken!,
+			refresh_token: this.credentials.refreshToken,
 			grant_type: 'refresh_token'
 		})
 		this.credentials.accessToken = token.access_token
