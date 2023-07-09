@@ -20,23 +20,20 @@ export const createPublicLikedSongs = functions
 			clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 			redirectUri: data.origin + '/authorize'
 		})
+		const { refresh_token } = await spotify.authorizationCodeGrant(data.code)
+		const user = await spotify.getMe()
 
-		const ref = db.collection('public-liked-songs').doc(context.auth.uid)
+		const ref = db.collection('public-liked-songs').doc(user.id)
 		let doc = await ref.get()
 
 		let docData: Document
 		if (doc.exists) {
 			docData = doc.data() as Document
-			spotify.setRefreshToken(docData.refresh_token)
-			await spotify.refreshAccessToken()
 		} else {
-			const { refresh_token } = await spotify.authorizationCodeGrant(data.code)
-			await ref.create({ refresh_token })
+			await ref.create({ refresh_token, uid: context.auth.uid })
 			doc = await ref.get() // Do I need this line?
 			docData = doc.data() as Document
 		}
-
-		const user = await spotify.getMe()
 
 		// Don't have playlist id
 		if (!docData.playlist_id) {
