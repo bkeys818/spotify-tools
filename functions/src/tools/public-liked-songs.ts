@@ -12,8 +12,7 @@ interface Document {
 }
 
 export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
-	if (!auth)
-		throw new HttpsError('unauthenticated', 'User must be authenticated.')
+	if (!auth) throw new HttpsError('unauthenticated', 'User must be authenticated.')
 
 	const spotify = new Spotify({
 		clientId: process.env.SPOTIFY_CLIENT_ID,
