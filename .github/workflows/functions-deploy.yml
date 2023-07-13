@@ -28,10 +28,14 @@ jobs:
               with:
                   name: functions-build
                   path: build
+            - name: Get commit message
+              run: |
+                  MSG="${{ github.event.head_commit.message }}"
+                  echo "commit_msg=${MSG%%$'\n'*}" >> "$GITHUB_ENV"
             - name: Deploy functions
               uses: w9jds/firebase-action@master
               with:
-                  args: deploy --only functions --message \"${{ github.event.head_commit.message }}\"
+                  args: deploy --only functions --message \"${{ env.commit_msg }}\"
               env:
                   GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
                   PROJECT_ID: ben-keys-spotify-tools

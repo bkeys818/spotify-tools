@@ -45,4 +45,3 @@ jobs:
               env:
                   GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
                   PROJECT_ID: ben-keys-spotify-tools
-                  COMMIT_MSG: ${STRINGTEST%%$'\n'*}
