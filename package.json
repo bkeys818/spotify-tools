@@ -3,6 +3,7 @@
 	"version": "0.0.1",
 	"license": "MIT",
 	"scripts": {
+		"preinstall": "npx only-allow pnpm",
 		"dev": "vite dev --port 5050 --host",
 		"build": "vite build",
 		"preview": "vite preview",
