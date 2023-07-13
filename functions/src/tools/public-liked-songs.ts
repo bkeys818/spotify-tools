@@ -11,7 +11,7 @@ interface Document {
 	playlist_id?: string
 }
 
-export const createPublicLikedSongs = onCall<Data>({ secrets }, async ({ data, auth }) => {
+export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 	if (!auth)
 		throw new HttpsError('unauthenticated', 'User must be authenticated.')
 
@@ -81,7 +81,7 @@ interface Data {
 	origin: string
 }
 
-export const syncPublicLikedSongs = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
+export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 	const docRefs = await db.collection('public-liked-songs').listDocuments()
 	await Promise.all(
 		docRefs.map(async ref => {

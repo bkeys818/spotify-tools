@@ -8,4 +8,4 @@ if (dev) connectFunctionsEmulator(functions, 'localhost', 5001)
 export const createPublicLikedSongs = httpsCallable<{
 	code: string
 	origin: string
-}>(functions, 'createPublicLikedSongs')
+}>(functions, 'publicLikedSongs-create')
