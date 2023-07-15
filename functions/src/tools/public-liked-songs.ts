@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onSchedule } from 'firebase-functions/v2/scheduler'
 import { warn } from 'firebase-functions/logger'
-import { db } from '../firestore'
+import { db } from '../init'
 import Spotify from '../spotify'
 import { forEvery } from '../utils'
 import { secrets } from '../env'
