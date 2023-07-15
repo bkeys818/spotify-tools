@@ -1,0 +1,12 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"types": ["spotify-api", "jest"],
+		"paths": {
+			"src/*": ["../src/*"],
+			"src": ["../src"]
+		}
+	},
+	"exclude": ["../src"]
+}

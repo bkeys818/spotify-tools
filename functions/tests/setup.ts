@@ -1,0 +1,3 @@
+afterAll(() => {
+	testEnv.cleanup()
+})
