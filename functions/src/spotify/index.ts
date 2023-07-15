@@ -1,7 +1,7 @@
 import { handleRepsonse } from './error'
 import fetch, { BodyInit } from 'node-fetch'
 
-export class Spotify {
+export default class Spotify {
 	private credentials: Credentials
 	setRefreshToken(value: string) {
 		this.credentials.refreshToken = value
