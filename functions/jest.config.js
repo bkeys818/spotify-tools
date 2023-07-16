@@ -5,6 +5,8 @@ const config = {
 	// testMatch: ['"**/?(*.)+test.[jt]s?(x)'],
 	setupFilesAfterEnv: ['./tests/setup.ts'],
 	verbose: true,
+	coverageReporters: ['html', 'json-summary'],
+	coverageDirectory: './coverage',
 	moduleNameMapper: {
 		'^src/(.*)$': '<rootDir>/src/$1',
 		'^src$': '<rootDir>/src'

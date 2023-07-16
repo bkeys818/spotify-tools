@@ -1,3 +1,4 @@
 afterAll(() => {
-	testEnv.cleanup()
+	if (process.env.JEST_ENV == 'FirebaseEnvironment')
+		testEnv.cleanup()
 })

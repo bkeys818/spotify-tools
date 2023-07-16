@@ -25,5 +25,13 @@ export default class FirebaseEnvironment extends NodeEnvironment {
 		if (!existsSync(keyPath))
 			throw new Error('Missing path to admin credentials.\nSee https://firebase.google.com/docs/functions/local-shell#set_up_admin_credentials_optional.')
 		this.global.testEnv = configTest(config, keyPath)
+		this.syncEnv('FIREBASE_CONFIG')
+		this.syncEnv('GCLOUD_PROJECT')
+		this.syncEnv('GOOGLE_APPLICATION_CREDENTIALS')
+		this.global.process.env.JEST_ENV = FirebaseEnvironment.name
+	}
+
+	private syncEnv(key: string) {
+		this.global.process.env[key] = process.env[key]
 	}
 }
