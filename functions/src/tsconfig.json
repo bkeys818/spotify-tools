@@ -3,7 +3,8 @@
 	"compilerOptions": {
 		"outDir": "../lib",
 		"sourceMap": true,
-		"noImplicitReturns": true
+		"noImplicitReturns": true,
+		"types": ["spotify-api"]
 	},
 	"exclude": ["../tests"]
 }

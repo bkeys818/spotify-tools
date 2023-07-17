@@ -2,7 +2,11 @@
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
 		"noEmit": true,
-		"types": ["spotify-api", "jest"],
+		"typeRoots": [
+			"../node_modules/@types",
+			"../node_modules/jest-environment-firebase-functions"
+		],
+		"types": ["spotify-api", "jest", "dist"],
 		"paths": {
 			"src/*": ["../src/*"],
 			"src": ["../src"]

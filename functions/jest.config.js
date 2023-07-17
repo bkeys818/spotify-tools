@@ -1,8 +1,13 @@
 /** @type {import('jest').Config} */
-const config = {
+module.exports = {
 	preset: 'ts-jest',
-	testEnvironment: './tests/firebase-env.ts',
-	// testMatch: ['"**/?(*.)+test.[jt]s?(x)'],
+	testEnvironment: 'jest-environment-firebase-functions',
+	/** @type {import('jest-environment-firebase-functions').Options} */
+	testEnvironmentOptions: {
+		projectId: 'ben-keys-spotify-tools-dev',
+		storageBucket: 'ben-keys-spotify-tools-dev.appspot.com',
+		keyPath: './serviceAccountKey.json'
+	},
 	setupFilesAfterEnv: ['./tests/setup.ts'],
 	verbose: true,
 	coverageReporters: ['html', 'json-summary'],
@@ -15,5 +20,3 @@ const config = {
 		'^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tests/tsconfig.json' }]
 	}
 }
-
-module.exports = config
