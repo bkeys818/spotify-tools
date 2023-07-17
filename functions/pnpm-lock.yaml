@@ -31,6 +31,9 @@ devDependencies:
   jest:
     specifier: ^29.6.1
     version: 29.6.1
+  jest-environment-firebase-functions:
+    specifier: ^1.0.0
+    version: 1.0.0(firebase-functions-test@3.1.0)(jest@29.6.1)
   jest-environment-node:
     specifier: ^29.6.1
     version: 29.6.1
@@ -2301,6 +2304,19 @@ packages:
       jest-get-type: 29.4.3
       jest-util: 29.6.1
       pretty-format: 29.6.1
+    dev: true
+
+  /jest-environment-firebase-functions@1.0.0(firebase-functions-test@3.1.0)(jest@29.6.1):
+    resolution: {integrity: sha512-Mvu6lE90CLm/thDhI4UF918iD6bu+Ol92n/ZkAMmAs4xVJeHJvqze3sRJBJi4AuOz46KD2nsYA/t1lKWax1Lmw==}
+    engines: {node: '>=14.0.0', pnpm: '>=3'}
+    requiresBuild: true
+    peerDependencies:
+      firebase-functions-test: '>=3.1.0'
+      jest: '>=28.0.0'
+    dependencies:
+      firebase-functions-test: 3.1.0(firebase-admin@11.10.0)(firebase-functions@4.4.1)(jest@29.6.1)
+      jest: 29.6.1
+      jest-environment-node: 29.6.1
     dev: true
 
   /jest-environment-node@29.6.1:
