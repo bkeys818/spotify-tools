@@ -21,8 +21,8 @@ jobs:
                   node-version-file: 'functions/.nvmrc'
             - name: Install dependencies
               run: |
-                yarn --cwd ./functions/
-                rm ./functions/pnpm-lock.yaml
+                  yarn --cwd ./functions/
+                  rm ./functions/pnpm-lock.yaml
             - name: Get commit message
               run: |
                   MSG="${{ github.event.head_commit.message }}"
