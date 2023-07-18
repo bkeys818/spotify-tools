@@ -1,7 +1,6 @@
 {
 	"name": "functions",
 	"scripts": {
-		"preinstall": "npx only-allow pnpm",
 		"build": "tsc -p src/tsconfig.json",
 		"build:watch": "tsc -p src/tsconfig.json --watch",
 		"serve": "yarn build && firebase emulators:start --only functions,firestore,pubsub -P dev",

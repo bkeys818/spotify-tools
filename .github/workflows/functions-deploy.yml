@@ -19,12 +19,10 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version-file: 'functions/.nvmrc'
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: ^8.6.9
             - name: Install dependencies
-              run: pnpm -C ./functions/ install
+              run: |
+                yarn --cwd ./functions/
+                rm ./functions/pnpm-lock.yaml
             - name: Get commit message
               run: |
                   MSG="${{ github.event.head_commit.message }}"
