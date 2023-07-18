@@ -28,12 +28,6 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
-              with:
-                  version: ^8.6.9
-            - name: Install dependencies
-              run: pnpm install
             - name: Download artifact
               uses: actions/download-artifact@v3
               with:
