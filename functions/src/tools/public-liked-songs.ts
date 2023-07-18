@@ -19,7 +19,11 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 		clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 		redirectUri: data.origin + '/authorize'
 	})
-	const { refresh_token } = await spotify.authorizationCodeGrant(data.code)
+	const { refresh_token } = await spotify.authorizationCodeGrant(data.code).catch(err => {
+		if (err == 'invalid_grant')
+			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
+		throw err
+	})
 	const user = await spotify.getMe()
 
 	const ref = db.collection('public-liked-songs').doc(user.id)
