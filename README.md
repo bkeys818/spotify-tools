@@ -4,6 +4,7 @@
 
 [![Deploy Frontend](https://github.com/bkeys818/spotify-tools/actions/workflows/frontend-deploy.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/frontend-deploy.yml)
 [![Deploy Functions](https://github.com/bkeys818/spotify-tools/actions/workflows/functions-deploy.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/functions-deploy.yml)
+[![Function Tests](https://github.com/bkeys818/spotify-tools/actions/workflows/functions-test.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/functions-test.yml)
 [![Check Formatting](https://github.com/bkeys818/spotify-tools/actions/workflows/check-format.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/check-format.yml)
 
 # Contribution Guidelines
