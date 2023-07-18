@@ -25,7 +25,7 @@ jobs:
             - name: Install dependencies
               run: pnpm  --C ./functions/ install
             - name: Create service acccount key
-              run: echo "$serviceAcccountKey" >> ./serviceAcccountKey.json
+              run: echo "$serviceAcccountKey" >> ./functions/serviceAcccountKey.json
               env:
                   serviceAcccountKey: ${{ secrets.serviceAcccountKey }}
             - name: Run tests
