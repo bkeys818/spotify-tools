@@ -9,12 +9,8 @@ on:
             - '.github/workflows/functions-deploy.yml'
 
 jobs:
-    build:
-        uses: ./.github/workflows/functions-build.yml
-
     deploy:
         name: Deploy functions
-        needs: build
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
@@ -29,11 +25,6 @@ jobs:
                   version: ^8.6.9
             - name: Install dependencies
               run: pnpm -C ./functions/ install
-            - name: Download Artifact
-              uses: actions/download-artifact@v3
-              with:
-                  name: functions-build
-                  path: build
             - name: Get commit message
               run: |
                   MSG="${{ github.event.head_commit.message }}"
