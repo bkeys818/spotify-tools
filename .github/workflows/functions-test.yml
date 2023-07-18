@@ -1,0 +1,33 @@
+name: Test Functions
+
+on:
+    pull_request:
+        branches: main
+        paths:
+            - 'functions/**'
+            - 'firebase.*'
+            - '.github/workflows/functions-test.yml'
+    workflow_call:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+            - name: Use Node v16
+            - uses: actions/setup-node@v3
+              with:
+                  node-version-file: 'functions/.nvmrc'
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: ^8.6.9
+            - name: Install dependencies
+              run: pnpm  --C ./functions/ install
+            - name: Create service acccount key
+              run: echo "$serviceAcccountKey" >> ./serviceAcccountKey.json
+              env:
+                  serviceAcccountKey: ${{ secrets.serviceAcccountKey }}
+            - name: Run tests
+              run: pnpm --C ./functions/ test
