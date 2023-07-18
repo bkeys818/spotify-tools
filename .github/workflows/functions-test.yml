@@ -24,9 +24,9 @@ jobs:
                   version: ^8.6.9
             - name: Install dependencies
               run: pnpm  --C ./functions/ install
-            - name: Create service acccount key
-              run: echo "$serviceAcccountKey" >> ./functions/serviceAcccountKey.json
+            - name: Create service account key
+              run: echo "$serviceAccountKey" >> ./functions/serviceAccountKey.json
               env:
-                  serviceAcccountKey: ${{ secrets.serviceAcccountKey }}
+                  serviceAccountKey: ${{ secrets.SERVICE_ACCOUNT_KEY }}
             - name: Run tests
               run: pnpm --C ./functions/ test
