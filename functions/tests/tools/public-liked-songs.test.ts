@@ -1,4 +1,4 @@
-import { mockedSpotify as ms } from '../spotify-mocked'
+import ms from '../spotify-mocked'
 import { create, sync } from 'src/tools/public-liked-songs'
 import { db } from 'src/init'
 import { HttpsError, CallableRequest, CallableFunction } from 'firebase-functions/v2/https'
