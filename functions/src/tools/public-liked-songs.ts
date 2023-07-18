@@ -1,8 +1,8 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onSchedule } from 'firebase-functions/v2/scheduler'
 import { warn } from 'firebase-functions/logger'
-import { db } from '../firestore'
-import { Spotify } from '../spotify'
+import { db } from '../init'
+import Spotify from '../spotify'
 import { forEvery } from '../utils'
 import { secrets } from '../env'
 
@@ -19,7 +19,11 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 		clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 		redirectUri: data.origin + '/authorize'
 	})
-	const { refresh_token } = await spotify.authorizationCodeGrant(data.code)
+	const { refresh_token } = await spotify.authorizationCodeGrant(data.code).catch(err => {
+		if (err == 'invalid_grant')
+			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
+		throw err
+	})
 	const user = await spotify.getMe()
 
 	const ref = db.collection('public-liked-songs').doc(user.id)

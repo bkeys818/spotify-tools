@@ -10,7 +10,13 @@ jobs:
     check:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
-            - run: yarn
+            - name: Checkout repository
+              uses: actions/checkout@v3
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: ^8.6.9
+            - name: Install dependencies
+              run: pnpm install
             - name: Run ESLint
-              run: yarn lint
+              run: pnpm lint

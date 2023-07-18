@@ -9,25 +9,22 @@ on:
             - '.github/workflows/functions-deploy.yml'
 
 jobs:
-    build:
-        uses: ./.github/workflows/functions-build.yml
-
     deploy:
         name: Deploy functions
-        needs: build
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - name: Checkout repository
+              uses: actions/checkout@v3
+            - name: Use Node v16
+              uses: actions/setup-node@v3
               with:
                   node-version-file: 'functions/.nvmrc'
-            - name: Install dependencies
-              run: yarn --cwd ./functions/
-            - name: Download Artifact
-              uses: actions/download-artifact@v3
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
               with:
-                  name: functions-build
-                  path: build
+                  version: ^8.6.9
+            - name: Install dependencies
+              run: pnpm -C ./functions/ install
             - name: Get commit message
               run: |
                   MSG="${{ github.event.head_commit.message }}"

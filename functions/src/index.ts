@@ -1,3 +1,3 @@
-import { initializeApp } from 'firebase-admin/app'
-initializeApp()
+import { app } from './init'
+app
 export * from './tools'

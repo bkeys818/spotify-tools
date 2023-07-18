@@ -1,4 +1,4 @@
-name: Build Functions
+name: Test Functions
 
 on:
     pull_request:
@@ -6,7 +6,7 @@ on:
         paths:
             - 'functions/**'
             - 'firebase.*'
-            - '.github/workflows/functions-build.yml'
+            - '.github/workflows/functions-test.yml'
     workflow_call:
 
 jobs:
@@ -25,5 +25,9 @@ jobs:
                   version: ^8.6.9
             - name: Install dependencies
               run: pnpm  --C ./functions/ install
-            - name: Build
-              run: pnpm --C ./functions/ build
+            - name: Create service acccount key
+              run: echo "$serviceAcccountKey" >> ./serviceAcccountKey.json
+              env:
+                  serviceAcccountKey: ${{ secrets.serviceAcccountKey }}
+            - name: Run tests
+              run: pnpm --C ./functions/ test
