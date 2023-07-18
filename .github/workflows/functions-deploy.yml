@@ -23,8 +23,12 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version-file: 'functions/.nvmrc'
+            - name: Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: ^8.6.9
             - name: Install dependencies
-              run: yarn --cwd ./functions/
+              run: pnpm -C ./functions/ install
             - name: Download Artifact
               uses: actions/download-artifact@v3
               with:
