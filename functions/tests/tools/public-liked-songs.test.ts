@@ -19,7 +19,7 @@ describe('update', () => {
 		return uris.map(uri => ({ track: { uri } } as T))
 	}
 	function getUris(calls: [string, string[]][]) {
-		return calls.flatMap(([_, uris]) => uris)
+		return calls.flatMap(([, uris]) => uris)
 	}
 
 	test('update synced playlist', async () => {
@@ -57,10 +57,10 @@ describe('update', () => {
 })
 
 describe(create.name, () => {
-	type Data<F> = F extends CallableFunction<infer T, any> ? T : never
+	type Data<F> = F extends CallableFunction<infer T, unknown> ? T : never
 	const data: Data<typeof create> = { code: 'some_code', origin: 'http://localhost:5050' }
-	const rawRequest = {} as CallableRequest<{}>['rawRequest']
-	type Auth = NonNullable<CallableRequest<{}>['auth']>
+	const rawRequest = {} as CallableRequest<unknown>['rawRequest']
+	type Auth = NonNullable<CallableRequest<unknown>['auth']>
 	const auth: Auth = {
 		uid: testEnv.auth.exampleUserRecord().uid,
 		token: {} as Auth['token']

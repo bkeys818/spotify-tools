@@ -3,7 +3,7 @@ import Spotify from 'src/spotify'
 
 test(Spotify.prototype['requestAll'].name, async () => {
 	type Spy = jest.SpiedFunction<Spotify['request']>
-	const spy = jest.spyOn(Spotify.prototype, 'request' as any) as Spy
+	const spy = jest.spyOn(Spotify.prototype, 'request' as keyof Spotify) as unknown as Spy
 	const spotify = new Spotify({})
 	const uris = Array.from(Array(53).keys()).map(n => n.toString())
 	const tracks = uris.map(uri => ({ track: { uri } } as SpotifyApi.PlaylistTrackObject))
