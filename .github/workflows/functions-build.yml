@@ -7,7 +7,6 @@ on:
             - 'functions/**'
             - 'firebase.*'
             - '.github/workflows/functions-build.yml'
-    workflow_call:
 
 jobs:
     build:
