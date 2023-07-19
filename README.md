@@ -35,7 +35,6 @@ First, you'll need to set up firebase.
 -   Create a new firebase project for development.
 -   Set up a Firebase deploy targets named `dev` ([tutorial](https://firebase.google.com/docs/cli/targets#set_up_deploy_targets_for_your_firebase_resources)).
 -   Replace the [`devConfig`](https://github.com/bkeys818/spotify-tools/blob/main/src/lib/firebase/index.ts#L15) with your development project configuration.
--   Create a `firebase`.
 
 A few more steps for the function tests.
 
@@ -45,8 +44,6 @@ A few more steps for the function tests.
 ### Spotify API
 
 You'll also need to add some Spotify credentials.
-
-To test Spotify related functionality, do the following:
 
 -   Create a [Spotify API project](https://developer.spotify.com/dashboard/login) for development.
 -   Create a `.env.development.local` file containing all [`ImportMetaEnv`](https://github.com/bkeys818/spotify-tools/blob/main/src/env.d.ts) properties.
