@@ -9,9 +9,15 @@ on:
             - '.github/workflows/functions-deploy.yml'
 
 jobs:
+    test:
+        uses: ./.github/workflows/functions-test.yml
+        secrets:
+            SERVICE_ACCOUNT_KEY: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+
     deploy:
         name: Deploy functions
         runs-on: ubuntu-latest
+        needs: test
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3

@@ -1,15 +1,19 @@
 name: Test Functions
 
 on:
-    push:
+    pull_request:
         branches: main
         paths:
             - 'functions/**'
             - 'firebase.*'
             - '.github/workflows/functions-test.yml'
+    workflow_call:
+        secrets:
+            SERVICE_ACCOUNT_KEY:
+                required: true
 
 jobs:
-    build:
+    test:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
