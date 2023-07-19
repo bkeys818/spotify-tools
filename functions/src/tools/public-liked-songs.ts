@@ -1,6 +1,6 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onSchedule } from 'firebase-functions/v2/scheduler'
-import { warn } from 'firebase-functions/logger'
+import { warn, error } from 'firebase-functions/logger'
 import { db } from '../init'
 import Spotify from '../spotify'
 import { forEvery } from '../utils'
@@ -86,7 +86,7 @@ interface Data {
 
 export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 	const docRefs = await db.collection('public-liked-songs').listDocuments()
-	await Promise.all(
+	const jobs = await Promise.allSettled(
 		docRefs.map(async ref => {
 			const doc = await ref.get()
 			const data = doc.data() as Document
@@ -104,6 +104,9 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 			} else return await ref.delete()
 		})
 	)
+	for (const job of jobs) {
+		if (job.status == 'rejected') error(job.reason)
+	}
 	return
 })
 
