@@ -7,6 +7,10 @@
 [![Function Tests](https://github.com/bkeys818/spotify-tools/actions/workflows/functions-test.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/functions-test.yml)
 [![Check Formatting](https://github.com/bkeys818/spotify-tools/actions/workflows/check-format.yml/badge.svg)](https://github.com/bkeys818/spotify-tools/actions/workflows/check-format.yml)
 
+| Tool               | Description                                                                         |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| Public Liked Songs | Creates a new public playlist that will sync with your liked tracks every 24 hours. |
+
 # Contribution
 
 Want to add or modify the sites functionality? Feel free to create an issue or submit a pull request!
