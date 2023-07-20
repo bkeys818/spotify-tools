@@ -20,7 +20,7 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 		redirectUri: data.origin + '/authorize'
 	})
 	const { refresh_token } = await spotify.authorizationCodeGrant(data.code).catch(err => {
-		if (err == 'invalid_grant')
+		if (err instanceof Error && err.message.includes('invalid_grant'))
 			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
 		throw err
 	})

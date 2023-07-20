@@ -111,7 +111,9 @@ describe(create.name, () => {
 			})
 
 			test('bad spotify authorization', async () => {
-				ms.authorizationCodeGrant.mockRejectedValueOnce('invalid_grant')
+				ms.authorizationCodeGrant.mockRejectedValueOnce(
+					new Error('Invalid refresh token (invalid_grant)')
+				)
 				try {
 					await create.run({ data, auth, rawRequest })
 					fail('An error should have been thrown.')
