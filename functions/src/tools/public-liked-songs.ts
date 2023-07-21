@@ -1,14 +1,17 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onSchedule } from 'firebase-functions/v2/scheduler'
-import { warn } from 'firebase-functions/logger'
+import { error, warn, info } from 'firebase-functions/logger'
 import { db } from '../init'
 import Spotify from '../spotify'
 import { forEvery } from '../utils'
 import { secrets } from '../env'
 
+const tool = 'public-liked-songs'
+
 interface Document {
 	refresh_token: string
 	playlist_id?: string
+	uid: string
 }
 
 export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
@@ -20,8 +23,10 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 		redirectUri: data.origin + '/authorize'
 	})
 	const { refresh_token } = await spotify.authorizationCodeGrant(data.code).catch(err => {
-		if (err == 'invalid_grant')
+		if (err instanceof Error && err.message.includes('invalid_grant')) {
+			warn('Unable to get Spotify refresh token.', { tool, error: err })
 			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
+		}
 		throw err
 	})
 	const user = await spotify.getMe()
@@ -60,6 +65,7 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 
 	if (!(await spotify.usersFollowPlaylist(docData.playlist_id, [user.id]))[0]) {
 		await ref.delete()
+		info('User deleted synced playlist', { tool })
 		throw new HttpsError(
 			'not-found',
 			'You may have deleted the synced playlist. Refresh to restore it.'
@@ -68,14 +74,15 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 
 	try {
 		return await update(spotify, docData.playlist_id)
-	} catch (error) {
-		let msg = 'Spotify Error'
-		warn(error)
-		if (typeof error == 'object' && error && 'statusCode' in error) {
-			if ('message' in error && typeof error.message == 'string') msg = error.message
-			throw new HttpsError('unknown', msg, error)
-		}
-		throw error
+	} catch (err) {
+		const msg = 'Failed to update synced playlist.'
+		error(msg, {
+			tool,
+			error: err,
+			spotifyUserId: doc.id,
+			firebaseUid: docData.uid
+		})
+		throw new HttpsError('unknown', msg, err)
 	}
 })
 
@@ -86,7 +93,7 @@ interface Data {
 
 export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 	const docRefs = await db.collection('public-liked-songs').listDocuments()
-	await Promise.all(
+	const jobs = await Promise.allSettled(
 		docRefs.map(async ref => {
 			const doc = await ref.get()
 			const data = doc.data() as Document
@@ -95,15 +102,28 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 				clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 				refreshToken: data.refresh_token
 			})
-			await spotify.refreshAccessToken()
-			if (data.playlist_id) {
-				const user = await spotify.getMe()
-				if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
-					return await ref.delete()
-				else return await update(spotify, data.playlist_id)
-			} else return await ref.delete()
+			try {
+				await spotify.refreshAccessToken()
+				if (data.playlist_id) {
+					const user = await spotify.getMe()
+					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
+						return await ref.delete()
+					else return await update(spotify, data.playlist_id)
+				} else return await ref.delete()
+			} catch (err) {
+				return error('Unable to sync playlist', {
+					tool,
+					error: err,
+					spotifyUserId: doc.id,
+					firebaseUid: data.uid
+				})
+			}
 		})
 	)
+	for (const job of jobs) {
+		if (job.status == 'rejected')
+			error("Failed while retrieving user's data", { tool, error: job.reason })
+	}
 	return
 })
 
