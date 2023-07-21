@@ -1,6 +1,6 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onSchedule } from 'firebase-functions/v2/scheduler'
-import { error } from 'firebase-functions/logger'
+import { error, warn, info } from 'firebase-functions/logger'
 import { db } from '../init'
 import Spotify from '../spotify'
 import { forEvery } from '../utils'
@@ -21,8 +21,10 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 		redirectUri: data.origin + '/authorize'
 	})
 	const { refresh_token } = await spotify.authorizationCodeGrant(data.code).catch(err => {
-		if (err instanceof Error && err.message.includes('invalid_grant'))
+		if (err instanceof Error && err.message.includes('invalid_grant')) {
+			warn('Unable to get Spotify refresh token.', { error: err })
 			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
+		}
 		throw err
 	})
 	const user = await spotify.getMe()
@@ -61,6 +63,7 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 
 	if (!(await spotify.usersFollowPlaylist(docData.playlist_id, [user.id]))[0]) {
 		await ref.delete()
+		info("User deleted synced playlist")
 		throw new HttpsError(
 			'not-found',
 			'You may have deleted the synced playlist. Refresh to restore it.'
@@ -114,7 +117,8 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 		})
 	)
 	for (const job of jobs) {
-		if (job.status == 'rejected') error(job.reason)
+		if (job.status == 'rejected')
+			error("Failed while retrieving user's data", { error: job.reason })
 	}
 	return
 })
