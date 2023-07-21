@@ -1,6 +1,6 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onSchedule } from 'firebase-functions/v2/scheduler'
-import { warn, error } from 'firebase-functions/logger'
+import { error } from 'firebase-functions/logger'
 import { db } from '../init'
 import Spotify from '../spotify'
 import { forEvery } from '../utils'
@@ -9,6 +9,7 @@ import { secrets } from '../env'
 interface Document {
 	refresh_token: string
 	playlist_id?: string
+	uid: string
 }
 
 export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
@@ -68,14 +69,14 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 
 	try {
 		return await update(spotify, docData.playlist_id)
-	} catch (error) {
-		let msg = 'Spotify Error'
-		warn(error)
-		if (typeof error == 'object' && error && 'statusCode' in error) {
-			if ('message' in error && typeof error.message == 'string') msg = error.message
-			throw new HttpsError('unknown', msg, error)
-		}
-		throw error
+	} catch (err) {
+		const msg = 'Failed to update synced playlist.'
+		error(msg, {
+			error: err,
+			spotifyUserId: doc.id,
+			firebaseUid: docData.uid
+		})
+		throw new HttpsError('unknown', msg, err)
 	}
 })
 
@@ -95,13 +96,21 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 				clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 				refreshToken: data.refresh_token
 			})
-			await spotify.refreshAccessToken()
-			if (data.playlist_id) {
-				const user = await spotify.getMe()
-				if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
-					return await ref.delete()
-				else return await update(spotify, data.playlist_id)
-			} else return await ref.delete()
+			try {
+				await spotify.refreshAccessToken()
+				if (data.playlist_id) {
+					const user = await spotify.getMe()
+					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
+						return await ref.delete()
+					else return await update(spotify, data.playlist_id)
+				} else return await ref.delete()
+			} catch (err) {
+				return error('Unable to sync playlist', {
+					error: err,
+					spotifyUserId: doc.id,
+					firebaseUid: data.uid
+				})
+			}
 		})
 	)
 	for (const job of jobs) {
