@@ -9,6 +9,7 @@ import { secrets } from '../env'
 interface Document {
 	refresh_token: string
 	playlist_id?: string
+	uid: string
 }
 
 export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
@@ -95,13 +96,22 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 				clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 				refreshToken: data.refresh_token
 			})
-			await spotify.refreshAccessToken()
-			if (data.playlist_id) {
-				const user = await spotify.getMe()
-				if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
-					return await ref.delete()
-				else return await update(spotify, data.playlist_id)
-			} else return await ref.delete()
+			try {
+				await spotify.refreshAccessToken()
+				if (data.playlist_id) {
+					const user = await spotify.getMe()
+					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
+						return await ref.delete()
+					else return await update(spotify, data.playlist_id)
+				} else return await ref.delete()
+			} catch (err) {
+				if (typeof err != 'object' || err == null) err = { error: err }
+				return error('Unable to sync playlist', {
+					...(err as object),
+					spotifyUserId: doc.id,
+					firebaseUid: data.uid
+				})
+			}
 		})
 	)
 	for (const job of jobs) {
