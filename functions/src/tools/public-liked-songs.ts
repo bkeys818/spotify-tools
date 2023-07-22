@@ -105,8 +105,7 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 			try {
 				await spotify.refreshAccessToken()
 				if (data.playlist_id) {
-					const user = await spotify.getMe()
-					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
+					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [doc.id]))[0])
 						return await ref.delete()
 					else return await update(spotify, data.playlist_id)
 				} else return await ref.delete()
