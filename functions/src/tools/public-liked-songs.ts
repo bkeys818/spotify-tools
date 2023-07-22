@@ -8,13 +8,18 @@ import { secrets } from '../env'
 
 const tool = 'public-liked-songs'
 
-interface Document {
+type Document = {
 	refresh_token: string
 	playlist_id?: string
 	uid: string
 }
 
-export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
+type CreateParams = {
+	code: string
+	origin: string
+}
+
+export const create = onCall<CreateParams>({ secrets }, async ({ data, auth }) => {
 	if (!auth) throw new HttpsError('unauthenticated', 'User must be authenticated.')
 
 	const spotify = new Spotify({
@@ -85,11 +90,6 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 		throw new HttpsError('unknown', msg, err)
 	}
 })
-
-interface Data {
-	code: string
-	origin: string
-}
 
 export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 	const docRefs = await db.collection(tool).listDocuments()
