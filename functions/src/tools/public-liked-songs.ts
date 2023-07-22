@@ -31,7 +31,7 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 	})
 	const user = await spotify.getMe()
 
-	const ref = db.collection('public-liked-songs').doc(user.id)
+	const ref = db.collection(tool).doc(user.id)
 	let doc = await ref.get()
 
 	let docData: Document
@@ -92,7 +92,7 @@ interface Data {
 }
 
 export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
-	const docRefs = await db.collection('public-liked-songs').listDocuments()
+	const docRefs = await db.collection(tool).listDocuments()
 	const jobs = await Promise.allSettled(
 		docRefs.map(async ref => {
 			const doc = await ref.get()
