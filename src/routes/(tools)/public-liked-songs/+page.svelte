@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { createPublicLikedSongs, populatePublicLikedSongs } from '$lib/firebase/functions'
+	import { publicLikedSongs } from '$lib/firebase/functions'
 	import { user } from '$lib/stores'
 	import AuthorizeButton from '$lib/components/AuthorizeButton.svelte'
 	import LoginButton from '$lib/components/LoginButton.svelte'
@@ -8,7 +8,7 @@
 	import SpotifyEmbed from '$lib/components/spotify-embed.svelte'
 	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 
-	let createResponse: ReturnType<typeof createPublicLikedSongs> | undefined
+	let createResponse: ReturnType<typeof publicLikedSongs['create']> | undefined
 	let isPopulated = false
 
 	onMount(() => {
@@ -21,9 +21,9 @@
 	})
 
 	async function createAndPopulate(code: string) {
-		createResponse = createPublicLikedSongs({ code, origin: location.origin })
+		createResponse = publicLikedSongs.create({ code, origin: location.origin })
 		const { data: { userId } } = await createResponse
-		await populatePublicLikedSongs({ userId, origin: location.origin })
+		await publicLikedSongs.populate({ userId, origin: location.origin })
 		isPopulated = true
 	}
 </script>
