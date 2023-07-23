@@ -1,57 +1,62 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { publicLikedSongs } from '$lib/firebase/functions'
-	import { user } from '$lib/stores'
-	import AuthorizeButton from '$lib/components/AuthorizeButton.svelte'
-	import LoginButton from '$lib/components/LoginButton.svelte'
+	import Authorize from '$lib/components/Authorize.svelte'
 	import Spinner from '$lib/components/spinner.svelte'
 	import SpotifyEmbed from '$lib/components/spotify-embed.svelte'
 	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 
-	let createResponse: ReturnType<(typeof publicLikedSongs)['create']> | undefined
-	let isPopulated = false
+	let playlistId: Promise<string>
+	let isPopulated: boolean | undefined = false
+	let error: unknown
 
 	onMount(() => {
 		const searchParams = new URLSearchParams(location.search.slice(1))
 		const code = searchParams.get('code')
 		if (code) {
-			createAndPopulate(code)
+			playlistId = create(code)
 			history.replaceState({}, document.title, location.pathname)
 		}
 	})
 
-	async function createAndPopulate(code: string) {
-		createResponse = publicLikedSongs.create({ code, origin: location.origin })
-		const {
-			data: { userId }
-		} = await createResponse
-		await publicLikedSongs.populate({ userId, origin: location.origin })
-		isPopulated = true
+	async function create(code: string) {
+		const { data } = await publicLikedSongs.create({ code, origin: location.origin })
+		populate(data.userId)
+		return data.playlistId
+	}
+
+	async function populate(userId: string) {
+		try {
+			await publicLikedSongs.populate({ userId: userId, origin: location.origin })
+			isPopulated = true
+		} catch (err) {
+			isPopulated = undefined
+			error = err
+		}
 	}
 </script>
 
 <div class="my-4 text-center">
-	{#if createResponse}
-		{#await createResponse}
+	<Authorize firebase spotify={playlistId === undefined}>
+		{#await playlistId}
 			<Spinner />
-		{:then { data: { playlistId } }}
+		{:then playlistId}
 			<SpotifyEmbed
 				title="public-liked-songs"
 				type="playlist"
 				id={playlistId}
 				className="mx-auto"
 			/>
-			{#if isPopulated}
+			{#if isPopulated === true}
 				<p>Playlist synced!</p>
-			{:else}
+			{:else if isPopulated === false}
 				<p class="loading">Populating playlist</p>
 			{/if}
 		{:catch error}
 			<ErrorMsg {error} />
 		{/await}
-	{:else if $user}
-		<AuthorizeButton />
-	{:else}
-		<LoginButton />
-	{/if}
+		{#if error}
+			<ErrorMsg {error} />
+		{/if}
+	</Authorize>
 </div>
