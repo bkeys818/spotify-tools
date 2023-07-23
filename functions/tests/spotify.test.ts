@@ -1,7 +1,7 @@
 /** @jest-environment node */
 import Spotify from 'src/spotify'
 
-test(Spotify.prototype['requestAll'].name, async () => {
+test(Spotify.prototype['getAll'].name, async () => {
 	type Spy = jest.SpiedFunction<Spotify['request']>
 	const spy = jest.spyOn(Spotify.prototype, 'request' as keyof Spotify) as unknown as Spy
 	const spotify = new Spotify({})

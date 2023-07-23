@@ -7,7 +7,7 @@
 		"dev": "yarn build && firebase emulators:start --only functions,firestore,pubsub --inspect-functions -P dev",
 		"shell-prep": "yarn build && firebase emulators:start --only firestore,pubsub -P dev",
 		"shell": "yarn build && firebase functions:shell -P dev --inspect-functions",
-		"test": "jest",
+		"test": "jest --silent",
 		"deploy": "firebase deploy --only functions -P prod",
 		"logs": "firebase functions:log"
 	},
