@@ -18,8 +18,12 @@ type CreateParams = {
 	code: string
 	origin: string
 }
+type CreateResponse = Promise<{
+	playlistId: string
+	userId: string
+}>
 
-export const create = onCall<CreateParams>({ secrets }, async ({ data, auth }) => {
+export const create = onCall<CreateParams, CreateResponse>({ secrets }, async ({ data, auth }) => {
 	if (!auth) throw new HttpsError('unauthenticated', 'User must be authenticated.')
 
 	const spotify = new Spotify({
@@ -77,10 +81,45 @@ export const create = onCall<CreateParams>({ secrets }, async ({ data, auth }) =
 		)
 	}
 
+	return { playlistId: docData.playlist_id, userId: user.id }
+})
+
+type PopulateParams = {
+	userId: string
+	origin: string
+}
+
+export const populate = onCall<PopulateParams>({ secrets }, async ({ data, auth }) => {
+	if (!auth) throw new HttpsError('unauthenticated', 'User must be authenticated.')
+	const ref = db.doc(tool + '/' + data.userId)
+	const doc = await ref.get()
+	if (!doc.exists) {
+		const msg = "Couldn't find any data for user."
+		warn(msg, {
+			spotifyUserId: data.userId,
+			firebaseUid: auth.uid
+		})
+		throw new HttpsError('not-found', msg)
+	}
+	const docData = doc.data() as Document
+	if (!docData.playlist_id) {
+		const msg = "Couldn't find a playlist for user."
+		warn(msg, {
+			spotifyUserId: data.userId,
+			firebaseUid: auth.uid
+		})
+		throw new HttpsError('not-found', msg)
+	}
+	const spotify = new Spotify({
+		clientId: process.env.SPOTIFY_CLIENT_ID,
+		clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+		refreshToken: docData.refresh_token
+	})
 	try {
+		await spotify.refreshAccessToken()
 		return await update(spotify, docData.playlist_id)
 	} catch (err) {
-		const msg = 'Failed to update synced playlist.'
+		const msg = 'Failed to populate playlist.'
 		error(msg, {
 			tool,
 			error: err,
