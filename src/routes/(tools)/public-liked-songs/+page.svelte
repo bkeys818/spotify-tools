@@ -8,7 +8,7 @@
 	import SpotifyEmbed from '$lib/components/spotify-embed.svelte'
 	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 
-	let createResponse: ReturnType<typeof publicLikedSongs['create']> | undefined
+	let createResponse: ReturnType<(typeof publicLikedSongs)['create']> | undefined
 	let isPopulated = false
 
 	onMount(() => {
@@ -22,7 +22,9 @@
 
 	async function createAndPopulate(code: string) {
 		createResponse = publicLikedSongs.create({ code, origin: location.origin })
-		const { data: { userId } } = await createResponse
+		const {
+			data: { userId }
+		} = await createResponse
 		await publicLikedSongs.populate({ userId, origin: location.origin })
 		isPopulated = true
 	}
@@ -33,17 +35,17 @@
 		{#await createResponse}
 			<Spinner />
 		{:then { data: { playlistId } }}
-				<SpotifyEmbed
-					title="public-liked-songs"
-					type="playlist"
-					id={playlistId}
-					className="mx-auto"
-				/>
-				{#if isPopulated}
-					<p>Playlist synced!</p>
-				{:else}
-					<p class='loading'>Populating playlist</p>
-				{/if}
+			<SpotifyEmbed
+				title="public-liked-songs"
+				type="playlist"
+				id={playlistId}
+				className="mx-auto"
+			/>
+			{#if isPopulated}
+				<p>Playlist synced!</p>
+			{:else}
+				<p class="loading">Populating playlist</p>
+			{/if}
 		{:catch error}
 			<ErrorMsg {error} />
 		{/await}
