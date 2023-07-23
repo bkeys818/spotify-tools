@@ -16,3 +16,8 @@ pnpm-lock.yaml
 /.firebase
 functions/lib/
 functions/typings/
+
+# Config files
+**/svelte.config.*js
+**/vite.config.*js
+**/jest.config.*js
