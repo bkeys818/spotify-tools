@@ -115,8 +115,15 @@ export const populate = onCall<PopulateParams>({ secrets }, async ({ data, auth 
 		clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 		refreshToken: docData.refresh_token
 	})
+	await spotify.refreshAccessToken().catch(err => {
+		if (err instanceof Error && err.message.includes('invalid_grant')) {
+			warn('Unable to get Spotify refresh token.', { tool, error: err })
+			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
+		}
+		throw err
+	})
+
 	try {
-		await spotify.refreshAccessToken()
 		return await update(spotify, docData.playlist_id)
 	} catch (err) {
 		const msg = 'Failed to populate playlist.'
