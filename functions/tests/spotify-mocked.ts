@@ -52,9 +52,7 @@ ms.createPlaylist.mockImplementation(async () => fullPlaylist)
 
 ms.changePlaylistDetails.mockImplementation(() => Promise.resolve())
 
-const playlistTracks = savedTrack as SpotifyApi.PlaylistTrackObject
-
-ms.getPlaylistTracks.mockImplementation(async () => [playlistTracks])
+ms.getPlaylistTracks.mockImplementation(async () => [{ track }])
 
 const playlistSnapshot: SpotifyApi.PlaylistSnapshotResponse = { snapshot_id: 'snapshotId' }
 

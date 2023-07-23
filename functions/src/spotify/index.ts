@@ -61,10 +61,12 @@ export default class Spotify {
 		)
 	}
 
-	private async requestAll<T>(endpoint: string): Promise<T[]> {
+	private async getAll<T>(endpoint: string, params?: Record<string, Primative>): Promise<T[]> {
 		const limit = 50
 		const { items, total } = await this.request<SpotifyApi.PagingObject<T>>(endpoint, 'GET', {
-			limit
+			limit,
+			fields: 'items,total',
+			...params
 		})
 		const reqN = [...Array(Math.ceil(total / limit)).keys()] // number of request that need to be run
 		reqN.shift() // first request has already been run
@@ -72,7 +74,9 @@ export default class Spotify {
 			reqN.map(i =>
 				this.request<SpotifyApi.PagingObject<T>>(endpoint, 'GET', {
 					limit,
-					offset: limit * i
+					offset: limit * i,
+					fields: 'items',
+					...params
 				})
 			)
 		)
@@ -108,11 +112,11 @@ export default class Spotify {
 	}
 
 	getMySavedTracks() {
-		return this.requestAll<SpotifyApi.SavedTrackObject>('me/tracks')
+		return this.getAll<SpotifyApi.SavedTrackObject>('me/tracks')
 	}
 
 	getMyPlaylists() {
-		return this.requestAll<SpotifyApi.PlaylistObjectSimplified>('me/playlists')
+		return this.getAll<SpotifyApi.PlaylistObjectSimplified>('me/playlists')
 	}
 
 	createPlaylist(userId: string, details: PlaylistDetails) {
@@ -128,7 +132,10 @@ export default class Spotify {
 	}
 
 	getPlaylistTracks(playlistId: string) {
-		return this.requestAll<SpotifyApi.PlaylistTrackObject>(`playlists/${playlistId}/tracks`)
+		type SimplifiedPlaylistTrack = { track: { uri: string } | null }
+		return this.getAll<SimplifiedPlaylistTrack>(`playlists/${playlistId}/tracks`, {
+			fields: 'items.track.uri,total'
+		})
 	}
 
 	addTracksToPlaylist(playlistId: string, uris: string[]) {

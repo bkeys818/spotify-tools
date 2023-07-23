@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { createPublicLikedSongs } from '$lib/firebase/functions'
+	import { publicLikedSongs } from '$lib/firebase/functions'
 	import { user } from '$lib/stores'
 	import AuthorizeButton from '$lib/components/AuthorizeButton.svelte'
 	import LoginButton from '$lib/components/LoginButton.svelte'
@@ -8,30 +8,43 @@
 	import SpotifyEmbed from '$lib/components/spotify-embed.svelte'
 	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 
-	let backendResponse: ReturnType<typeof createPublicLikedSongs> | undefined
+	let createResponse: ReturnType<(typeof publicLikedSongs)['create']> | undefined
+	let isPopulated = false
 
-	onMount(async () => {
+	onMount(() => {
 		const searchParams = new URLSearchParams(location.search.slice(1))
 		const code = searchParams.get('code')
 		if (code) {
-			backendResponse = createPublicLikedSongs({ code, origin: location.origin })
+			createAndPopulate(code)
 			history.replaceState({}, document.title, location.pathname)
 		}
 	})
+
+	async function createAndPopulate(code: string) {
+		createResponse = publicLikedSongs.create({ code, origin: location.origin })
+		const {
+			data: { userId }
+		} = await createResponse
+		await publicLikedSongs.populate({ userId, origin: location.origin })
+		isPopulated = true
+	}
 </script>
 
 <div class="my-4 text-center">
-	{#if backendResponse}
-		{#await backendResponse}
+	{#if createResponse}
+		{#await createResponse}
 			<Spinner />
-		{:then result}
-			{#if typeof result.data == 'string'}
-				<SpotifyEmbed
-					title="public-liked-songs"
-					type="playlist"
-					id={result.data}
-					className="mx-auto"
-				/>
+		{:then { data: { playlistId } }}
+			<SpotifyEmbed
+				title="public-liked-songs"
+				type="playlist"
+				id={playlistId}
+				className="mx-auto"
+			/>
+			{#if isPopulated}
+				<p>Playlist synced!</p>
+			{:else}
+				<p class="loading">Populating playlist</p>
 			{/if}
 		{:catch error}
 			<ErrorMsg {error} />

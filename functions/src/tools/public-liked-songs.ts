@@ -8,13 +8,22 @@ import { secrets } from '../env'
 
 const tool = 'public-liked-songs'
 
-interface Document {
+type Document = {
 	refresh_token: string
 	playlist_id?: string
 	uid: string
 }
 
-export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
+type CreateParams = {
+	code: string
+	origin: string
+}
+type CreateResponse = Promise<{
+	playlistId: string
+	userId: string
+}>
+
+export const create = onCall<CreateParams, CreateResponse>({ secrets }, async ({ data, auth }) => {
 	if (!auth) throw new HttpsError('unauthenticated', 'User must be authenticated.')
 
 	const spotify = new Spotify({
@@ -31,7 +40,7 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 	})
 	const user = await spotify.getMe()
 
-	const ref = db.collection('public-liked-songs').doc(user.id)
+	const ref = db.collection(tool).doc(user.id)
 	let doc = await ref.get()
 
 	let docData: Document
@@ -72,10 +81,52 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 		)
 	}
 
+	return { playlistId: docData.playlist_id, userId: user.id }
+})
+
+type PopulateParams = {
+	userId: string
+	origin: string
+}
+
+export const populate = onCall<PopulateParams>({ secrets }, async ({ data, auth }) => {
+	if (!auth) throw new HttpsError('unauthenticated', 'User must be authenticated.')
+	const ref = db.doc(tool + '/' + data.userId)
+	const doc = await ref.get()
+	if (!doc.exists) {
+		const msg = "Couldn't find any data for user."
+		warn(msg, {
+			spotifyUserId: data.userId,
+			firebaseUid: auth.uid
+		})
+		throw new HttpsError('not-found', msg)
+	}
+	const docData = doc.data() as Document
+	if (!docData.playlist_id) {
+		const msg = "Couldn't find a playlist for user."
+		warn(msg, {
+			spotifyUserId: data.userId,
+			firebaseUid: auth.uid
+		})
+		throw new HttpsError('not-found', msg)
+	}
+	const spotify = new Spotify({
+		clientId: process.env.SPOTIFY_CLIENT_ID,
+		clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+		refreshToken: docData.refresh_token
+	})
+	await spotify.refreshAccessToken().catch(err => {
+		if (err instanceof Error && err.message.includes('invalid_grant')) {
+			warn('Unable to get Spotify refresh token.', { tool, error: err })
+			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
+		}
+		throw err
+	})
+
 	try {
 		return await update(spotify, docData.playlist_id)
 	} catch (err) {
-		const msg = 'Failed to update synced playlist.'
+		const msg = 'Failed to populate playlist.'
 		error(msg, {
 			tool,
 			error: err,
@@ -86,13 +137,8 @@ export const create = onCall<Data>({ secrets }, async ({ data, auth }) => {
 	}
 })
 
-interface Data {
-	code: string
-	origin: string
-}
-
 export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
-	const docRefs = await db.collection('public-liked-songs').listDocuments()
+	const docRefs = await db.collection(tool).listDocuments()
 	const jobs = await Promise.allSettled(
 		docRefs.map(async ref => {
 			const doc = await ref.get()
@@ -105,8 +151,7 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 			try {
 				await spotify.refreshAccessToken()
 				if (data.playlist_id) {
-					const user = await spotify.getMe()
-					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [user.id]))[0])
+					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [doc.id]))[0])
 						return await ref.delete()
 					else return await update(spotify, data.playlist_id)
 				} else return await ref.delete()
