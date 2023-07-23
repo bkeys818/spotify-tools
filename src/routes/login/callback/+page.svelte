@@ -33,7 +33,6 @@
 {#if email}
 	{#await signInWith(email) catch error}
 		<p>Something went wrong: {error.message}</p>
-		{@debug error}
 	{/await}
 {:else}
 	<EmailForm

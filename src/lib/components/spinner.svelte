@@ -3,6 +3,7 @@
 </script>
 
 <div class="spin-ring">
+	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 	{#each Array(4) as _}
 		<div style="--border-width: {borderWidth}px" />
 	{/each}

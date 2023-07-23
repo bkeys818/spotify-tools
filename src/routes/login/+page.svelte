@@ -25,6 +25,5 @@
 		<p class="mt-4 text-center">Sign in link sent to {submittedEmail}.</p>
 	{:catch error}
 		<p class="mt-4 text-center">Something went wrong: {error.message}</p>
-		{@debug error}
 	{/await}
 {/if}
