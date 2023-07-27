@@ -30,19 +30,21 @@ function createState(length = 18) {
 export function parseCode() {
 	const params = new URLSearchParams(location.search.slice(1))
 	history.replaceState({}, document.title, location.pathname)
-	if (params.has('error')) throw authError(params.get('error')!)
+	const error = params.get('error')
+	if (error) throw authError(error)
 	return params.get('code')
 }
 
 export function parseToken(): AccessTokenResponse | undefined {
 	const params = new URLSearchParams(location.search.slice(1))
 	history.replaceState({}, document.title, location.pathname)
-	if (params.has('error')) throw authError(params.get('error')!)
+	const error = params.get('error')
+	if (error) throw authError(error)
 	const access_token = params.get('access_token')
 	const token_type = params.get('token_type') as 'Bearer'
 	const expires_in = params.get('expires_in')
 	if (access_token && expires_in)
-	return { access_token, token_type, expires_in: parseInt(expires_in) }
+		return { access_token, token_type, expires_in: parseInt(expires_in) }
 }
 
 const authError = (msg: string) => new Error(`Spotify authorization failed (${msg})`)
