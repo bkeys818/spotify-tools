@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { publicLikedSongs } from '$lib/firebase/functions'
+	import { parseCode } from '$lib/spotify'
 	import Authorize from '$lib/components/Authorize.svelte'
 	import Spinner from '$lib/components/spinner.svelte'
 	import SpotifyEmbed from '$lib/components/spotify-embed.svelte'
@@ -11,11 +12,11 @@
 	let error: unknown
 
 	onMount(() => {
-		const searchParams = new URLSearchParams(location.search.slice(1))
-		const code = searchParams.get('code')
-		if (code) {
-			playlistId = create(code)
-			history.replaceState({}, document.title, location.pathname)
+		try {
+			const code = parseCode()
+			if (code) { playlistId = create(code) }
+		} catch (err) {
+			error = err
 		}
 	})
 

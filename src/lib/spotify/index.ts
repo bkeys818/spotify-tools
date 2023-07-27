@@ -26,3 +26,12 @@ function createState(length = 18) {
 	for (let i = 0; i < length; i++) str += chars[Math.floor(Math.random() * chars.length)]
 	return str
 }
+
+export function parseCode() {
+	const params = new URLSearchParams(location.search.slice(1))
+	history.replaceState({}, document.title, location.pathname)
+	if (params.has('error')) throw authError(params.get('error')!)
+	return params.get('code')
+}
+
+const authError = (msg: string) => new Error(`Spotify authorization failed (${msg})`)
