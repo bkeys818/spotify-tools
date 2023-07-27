@@ -6,7 +6,9 @@
 
 	onMount(async () => {
 		const cookies = getAllCookies()
-		const searchParams = new URLSearchParams(location.search.slice(1))
+		const searchParams = new URLSearchParams(
+			location[location.search == '' ? 'hash' : 'search'].slice(1)
+		)
 		if (cookies.state && cookies.state == searchParams.get('state')) {
 			searchParams.delete('state')
 			const { directed_from_path } = getAllCookies()
