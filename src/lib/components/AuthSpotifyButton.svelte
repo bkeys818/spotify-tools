@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authorize } from '$lib/spotify'
+	import { authorize } from '$lib/spotify/auth'
 	import { setCookie } from '$lib/cookie'
 
 	export let authType: Parameters<typeof authorize>[0] = 'token'

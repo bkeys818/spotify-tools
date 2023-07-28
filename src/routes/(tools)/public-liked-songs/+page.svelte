@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { publicLikedSongs } from '$lib/firebase/functions'
-	import { parseCode } from '$lib/spotify'
+	import { parseCode } from '$lib/spotify/auth'
 	import AuthFirebase from '$lib/components/AuthFirebase.svelte'
 	import AuthSpotifyButton from '$lib/components/AuthSpotifyButton.svelte'
 	import Spinner from '$lib/components/spinner.svelte'

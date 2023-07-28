@@ -1,7 +1,7 @@
 import { readable, writable } from 'svelte/store'
 import { auth } from './firebase/auth'
 import { getAllCookies, setTokenCookie } from './cookie'
-import type { AccessTokenResponse } from './spotify'
+import type { AccessTokenResponse } from './spotify/auth'
 import type { User } from 'firebase/auth'
 
 export const user = readable<User | null | undefined>(undefined, set =>

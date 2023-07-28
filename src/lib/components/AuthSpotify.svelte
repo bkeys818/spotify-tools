@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { createTokenStore } from '$lib/stores'
-	import { parseToken } from '$lib/spotify'
+	import { parseToken } from '$lib/spotify/auth'
 	import AuthSpotifyButton from './AuthSpotifyButton.svelte'
 	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 
