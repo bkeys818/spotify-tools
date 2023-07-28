@@ -13,6 +13,7 @@
 			"$lib": ["src/lib"],
 			"$lib/*": ["src/lib/*"],
 			"@functions/*": ["functions/src/*"]
-		}
+		},
+		"types": ["spotify-api"]
 	}
 }

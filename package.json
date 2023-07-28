@@ -37,6 +37,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@types/spotify-api": "^0.0.22",
 		"cookie": "^0.5.0",
 		"firebase": "^9.9.0"
 	}

@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@types/spotify-api':
+    specifier: ^0.0.22
+    version: 0.0.22
   cookie:
     specifier: ^0.5.0
     version: 0.5.0
@@ -984,14 +987,13 @@ packages:
     resolution: {integrity: sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==}
     dev: true
 
-  /@types/spotify-api@0.0.16:
-    resolution: {integrity: sha512-5tzZ8cJe2Wv5zjhBLXi7gJObp/kzuG10FwMKPqNtmG9HFWlXKvqBhd0Z+T5Oa0yhkSX1u8Y+bBUhUEPmZpGpDQ==}
-    dev: true
+  /@types/spotify-api@0.0.22:
+    resolution: {integrity: sha512-oZLKiI6Fck/BGd0QdmIdJCY351xQfRkfpx2Q23jIntL3YQx85vScYuFJMK81/NoSK9m7HYOl2DW4A9WomDuJOA==}
 
   /@types/spotify-web-api-node@5.0.7:
     resolution: {integrity: sha512-8ajd4xS3+l4Zau1OyggPv7DjeSFEIGYvG5Q8PbbBMKiaRFD53IkcvU4Bx4Ijyzw+l+Kc09L5L+MXRj0wyVLx9Q==}
     dependencies:
-      '@types/spotify-api': 0.0.16
+      '@types/spotify-api': 0.0.22
     dev: true
 
   /@typescript-eslint/eslint-plugin@5.48.1(@typescript-eslint/parser@5.48.1)(eslint@8.31.0)(typescript@4.9.4):
