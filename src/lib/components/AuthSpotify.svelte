@@ -7,7 +7,7 @@
 
 	export let scopes: string | undefined = undefined
 	export let path: string
-	export let token = createTokenStore(path)
+	let token = createTokenStore(path)
 
 	let error: unknown
 
@@ -31,5 +31,5 @@
 		<ErrorMsg error />
 	{/if}
 {:else}
-	<slot />
+	<slot token={`${$token}`} />
 {/if}
