@@ -1,0 +1,39 @@
+<script lang="ts">
+	import { getMe, getMyPlaylists } from '$lib/spotify'
+	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
+	import Playlist from '$lib/components/spotify/PlaylistPreview.svelte'
+
+	export let token: string
+
+	const playlistsPromise = getPlaylists()
+
+	async function getPlaylists() {
+		const { id } = await getMe(token)
+		const playlist = await getMyPlaylists(token)
+		return playlist.filter(p => p.owner.id === id && p.tracks.total > 0)
+	}
+</script>
+
+<div class="playlistGrid">
+	{#await playlistsPromise}
+		<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+		{#each { length: 9 } as _}
+			<Playlist />
+		{/each}
+	{:then playlists}
+		{#each playlists as playlist (playlist.id)}
+			<Playlist {playlist} />
+		{/each}
+	{/await}
+</div>
+{#await playlistsPromise catch error}
+	<ErrorMsg {error} />
+{/await}
+
+<style>
+	.playlistGrid {
+		display: grid;
+		grid-template: auto/repeat(auto-fill, minmax(max(270px, 25%), 1fr));
+		gap: 16px 24px;
+	}
+</style>

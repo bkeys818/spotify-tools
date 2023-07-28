@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { path } from '.'
-	import type { TokenStore } from '$lib/stores'
 	import AuthSpotify from '$lib/components/AuthSpotify.svelte'
-
-	let token: TokenStore
+	import PlaylistList from '$lib/components/spotify/PlaylistGrid.svelte'
 </script>
 
 <div class="my-4 text-center">
-	<AuthSpotify {path} scopes="user-library-modify playlist-modify-private" bind:token />
+	<AuthSpotify {path} scopes="user-library-modify playlist-modify-private" let:token>
+		<PlaylistList {token} />
+	</AuthSpotify>
 </div>
