@@ -13,8 +13,6 @@ export function setTokenCookie(path: string, accessToken: string, expiresIn: num
 	document.cookie = cookie.serialize('access_token', accessToken, options)
 	const expirationDate = ((Date.now() / 1000) | 0) + expiresIn
 	document.cookie = cookie.serialize('auth_expiration', expirationDate.toString(), options)
-	console.log('cookies set')
-	console.table(options)
 }
 
 const setOptions = {
