@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { getMe, getMyPlaylists } from '$lib/spotify'
+	import type { ComponentProps } from 'svelte'
 	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 	import Playlist from '$lib/components/spotify/PlaylistPreview.svelte'
 
+	export let playlistLink: ComponentProps<Playlist>['link'] = undefined
 	export let token: string
 
 	const playlistsPromise = getPlaylists()
@@ -18,11 +20,11 @@
 	{#await playlistsPromise}
 		<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
 		{#each { length: 9 } as _}
-			<Playlist />
+			<Playlist link={playlistLink} />
 		{/each}
 	{:then playlists}
 		{#each playlists as playlist (playlist.id)}
-			<Playlist {playlist} />
+			<Playlist {playlist} link={playlistLink} />
 		{/each}
 	{/await}
 </div>
