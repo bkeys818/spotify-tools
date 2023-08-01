@@ -30,3 +30,30 @@ export function createTokenStore(path: string) {
 	return { subscribe, set: handleSet, check }
 }
 export type TokenStore = ReturnType<typeof createTokenStore>
+
+export function sessioned<T>(
+	key: string,
+	value: T,
+	encode: (value: T) => string,
+	decode: (str: string) => T,
+) {
+	let { set, subscribe } = writable(value)
+
+	function check() {
+		if (!document) throw new Error("Invalid environment: Can't reach document.")
+		const storedValue = sessionStorage.getItem(key)
+		if (storedValue) {
+			set(decode(storedValue))
+		} else {
+			customSet(value)
+		}
+	}
+
+	function customSet(value: T) {
+		set(value)
+		if (value === undefined) sessionStorage.removeItem(key)
+		else sessionStorage.setItem(key, encode(value))
+	}
+
+	return { subscribe, set: customSet, check }
+}
