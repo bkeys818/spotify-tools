@@ -2,6 +2,7 @@
 	import { path } from '..'
 	import { onMount } from 'svelte'
 	import { getPlaylistTracks, type TrackObj } from '$lib/spotify'
+	import { sessioned } from '$lib/stores'
 	import { findDuplicates } from '.'
 	import AuthSpotify from '$lib/components/AuthSpotify.svelte'
 	import CheckBox from '$lib/components/CheckBox.svelte'
@@ -12,7 +13,19 @@
 	let playlistCoverSrc: string
 	let duplicates: Record<string, string[]> = {}
 	const trackMap: Record<string, TrackObj> = {}
-	const trackSelected: Record<string, boolean> = {}
+	const selections = sessioned<Record<string, boolean>>(
+		'selected_duplicates',
+		{},
+		value =>
+			Object.keys(value)
+				.filter(k => value[k])
+				.join(),
+		str =>
+			str.split(',').reduce<Record<string, boolean>>((obj, key) => {
+				obj[key] = true
+				return obj
+			}, {})
+	)
 	let selectedGroupId: string | undefined = undefined
 
 	onMount(() => {
@@ -27,12 +40,13 @@
 			playlistId = id
 			playlistCoverSrc = image
 		}
+		selections.check()
 	})
 
 	async function getDuplicates(token: string) {
 		const tracks = await getPlaylistTracks(token, playlistId)
 		duplicates = findDuplicates(tracks, trackMap)
-		for (const id in duplicates) trackSelected[id] = false
+		for (const id in duplicates) if (!(id in $selections)) $selections[id] = false
 	}
 </script>
 
@@ -63,14 +77,17 @@
 				<div
 					class="track-group"
 					class:selected={track.id == selectedGroupId}
-					class:disabled={trackSelected[track.id]}
+					class:disabled={$selections[track.id]}
 					style={`--duplicate-count: ${duplicates[track.id].length}`}
 				>
 					<div
 						class="row cursor-pointer"
-						on:click={() => {
-							selectedGroupId = selectedGroupId == track.id ? undefined : track.id
-						}}
+						on:click={$selections[track.id]
+							? undefined
+							: () => {
+									selectedGroupId =
+										selectedGroupId == track.id ? undefined : track.id
+							  }}
 					>
 						<p class="text-right mb-0.5">{track.index + 1}</p>
 						<Track {track} />
@@ -83,14 +100,14 @@
 							class="row duplicate cursor-pointer !pl-4"
 							style={`--index: ${index}`}
 							on:click={() => {
-								trackSelected[duplicateId] = !trackSelected[duplicateId]
+								$selections[duplicateId] = !$selections[duplicateId]
 							}}
 						>
 							<div class="!mr-auto">
 								<CheckBox
 									id={track.id}
 									size="sm"
-									bind:checked={trackSelected[duplicateId]}
+									bind:checked={$selections[duplicateId]}
 								/>
 							</div>
 							<Track track={trackMap[duplicateId]} />
