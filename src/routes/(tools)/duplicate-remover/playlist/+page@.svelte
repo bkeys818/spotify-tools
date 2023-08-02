@@ -89,9 +89,9 @@
 										selectedGroupId == track.id ? undefined : track.id
 							  }}
 					>
-						<p class="text-right mb-0.5">{track.index + 1}</p>
+						<p class="text-right text-sm justify-self-end mb-0 md:ml-2">{track.index + 1}</p>
 						<Track {track} />
-						<p class="text-center mb-0">
+						<p class="text-center mb-0 mx-1 md:mx-3">
 							{duplicates[track.id].length}
 						</p>
 					</div>
@@ -103,7 +103,7 @@
 								$selections[duplicateId] = !$selections[duplicateId]
 							}}
 						>
-							<div class="!mr-auto">
+							<div>
 								<CheckBox
 									id={track.id}
 									size="sm"
@@ -121,19 +121,16 @@
 
 <style lang="postcss">
 	.row {
-		@apply grid items-center rounded bg-inherit px-2 hover:bg-slate-50;
-		grid-template-columns: 28px minmax(0, 4fr) minmax(0, 3fr) 36px;
+		@apply grid gap-4 items-center rounded bg-inherit hover:bg-slate-50;
+		grid-template-columns: 32px minmax(0, 4fr) minmax(0, 3fr) fit-content(36px);
 		transition: background-color 0.2s ease-in-out;
-		& :global(> *) {
-			@apply mr-4;
-		}
-		& > *:last-child {
-			@apply mr-0;
+		& *:first-child {
+			@apply justify-self-end;
 		}
 	}
 	.track-group {
 		--track-hieght: 3.5rem;
-		@apply relative bg-white;
+		@apply relative bg-white overflow-y-hidden;
 		height: var(--track-hieght);
 		transition: height 0.4s ease-in-out;
 
@@ -142,8 +139,8 @@
 		}
 
 		.duplicate {
-			@apply opacity-0 top-0;
-			transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
+			@apply opacity-0;
+			transition: opacity 0.4s ease-in-out;
 		}
 
 		&.disabled .row {
@@ -156,31 +153,16 @@
 		&.selected {
 			height: calc(var(--track-hieght) * (var(--duplicate-count) + 1));
 			@apply rounded bg-slate-100;
-			> .row {
-				@apply border-b border-b-neutral-600 rounded-b-none;
-			}
 			.row {
 				@apply hover:bg-slate-200;
+				&:first-child {
+					@apply border-b border-b-neutral-400 rounded-b-none;
+				}
 			}
 			.duplicate {
 				@apply opacity-100;
 				top: calc((var(--index) + 1) * var(--track-hieght));
 			}
 		}
-	}
-	.row {
-		@apply grid items-center rounded bg-inherit px-2;
-		grid-template-columns: 28px minmax(0, 4fr) minmax(0, 3fr) 36px;
-		& :global(> *) {
-			@apply mr-4;
-		}
-		& > *:last-child {
-			@apply mr-0;
-		}
-	}
-	.row {
-		@apply hover:bg-slate-50;
-		transition: background-color 0.2s ease-in-out;
-		height: var(--track-hieght);
 	}
 </style>
