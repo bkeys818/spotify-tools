@@ -10,7 +10,11 @@
 			{token}
 			playlistLink={({ name, id, images }) => {
 				const image = images[0].url
-				return `${location.pathname}/playlist?${new URLSearchParams({ name, id, image }).toString()}`
+				return `${location.pathname}/playlist?${new URLSearchParams({
+					name,
+					id,
+					image
+				}).toString()}`
 			}}
 		/>
 	</AuthSpotify>

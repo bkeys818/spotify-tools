@@ -63,6 +63,7 @@
 					class:disabled={$selections.includes(track.id)}
 					style={`--duplicate-count: ${track.duplicates.length}`}
 				>
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					<div
 						class="row cursor-pointer"
 						on:click={track.selected
@@ -81,6 +82,7 @@
 						</p>
 					</div>
 					{#each track.duplicates as duplicateTrack, index}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
 						<div
 							class="row duplicate cursor-pointer !pl-4"
 							style={`--index: ${index}`}

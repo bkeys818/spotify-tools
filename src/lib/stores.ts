@@ -37,7 +37,7 @@ export function sessioned<T>(
 	encode: (value: T) => string,
 	decode: (str: string) => T
 ) {
-	let { set, subscribe, update } = writable(value)
+	const { set, subscribe, update } = writable(value)
 
 	function check() {
 		if (!document) throw new Error("Invalid environment: Can't reach document.")
