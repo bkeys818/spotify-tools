@@ -1,21 +1,30 @@
 import type { TrackObj } from '$lib/spotify'
 
-export function findDuplicates(tracks: TrackObj[], trackMap: Record<string, TrackObj>) {
-	const duplicates: Record<string, string[]> = {}
+export interface DuplicateTrack extends TrackObj {
+	duplicates: DuplicateTrack[]
+	selected: boolean
+}
+
+const createDuplicate = (track: TrackObj): DuplicateTrack => ({
+	...track,
+	duplicates: [],
+	selected: false
+})
+
+export function findDuplicates(tracks: TrackObj[]) {
+	const trackMap: Record<string, DuplicateTrack> = {}
 	const sorted = tracks.sort((a, b) => a.name.localeCompare(b.name))
 	for (let i = 0; i < sorted.length; i++) {
-		if (!(sorted[i].id in duplicates)) duplicates[sorted[i].id] = []
-		for (let j = i + 1; j < sorted.length && sorted[i].name == sorted[j].name; j++)
+		for (let j = i + 1; j < sorted.length && sorted[i].name == sorted[j].name; j++) {
 			if (artistMatch(sorted[i], sorted[j])) {
-				duplicates[sorted[i].id].push(sorted[j].id)
-				if (!(sorted[j].id in duplicates)) duplicates[sorted[j].id] = []
-				duplicates[sorted[j].id].push(sorted[i].id)
+				if (!(sorted[i].id in trackMap)) trackMap[sorted[i].id] = createDuplicate(sorted[i])
+				if (!(sorted[j].id in trackMap)) trackMap[sorted[j].id] = createDuplicate(sorted[j])
+				trackMap[sorted[i].id].duplicates.push(trackMap[sorted[j].id])
+				trackMap[sorted[j].id].duplicates.push(trackMap[sorted[i].id])
 			}
-		if (duplicates[sorted[i].id]?.length > 0)
-			trackMap[sorted[i].id] = sorted[i] // populate trackMap
-		else delete duplicates[sorted[i].id]
+		}
 	}
-	return duplicates
+	return Object.values(trackMap).sort((a, b) => a.index - b.index)
 }
 
 /** True if the first listed artists match or all artist match. */
