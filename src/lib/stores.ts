@@ -35,9 +35,9 @@ export function sessioned<T>(
 	key: string,
 	value: T,
 	encode: (value: T) => string,
-	decode: (str: string) => T,
+	decode: (str: string) => T
 ) {
-	let { set, subscribe } = writable(value)
+	let { set, subscribe, update } = writable(value)
 
 	function check() {
 		if (!document) throw new Error("Invalid environment: Can't reach document.")
@@ -45,15 +45,30 @@ export function sessioned<T>(
 		if (storedValue) {
 			set(decode(storedValue))
 		} else {
-			customSet(value)
+			updateSession(value)
+			set(value)
 		}
 	}
 
-	function customSet(value: T) {
-		set(value)
+	return {
+		subscribe,
+		check,
+		set: (value: T) => {
+			updateSession(value)
+			set(value)
+		},
+		update: (updater: (value: T) => T) => {
+			updateSession(value)
+			update(value => {
+				const updated = updater(value)
+				updateSession(updated)
+				return updated
+			})
+		}
+	}
+
+	function updateSession(value: T) {
 		if (value === undefined) sessionStorage.removeItem(key)
 		else sessionStorage.setItem(key, encode(value))
 	}
-
-	return { subscribe, set: customSet, check }
 }

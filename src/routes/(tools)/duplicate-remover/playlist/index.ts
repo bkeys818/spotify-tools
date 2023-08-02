@@ -1,4 +1,13 @@
+import { sessioned } from '$lib/stores'
+import { get } from 'svelte/store'
 import type { TrackObj } from '$lib/spotify'
+
+export const selections = sessioned<string[]>(
+	'selected_duplicates',
+	[],
+	value => value.join(),
+	str => str.split(',')
+)
 
 export interface DuplicateTrack extends TrackObj {
 	duplicates: DuplicateTrack[]
@@ -8,11 +17,25 @@ export interface DuplicateTrack extends TrackObj {
 const createDuplicate = (track: TrackObj): DuplicateTrack => ({
 	...track,
 	duplicates: [],
-	selected: false
+	get selected() {
+		return get(selections).includes(track.id)
+	},
+	set selected(value: boolean) {
+		selections.update(selections => {
+			if (!value) {
+				const i = selections.findIndex(id => id == track.id)
+				if (i != -1) selections.splice(i, 1)
+			} else if (!selections.includes(track.id)) {
+				selections.push(track.id)
+			}
+			return selections
+		})
+	}
 })
 
 export function findDuplicates(tracks: TrackObj[]) {
 	const trackMap: Record<string, DuplicateTrack> = {}
+	selections.check()
 	const sorted = tracks.sort((a, b) => a.name.localeCompare(b.name))
 	for (let i = 0; i < sorted.length; i++) {
 		for (let j = i + 1; j < sorted.length && sorted[i].name == sorted[j].name; j++) {
@@ -24,6 +47,7 @@ export function findDuplicates(tracks: TrackObj[]) {
 			}
 		}
 	}
+	selections.update(selections => selections.filter(id => id in trackMap))
 	return Object.values(trackMap).sort((a, b) => a.index - b.index)
 }
 

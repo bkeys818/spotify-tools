@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { path } from '..'
 	import { onMount } from 'svelte'
-	import { getPlaylistTracks, type TrackObj } from '$lib/spotify'
-	import { sessioned } from '$lib/stores'
-	import { findDuplicates, type DuplicateTrack } from '.'
+	import { getPlaylistTracks } from '$lib/spotify'
+	import { selections, findDuplicates, type DuplicateTrack } from '.'
 	import AuthSpotify from '$lib/components/AuthSpotify.svelte'
 	import CheckBox from '$lib/components/CheckBox.svelte'
 	import Track from './Track.svelte'
@@ -12,19 +11,6 @@
 	let playlistId: string
 	let playlistCoverSrc: string
 	let duplicates: DuplicateTrack[] = []
-	const selections = sessioned<Record<string, boolean>>(
-		'selected_duplicates',
-		{},
-		value =>
-			Object.keys(value)
-				.filter(k => value[k])
-				.join(),
-		str =>
-			str.split(',').reduce<Record<string, boolean>>((obj, key) => {
-				obj[key] = true
-				return obj
-			}, {})
-	)
 	let selectedGroupId: string | undefined = undefined
 
 	onMount(() => {
@@ -39,13 +25,11 @@
 			playlistId = id
 			playlistCoverSrc = image
 		}
-		selections.check()
 	})
 
 	async function getDuplicates(token: string) {
 		const tracks = await getPlaylistTracks(token, playlistId)
 		duplicates = findDuplicates(tracks)
-		for (const id in duplicates) if (!(id in $selections)) $selections[id] = false
 	}
 </script>
 
@@ -76,12 +60,12 @@
 				<div
 					class="track-group"
 					class:selected={track.id == selectedGroupId}
-					class:disabled={$selections[track.id]}
+					class:disabled={$selections.includes(track.id)}
 					style={`--duplicate-count: ${track.duplicates.length}`}
 				>
 					<div
 						class="row cursor-pointer"
-						on:click={$selections[track.id]
+						on:click={track.selected
 							? undefined
 							: () => {
 									selectedGroupId =
@@ -102,7 +86,6 @@
 							style={`--index: ${index}`}
 							on:click={() => {
 								duplicateTrack.selected = !duplicateTrack.selected
-								$selections[duplicateTrack.id] = duplicateTrack.selected
 							}}
 						>
 							<div>
