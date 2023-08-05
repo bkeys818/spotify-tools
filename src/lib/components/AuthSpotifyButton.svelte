@@ -9,7 +9,10 @@
 <button
 	class="btn-primary"
 	on:click={() => {
-		setCookie('directed_from_path', location.pathname)
+		let url = location.pathname
+		if (location.search) url += location.search
+		if (location.hash) url += location.hash
+		setCookie('directed_from', url)
 		authorize(authType, scopes)
 	}}>Authorize</button
 >

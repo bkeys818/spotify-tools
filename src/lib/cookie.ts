@@ -16,7 +16,7 @@ export function setTokenCookie(path: string, accessToken: string, expiresIn: num
 }
 
 const setOptions = {
-	directed_from_path: { maxAge: 120, path: '/authorize' },
+	directed_from: { maxAge: 120, path: '/authorize' },
 	state: { maxAge: 120, path: '/authorize' },
 	email: { maxAge: 300, path: '/login/callback' },
 	access_token: {},

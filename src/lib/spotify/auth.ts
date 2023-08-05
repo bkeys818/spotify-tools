@@ -35,9 +35,7 @@ export function parseCode() {
 	return params.get('code')
 }
 
-export function parseToken(): AccessTokenResponse | undefined {
-	const params = new URLSearchParams(location.search.slice(1))
-	history.replaceState({}, document.title, location.pathname)
+export function parseToken(params: URLSearchParams): AccessTokenResponse {
 	const error = params.get('error')
 	if (error) throw authError(error)
 	const access_token = params.get('access_token')
@@ -45,6 +43,7 @@ export function parseToken(): AccessTokenResponse | undefined {
 	const expires_in = params.get('expires_in')
 	if (access_token && expires_in)
 		return { access_token, token_type, expires_in: parseInt(expires_in) }
+	throw authError('No token found')
 }
 
 const authError = (msg: string) => new Error(`Spotify authorization failed (${msg})`)
