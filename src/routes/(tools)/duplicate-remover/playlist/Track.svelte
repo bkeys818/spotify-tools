@@ -10,7 +10,7 @@
 			: undefined
 </script>
 
-<div class="flex gap-4">
+<div class="flex gap-4" title={track.id}>
 	<img
 		src={albumCoverSrc}
 		alt={track.album.name + ' album cover'}
