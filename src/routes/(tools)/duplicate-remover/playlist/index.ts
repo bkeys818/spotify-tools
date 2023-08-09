@@ -10,44 +10,49 @@ export const selections = sessioned<string[]>(
 )
 
 export interface DuplicateTrack extends TrackObj {
+	readonly key: string
 	duplicates: DuplicateTrack[]
 	selected: boolean
 }
 
-const createDuplicate = (track: TrackObj): DuplicateTrack => ({
-	...track,
-	duplicates: [],
-	get selected() {
-		return get(selections).includes(track.id)
-	},
-	set selected(value: boolean) {
-		selections.update(selections => {
-			if (!value) {
+const keyFor = (track: TrackObj) => track.id + '-' + track.index
+const createDuplicate = (track: TrackObj, key: string): DuplicateTrack => {
+	return {
+		...track,
+		key,
+		duplicates: [],
+		get selected() {
+			return get(selections).includes(track.id)
+		},
+		set selected(isSelected: boolean) {
+			selections.update(selections => {
 				const i = selections.findIndex(id => id == track.id)
-				if (i != -1) selections.splice(i, 1)
-			} else if (!selections.includes(track.id)) {
-				selections.push(track.id)
-			}
-			return selections
-		})
+				console.log(i)
+				if (!isSelected && i != -1) selections.splice(i, 1)
+				else if (isSelected && i == -1) selections.push(track.id)
+				return selections
+			})
+		}
 	}
-})
+}
 
 export function findDuplicates(tracks: TrackObj[]) {
 	const trackMap: Record<string, DuplicateTrack> = {}
 	selections.check()
 	const sorted = tracks.sort((a, b) => a.name.localeCompare(b.name))
 	for (let i = 0; i < sorted.length; i++) {
+		const key1 = keyFor(sorted[i])
 		for (let j = i + 1; j < sorted.length && sorted[i].name == sorted[j].name; j++) {
-			if (artistMatch(sorted[i], sorted[j])) {
-				if (!(sorted[i].id in trackMap)) trackMap[sorted[i].id] = createDuplicate(sorted[i])
-				if (!(sorted[j].id in trackMap)) trackMap[sorted[j].id] = createDuplicate(sorted[j])
-				trackMap[sorted[i].id].duplicates.push(trackMap[sorted[j].id])
-				trackMap[sorted[j].id].duplicates.push(trackMap[sorted[i].id])
+			const key2 = keyFor(sorted[j])
+			if (sorted[i].id == sorted[j].id || artistMatch(sorted[i], sorted[j])) {
+				if (!(key1 in trackMap)) trackMap[key1] = createDuplicate(sorted[i], key1)
+				if (!(key2 in trackMap)) trackMap[key2] = createDuplicate(sorted[j], key2)
+				trackMap[key1].duplicates.push(trackMap[key2])
+				trackMap[key2].duplicates.push(trackMap[key1])
 			}
 		}
 	}
-	selections.update(selections => selections.filter(id => id in trackMap))
+	selections.update(selections => selections.filter(key => key in trackMap))
 	return Object.values(trackMap).sort((a, b) => a.index - b.index)
 }
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { path } from '..'
 	import { onMount } from 'svelte'
-	import { getPlaylistTracks } from '$lib/spotify'
+	import { getPlaylistTracks, removeTracksFromPlaylist } from '$lib/spotify'
 	import { selections, findDuplicates, type DuplicateTrack } from '.'
 	import AuthSpotify from '$lib/components/AuthSpotify.svelte'
 	import CheckBox from '$lib/components/CheckBox.svelte'
@@ -11,7 +11,7 @@
 	let playlistId: string
 	let playlistCoverSrc: string
 	let duplicates: DuplicateTrack[] = []
-	let selectedGroupId: string | undefined = undefined
+	let selectedGroupKey: string | undefined = undefined
 
 	onMount(() => {
 		const params = new URLSearchParams(location.search)
@@ -31,6 +31,33 @@
 		const tracks = await getPlaylistTracks(token, playlistId)
 		duplicates = findDuplicates(tracks)
 	}
+
+	async function removeTracks(token: string) {
+		const uris: string[] = []
+		const removedTracks: DuplicateTrack[] = []
+		const remainingTracks: DuplicateTrack[] = []
+		for (const track of duplicates) {
+			if (track.selected) {
+				uris.push(track.uri)
+				removedTracks.push(track)
+			} else remainingTracks.push(track)
+		}
+		if (uris.length > 0)
+			try {
+				await removeTracksFromPlaylist(token, playlistId, uris)
+				duplicates = remainingTracks
+				$selections = []
+				for (const removedTrack of removedTracks) {
+					for (const { duplicates } of removedTrack.duplicates) {
+						const index = duplicates.indexOf(removedTrack)
+						duplicates.splice(index, 1)
+					}
+				}
+			} catch (error) {
+				console.error(error)
+				playlistName = JSON.stringify(error)
+			}
+	}
 </script>
 
 <svelte:head>
@@ -48,6 +75,14 @@
 		</div>
 		<h2 class="text-left text-4xl md:pl-4 lg:pl-6">{playlistName}</h2>
 	</div>
+	{#if $selections.length > 0}
+		<button
+			class="fixed bottom-4 right-2 btn-secondary md:bottom-6 md:right-4"
+			on:click={() => removeTracks(token)}
+		>
+			Remove Duplicates
+		</button>
+	{/if}
 	<div>
 		<div class="row h-8 border-b border-b-neutral-600 !rounded-none">
 			<p class="text-right mb-0 text-sm text-neutral-600">#</p>
@@ -56,11 +91,11 @@
 			<div class="mx-3" />
 		</div>
 		{#await getDuplicates(token) then}
-			{#each duplicates as track}
+			{#each duplicates as track (track.key)}
 				<div
 					class="track-group"
-					class:selected={track.id == selectedGroupId}
-					class:disabled={$selections.includes(track.id)}
+					class:selected={track.key == selectedGroupKey}
+					class:disabled={track.selected}
 					style={`--duplicate-count: ${track.duplicates.length}`}
 				>
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -69,8 +104,8 @@
 						on:click={track.selected
 							? undefined
 							: () => {
-									selectedGroupId =
-										selectedGroupId == track.id ? undefined : track.id
+									selectedGroupKey =
+										selectedGroupKey == track.key ? undefined : track.key
 							  }}
 					>
 						<p class="text-right text-sm justify-self-end mb-0 md:ml-2">
@@ -92,7 +127,7 @@
 						>
 							<div>
 								<CheckBox
-									id={track.id}
+									id={duplicateTrack.id}
 									size="sm"
 									bind:checked={duplicateTrack.selected}
 								/>

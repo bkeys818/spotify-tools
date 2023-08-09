@@ -5,7 +5,7 @@
 </script>
 
 <div class="my-4 text-center">
-	<AuthSpotify {path} scopes="user-library-modify playlist-modify-private" let:token>
+	<AuthSpotify {path} scopes="playlist-modify-public playlist-modify-private" let:token>
 		<PlaylistList
 			{token}
 			playlistLink={({ name, id, images }) => {
