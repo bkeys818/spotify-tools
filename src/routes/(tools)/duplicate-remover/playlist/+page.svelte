@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { path } from '../+page.svelte'
 	import { onMount } from 'svelte'
+	import { fade } from 'svelte/transition'
+	import { cubicInOut } from 'svelte/easing'
 	import { getPlaylistTracks, removeTracksFromPlaylist } from '$lib/spotify'
 	import { selections, findDuplicates, type DuplicateTrack } from '.'
 	import AuthSpotify from '$lib/components/AuthSpotify.svelte'
@@ -116,25 +118,28 @@
 							{track.duplicates.length}
 						</p>
 					</div>
-					{#each track.duplicates as duplicateTrack, index}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<div
-							class="row duplicate cursor-pointer !pl-4"
-							style={`--index: ${index}`}
-							on:click={() => {
-								duplicateTrack.selected = !duplicateTrack.selected
-							}}
-						>
-							<div>
-								<CheckBox
-									id={duplicateTrack.id}
-									size="sm"
-									bind:checked={duplicateTrack.selected}
-								/>
+					{#if track.key == selectedGroupKey}
+						{#each track.duplicates as duplicateTrack, index}
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<div
+								class="row duplicate cursor-pointer !pl-4"
+								transition:fade={{ duration: 400, easing: cubicInOut }}
+								style={`--index: ${index}`}
+								on:click={() => {
+									duplicateTrack.selected = !duplicateTrack.selected
+								}}
+							>
+								<div>
+									<CheckBox
+										id={duplicateTrack.id}
+										size="sm"
+										bind:checked={duplicateTrack.selected}
+									/>
+								</div>
+								<Track track={duplicateTrack} />
 							</div>
-							<Track track={duplicateTrack} />
-						</div>
-					{/each}
+						{/each}
+					{/if}
 				</div>
 			{/each}
 		{/await}
@@ -160,11 +165,6 @@
 			height: var(--track-hieght);
 		}
 
-		.duplicate {
-			@apply opacity-0;
-			transition: opacity 0.4s ease-in-out;
-		}
-
 		&.disabled .row {
 			@apply cursor-not-allowed hover:bg-inherit;
 			& :global(p),
@@ -183,7 +183,6 @@
 				}
 			}
 			.duplicate {
-				@apply opacity-100;
 				top: calc((var(--index) + 1) * var(--track-hieght));
 			}
 		}
