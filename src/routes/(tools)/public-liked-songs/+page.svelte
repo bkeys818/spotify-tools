@@ -1,7 +1,9 @@
 <script lang="ts">
+	import toolInfo from '../info.json'
 	import { onMount } from 'svelte'
 	import { publicLikedSongs } from '$lib/firebase/functions'
 	import { parseCode } from '$lib/spotify/auth'
+	import ToolHeader from '$lib/components/ToolHeader.svelte'
 	import AuthFirebase from '$lib/components/AuthFirebase.svelte'
 	import AuthSpotifyButton from '$lib/components/AuthSpotifyButton.svelte'
 	import Spinner from '$lib/components/spinner.svelte'
@@ -39,6 +41,8 @@
 		}
 	}
 </script>
+
+<ToolHeader info={toolInfo['public-liked-songs']} />
 
 <div class="my-4 text-center">
 	<AuthFirebase>

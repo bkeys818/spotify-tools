@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { path } from '..'
+	import { path } from '../+page.svelte'
 	import { onMount } from 'svelte'
 	import { getPlaylistTracks, removeTracksFromPlaylist } from '$lib/spotify'
 	import { selections, findDuplicates, type DuplicateTrack } from '.'
