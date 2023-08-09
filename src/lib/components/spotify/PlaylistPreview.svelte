@@ -14,20 +14,21 @@
 <a
 	href={playlist ? link(playlist) : undefined}
 	class:loading={!playlist}
-	class="flex bg-[#0000001a] rounded h-20"
+	class="grid bg-[#0000001a] rounded h-20 items-center"
+	style="grid-template-columns: 80px auto;"
 >
-	<div class="playlistImage">
+	<div class="playlistImage" class:w-30={playlist}>
 		{#if playlist}
 			<img
 				src={getPhoto(playlist.images)}
 				alt={`"${playlist.name}" playlist cover`}
 				height="80"
 				width="80"
-				class="object-cover h-20 rounded-l"
+				class="object-cover rounded-l"
 			/>
 		{/if}
 	</div>
-	<div class="flex items-center">
+	<div class="">
 		<p class="px-4 mb-0 text-left">{playlist?.name ?? ''}</p>
 	</div>
 </a>

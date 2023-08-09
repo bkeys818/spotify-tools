@@ -12,7 +12,7 @@
 <ul>
 	{#each Object.entries(toolInfo) as [id, { title, desc }] (id)}
 		<li>
-			<a href={'./' + id} class="block container">
+			<a href={'./' + id} class="block container mb-3">
 				<h2 class="text-left">{title}</h2>
 				<h4>{desc}</h4>
 			</a>

@@ -19,7 +19,7 @@
 <div class="playlistGrid">
 	{#await playlistsPromise}
 		<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
-		{#each { length: 9 } as _}
+		{#each { length: 8 } as _}
 			<Playlist link={playlistLink} />
 		{/each}
 	{:then playlists}
@@ -35,7 +35,7 @@
 <style>
 	.playlistGrid {
 		display: grid;
-		grid-template: auto/repeat(auto-fill, minmax(max(270px, 25%), 1fr));
+		grid-template: auto/repeat(auto-fill, minmax(max(280px, 25%), 1fr));
 		gap: 16px 24px;
 	}
 </style>
