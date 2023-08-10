@@ -22,14 +22,14 @@ const createDuplicate = (track: TrackObj, key: string): DuplicateTrack => {
 		key,
 		duplicates: [],
 		get selected() {
-			return get(selections).includes(track.id)
+			return get(selections).includes(key)
 		},
-		set selected(isSelected: boolean) {
+		set selected(value: boolean) {
 			selections.update(selections => {
-				const i = selections.findIndex(id => id == track.id)
-				console.log(i)
-				if (!isSelected && i != -1) selections.splice(i, 1)
-				else if (isSelected && i == -1) selections.push(track.id)
+				console.log(selections)
+				const i = selections.findIndex(k => k == key)
+				if (!value && i != -1) selections.splice(i, 1)
+				else if (value && i == -1) selections.push(key)
 				return selections
 			})
 		}
