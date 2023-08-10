@@ -29,13 +29,29 @@ export async function getPlaylistTracks(token: string, playlistId: string) {
 		.map<TrackObj>((item, index) => ({ index, ...item.track }))
 }
 
-export async function removeTracksFromPlaylist(token: string, playlistId: string, uris: string[]) {
+export function removeTracksFromPlaylist(token: string, playlistId: string, uris: string[]) {
 	return forEvery(uris, 100, uris =>
 		request<SpotifyApi.PlaylistSnapshotResponse>(
 			`playlists/${playlistId}/tracks`,
 			'DELETE',
 			token,
 			{ uris }
+		)
+	)
+}
+
+export function addTracksToPlaylist(
+	token: string,
+	playlistId: string,
+	uris: string[],
+	position = 0
+) {
+	return forEvery(uris, 100, (uris, i) =>
+		request<SpotifyApi.PlaylistSnapshotResponse>(
+			`playlists/${playlistId}/tracks`,
+			'POST',
+			token,
+			{ uris, position: position + i }
 		)
 	)
 }

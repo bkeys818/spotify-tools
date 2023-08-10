@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte'
 	import { fade } from 'svelte/transition'
 	import { cubicInOut } from 'svelte/easing'
-	import { getPlaylistTracks, removeTracksFromPlaylist } from '$lib/spotify'
+	import { getPlaylistTracks, removeTracksFromPlaylist, addTracksToPlaylist } from '$lib/spotify'
 	import { selections, findDuplicates, type DuplicateTrack } from '.'
 	import AuthSpotify from '$lib/components/AuthSpotify.svelte'
 	import CheckBox from '$lib/components/CheckBox.svelte'
@@ -40,16 +40,20 @@
 		const uris: string[] = []
 		const removedTracks: DuplicateTrack[] = []
 		const remainingTracks: DuplicateTrack[] = []
-		const updatedIndexes: number[] = []
-		for (const track of tracks) {
+		const updatedIndexes: Record<string, number> = {}
+		const remainingExactDuplicates: DuplicateTrack[] = []
+		for (const track of tracks)
 			if (track.selected) {
 				removedTracks.push(track)
 				uris.push(track.uri)
 			} else {
-				remainingTracks.push(track)
-				updatedIndexes.push(track.index - removedTracks.length)
+				if (!track.duplicates.every(duplicate => duplicate.selected))
+					remainingTracks.push(track)
+				updatedIndexes[track.id] = track.index - removedTracks.length
+				for (const duplicate of track.duplicates)
+					if (duplicate.selected && track.id == duplicate.id)
+						remainingExactDuplicates.push(track)
 			}
-		}
 
 		try {
 			await removeTracksFromPlaylist(token, playlistId, uris)
@@ -57,14 +61,28 @@
 			tracks = remainingTracks
 			// clear selections
 			$selections = []
-			// remove indented instances of duplicate tracks
-			for (const removedTrack of removedTracks)
-				for (const { duplicates } of removedTrack.duplicates) {
-					const index = duplicates.indexOf(removedTrack)
-					duplicates.splice(index, 1)
+			// for all removed tracks
+			for (const removedTrack of removedTracks) {
+				// for duplicates of duplicates (originals)
+				for (const { duplicates: originals } of removedTrack.duplicates) {
+					// delete indented instances of removed duplicate
+					originals.splice(originals.indexOf(removedTrack), 1)
 				}
-			// update indexes
-			for (let i = 0; i < updatedIndexes.length; i++) tracks[i].index = updatedIndexes[i]
+			}
+			// update index of remaining tracks
+			for (const track of tracks)
+				if (track.id in updatedIndexes) track.index = updatedIndexes[track.id]
+			// add back any exact duplicates that weren't maked for removal
+			await Promise.all(
+				remainingExactDuplicates.map(track =>
+					addTracksToPlaylist(
+						token,
+						playlistId,
+						[track.uri],
+						updatedIndexes[track.id] ?? track.index
+					)
+				)
+			)
 		} catch (error) {
 			console.error(error)
 			playlistName = JSON.stringify(error)
@@ -76,7 +94,7 @@
 	<title>Remove Duplicates - {playlistName}</title>
 </svelte:head>
 
-<AuthSpotify {path} scopes="user-library-modify playlist-modify-private" let:token>
+<AuthSpotify {path} scopes="playlist-modify-public playlist-modify-private" let:token>
 	<div class="flex items-end my-4">
 		<div class="hidden md:block md:w-32 md:h-32 md:rounded">
 			<img
@@ -89,7 +107,7 @@
 	</div>
 	{#if $selections.length > 0}
 		<button
-			class="fixed bottom-4 right-2 btn-secondary md:bottom-6 md:right-4"
+			class="fixed bottom-4 right-2 btn-secondary md:bottom-6 md:right-4 z-10 bg-white drop-shadow"
 			on:click={() => removeTracks(token)}
 		>
 			Remove Duplicates

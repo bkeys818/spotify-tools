@@ -88,12 +88,14 @@ function hasKeys<K extends string>(obj: object, ...keys: K[]): obj is object & R
 	return true
 }
 
-export async function forEvery<T>(
+export async function forEvery<T, R>(
 	items: T[],
 	limit: number,
-	method: (items: T[]) => Promise<unknown>
+	method: (items: T[], index: number) => Promise<R>
 ) {
+	const responses: R[] = []
 	for (let i = 0; i < items.length; i += limit) {
-		await method(items.slice(i, i + limit))
+		responses.push(await method(items.slice(i, i + limit), i))
 	}
+	return responses
 }
