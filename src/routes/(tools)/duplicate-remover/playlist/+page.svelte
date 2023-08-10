@@ -12,7 +12,7 @@
 	let playlistName = ''
 	let playlistId: string
 	let playlistCoverSrc: string
-	let duplicates: DuplicateTrack[] = []
+	let tracks: DuplicateTrack[] = []
 	let selectedGroupKey: string | undefined = undefined
 
 	onMount(() => {
@@ -30,8 +30,8 @@
 	})
 
 	async function getDuplicates(token: string) {
-		const tracks = await getPlaylistTracks(token, playlistId)
-		duplicates = findDuplicates(tracks)
+		const allTracks = await getPlaylistTracks(token, playlistId)
+		tracks = findDuplicates(allTracks)
 	}
 
 	async function removeTracks(token: string) {
@@ -41,7 +41,7 @@
 		const removedTracks: DuplicateTrack[] = []
 		const remainingTracks: DuplicateTrack[] = []
 		const updatedIndexes: number[] = []
-		for (const track of duplicates) {
+		for (const track of tracks) {
 			if (track.selected) {
 				removedTracks.push(track)
 				uris.push(track.uri)
@@ -54,7 +54,7 @@
 		try {
 			await removeTracksFromPlaylist(token, playlistId, uris)
 			// remove selected tracks from list
-			duplicates = remainingTracks
+			tracks = remainingTracks
 			// clear selections
 			$selections = []
 			// remove indented instances of duplicate tracks
@@ -64,7 +64,7 @@
 					duplicates.splice(index, 1)
 				}
 			// update indexes
-			for (let i = 0; i < updatedIndexes.length; i++) duplicates[i].index = updatedIndexes[i]
+			for (let i = 0; i < updatedIndexes.length; i++) tracks[i].index = updatedIndexes[i]
 		} catch (error) {
 			console.error(error)
 			playlistName = JSON.stringify(error)
@@ -103,7 +103,7 @@
 			<div class="mx-3" />
 		</div>
 		{#await getDuplicates(token) then}
-			{#each duplicates as track (track.key)}
+			{#each tracks as track (track.key)}
 				<div
 					class="track-group"
 					class:selected={track.key == selectedGroupKey}
