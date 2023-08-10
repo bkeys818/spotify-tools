@@ -35,30 +35,40 @@
 	}
 
 	async function removeTracks(token: string) {
+		if ($selections.length == 0) return
+
 		const uris: string[] = []
 		const removedTracks: DuplicateTrack[] = []
 		const remainingTracks: DuplicateTrack[] = []
+		const updatedIndexes: number[] = []
 		for (const track of duplicates) {
 			if (track.selected) {
-				uris.push(track.uri)
 				removedTracks.push(track)
-			} else remainingTracks.push(track)
-		}
-		if (uris.length > 0)
-			try {
-				await removeTracksFromPlaylist(token, playlistId, uris)
-				duplicates = remainingTracks
-				$selections = []
-				for (const removedTrack of removedTracks) {
-					for (const { duplicates } of removedTrack.duplicates) {
-						const index = duplicates.indexOf(removedTrack)
-						duplicates.splice(index, 1)
-					}
-				}
-			} catch (error) {
-				console.error(error)
-				playlistName = JSON.stringify(error)
+				uris.push(track.uri)
+			} else {
+				remainingTracks.push(track)
+				updatedIndexes.push(track.index - removedTracks.length)
 			}
+		}
+
+		try {
+			await removeTracksFromPlaylist(token, playlistId, uris)
+			// remove selected tracks from list
+			duplicates = remainingTracks
+			// clear selections
+			$selections = []
+			// remove indented instances of duplicate tracks
+			for (const removedTrack of removedTracks)
+				for (const { duplicates } of removedTrack.duplicates) {
+					const index = duplicates.indexOf(removedTrack)
+					duplicates.splice(index, 1)
+				}
+			// update indexes
+			for (let i = 0; i < updatedIndexes.length; i++) duplicates[i].index = updatedIndexes[i]
+		} catch (error) {
+			console.error(error)
+			playlistName = JSON.stringify(error)
+		}
 	}
 </script>
 
