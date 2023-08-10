@@ -169,6 +169,8 @@
 						{/each}
 					{/if}
 				</div>
+			{:else}
+				<h3 class="text-center my-4">No Duplicates Found!</h3>
 			{/each}
 		{/await}
 	</div>
