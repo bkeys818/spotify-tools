@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getMe, getMyPlaylists } from '$lib/spotify'
+	import { error } from '$lib/stores'
 	import type { ComponentProps } from 'svelte'
-	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 	import Playlist from '$lib/components/spotify/PlaylistPreview.svelte'
 
 	export let playlistLink: ComponentProps<Playlist>['link'] = undefined
@@ -10,9 +10,14 @@
 	const playlistsPromise = getPlaylists()
 
 	async function getPlaylists() {
-		const { id } = await getMe(token)
-		const playlist = await getMyPlaylists(token)
-		return playlist.filter(p => p.owner.id === id && p.tracks.total > 0)
+		try {
+			const { id } = await getMe(token)
+			const playlist = await getMyPlaylists(token)
+			return playlist.filter(p => p.owner.id === id && p.tracks.total > 0)
+		} catch (err) {
+			$error = err
+			return []
+		}
 	}
 </script>
 
@@ -28,9 +33,6 @@
 		{/each}
 	{/await}
 </div>
-{#await playlistsPromise catch error}
-	<ErrorMsg {error} />
-{/await}
 
 <style>
 	.playlistGrid {

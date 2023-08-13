@@ -1,6 +1,7 @@
 <script lang="ts">
 	import toolInfo from '../info.json'
 	import { onMount } from 'svelte'
+	import { error } from '$lib/stores'
 	import { publicLikedSongs } from '$lib/firebase/functions'
 	import { parseCode } from '$lib/spotify/auth'
 	import ToolHeader from '$lib/components/ToolHeader.svelte'
@@ -8,11 +9,9 @@
 	import AuthSpotifyButton from '$lib/components/AuthSpotifyButton.svelte'
 	import Spinner from '$lib/components/spinner.svelte'
 	import SpotifyEmbed from '$lib/components/spotify-embed.svelte'
-	import ErrorMsg from '$lib/components/ErrorMsg.svelte'
 
 	let playlistId: Promise<string> | undefined
 	let isPopulated: boolean | undefined = false
-	let error: unknown
 
 	onMount(() => {
 		try {
@@ -21,7 +20,7 @@
 				playlistId = create(code)
 			}
 		} catch (err) {
-			error = err
+			$error = err
 		}
 	})
 
@@ -37,7 +36,7 @@
 			isPopulated = true
 		} catch (err) {
 			isPopulated = undefined
-			error = err
+			$error = err
 		}
 	}
 </script>
@@ -63,12 +62,7 @@
 				{:else if isPopulated === false}
 					<p class="loading">Populating playlist</p>
 				{/if}
-			{:catch error}
-				<ErrorMsg {error} />
 			{/await}
-			{#if error}
-				<ErrorMsg {error} />
-			{/if}
 		{/if}
 	</AuthFirebase>
 </div>

@@ -8,6 +8,8 @@ export const user = readable<User | null | undefined>(undefined, set =>
 	auth.onAuthStateChanged(set)
 )
 
+export const error = writable<unknown>(undefined)
+
 export function createTokenStore(path: string) {
 	const { set, subscribe } = writable<string | undefined | null>()
 
