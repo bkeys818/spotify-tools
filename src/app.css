@@ -58,7 +58,7 @@
 		@apply hover:bg-spotify-gray-600 hover:text-spotify-white;
 	}
 
-	.loading:after {
+	p.loading:after {
 		overflow: hidden;
 		display: inline-block;
 		vertical-align: bottom;

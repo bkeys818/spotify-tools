@@ -10,6 +10,7 @@
 | Tool               | Description                                                                         |
 | ------------------ | ----------------------------------------------------------------------------------- |
 | Public Liked Songs | Creates a new public playlist that will sync with your liked tracks every 24 hours. |
+| Duplicate Remover  | Finds any duplicates in your playlists and allows you to removes them.              |
 
 # Contribution
 

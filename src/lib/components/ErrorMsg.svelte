@@ -1,41 +1,77 @@
 <script lang="ts">
-	import { onMount } from 'svelte'
+	import { fade, scale } from 'svelte/transition'
+	import { error } from '$lib/stores'
 	import type { FunctionsErrorCode } from 'firebase/functions'
 
-	export let error: unknown
+	let title = 'Uknown Error'
+	let message: string | undefined
+	let details: unknown
 
-	let msg = 'Uknown Error'
-	let details: string | undefined
-
-	onMount(() => {
-		if (typeof error == 'object' && error !== null) {
-			if (isFirebaseError(error)) {
-				msg = error.message
-				if (typeof error.details == 'string') details = error.details
-			} else if ('message' in error && typeof error.message == 'string') {
-				msg = error.message
-			} else details = JSON.stringify(error)
-		} else if (typeof error == 'string') {
-			msg = error
+	$: {
+		if ($error) {
+			if (typeof $error == 'string') {
+				title = 'Error!'
+				message = $error
+			} else if (typeof $error == 'object') {
+				if (isFirebaseError(error)) {
+					title = 'Firebase Error'
+					message = `${error.message} (${error.code})`
+					if (error.details) details = details
+				} else {
+					if ('name' in $error && typeof $error.name == 'string') {
+						title = $error.name
+						delete $error.name
+					} else {
+						title = 'Error!'
+					}
+					if ('message' in $error && typeof $error.message == 'string') {
+						message = $error.message
+						delete $error.message
+					}
+					details = 'details' in $error ? $error.details : JSON.stringify($error)
+				}
+			}
+			if (Object.values($error).length > 0) details = JSON.stringify($error)
+			console.error(message)
+			console.log(details)
 		}
-		console.error(error, details)
-	})
+	}
 
 	function isFirebaseError(error: object): error is FirebaseError {
 		return 'name' in error && error.name == 'FirebaseError'
 	}
 	interface FirebaseError extends Error {
+		name: 'FirebaseError'
 		code: FunctionsErrorCode
 		details: unknown
 	}
 </script>
 
-<div class="mx-auto max-w-md">
-	<div class="m-4 p-3 border-red-700 border-2 border-opacity-70 rounded-md">
-		<h4>Oh No! Something went wrong</h4>
-		<p>{msg}</p>
-		{#if details}
-			<h6>{details}</h6>
-		{/if}
+{#if $error}
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<div class="popup" transition:fade={{ duration: 300 }}>
+		<div on:click={() => location.reload()} />
+		<div transition:scale={{ duration: 300, delay: 50, start: 0.4, opacity: 0.3 }}>
+			<h4 class="font-bold text-red-600">{title}</h4>
+			{#if message}
+				<p>{message}</p>
+			{/if}
+			{#if details}
+				<h6>{details}</h6>
+			{/if}
+		</div>
 	</div>
-</div>
+{/if}
+
+<style lang="postcss">
+	.popup {
+		@apply fixed top-16 left-0 bottom-0 right-0;
+	}
+	.popup div:first-child {
+		@apply fixed top-16 left-0 bottom-0 right-0 bg-black opacity-30 -z-10;
+	}
+	.popup div:last-child {
+		@apply max-w-md max-h-80 overflow-hidden mx-auto mt-4 md:mt-8 px-4 py-6 rounded-md bg-white z-10 drop-shadow text-center;
+		border: 2px solid theme(colors.red.600);
+	}
+</style>

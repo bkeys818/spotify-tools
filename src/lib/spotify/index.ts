@@ -1,28 +1,57 @@
-import { PUBLIC_CLIENT_ID } from '$env/static/public'
-import { setCookie } from '$lib/cookie'
+import { request, getAll, forEvery } from './utils'
 
-export function authorize(scopes?: string) {
-	const state = createState()
-	setCookie('state', state)
-	const params = new URLSearchParams({
-		response_type: 'code',
-		client_id: PUBLIC_CLIENT_ID,
-		redirect_uri: location.origin + '/authorize',
-		state
-	})
-	if (scopes) params.set('scope', scopes)
-	location.href = 'https://accounts.spotify.com/authorize?' + params.toString()
+export function getMe(token: string) {
+	return request<SpotifyApi.UserObjectPrivate>('me', 'GET', token)
 }
 
-export interface AccessTokenResponse {
-	readonly access_token: string
-	readonly token_type: 'Bearer'
-	readonly expires_in: number
+export function getMyPlaylists(token: string) {
+	return getAll<SpotifyApi.PlaylistObjectSimplified>('me/playlists', token)
 }
 
-function createState(length = 18) {
-	const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~'.split('')
-	let str = ''
-	for (let i = 0; i < length; i++) str += chars[Math.floor(Math.random() * chars.length)]
-	return str
+type FilteredTrack = Pick<
+	SpotifyApi.TrackObjectFull,
+	'id' | 'uri' | 'name' | 'is_local' | 'duration_ms' | 'type'
+> & {
+	album: Pick<SpotifyApi.TrackObjectFull['album'], 'id' | 'name' | 'images'>
+	artists: Pick<SpotifyApi.TrackObjectFull['album']['artists'][number], 'id' | 'name'>[]
+}
+export type TrackObj = FilteredTrack & { index: number }
+export async function getPlaylistTracks(token: string, playlistId: string) {
+	const items = await getAll<{ track: FilteredTrack | null }>(
+		`playlists/${playlistId}/tracks`,
+		token,
+		{
+			fields: 'total,items.track(album(id,name,artists,images),artists(id,name),id,uri,name,is_local,duration_ms,type)'
+		}
+	)
+	return items
+		.filter((item): item is { track: FilteredTrack } => item.track?.type == 'track')
+		.map<TrackObj>((item, index) => ({ index, ...item.track }))
+}
+
+export function removeTracksFromPlaylist(token: string, playlistId: string, uris: string[]) {
+	return forEvery(uris, 100, uris =>
+		request<SpotifyApi.PlaylistSnapshotResponse>(
+			`playlists/${playlistId}/tracks`,
+			'DELETE',
+			token,
+			{ uris }
+		)
+	)
+}
+
+export function addTracksToPlaylist(
+	token: string,
+	playlistId: string,
+	uris: string[],
+	position = 0
+) {
+	return forEvery(uris, 100, (uris, i) =>
+		request<SpotifyApi.PlaylistSnapshotResponse>(
+			`playlists/${playlistId}/tracks`,
+			'POST',
+			token,
+			{ uris, position: position + i }
+		)
+	)
 }
