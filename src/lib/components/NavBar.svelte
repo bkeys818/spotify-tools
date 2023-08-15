@@ -1,21 +1,8 @@
-<script lang="ts">
-	import { user } from '../stores'
-	import { auth } from '$lib/firebase/auth'
-	const signOut = () => auth.signOut()
-	function goToLogin() {
-		location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`
-	}
-</script>
-
 <nav class="bg-gray-800 text-spotify-white">
 	<div class="max-w-7xl mx-auto h-16 px-2 sm:px-6 lg:px-8 flex items-center gap-6">
 		<a class="text-2xl font-extralight" href="/">Spotify Tools</a>
 		<div class="flex justify-end flex-grow gap-3">
-			{#if $user}
-				<button class="hover:underline" on:click={signOut}>Sign Out</button>
-			{:else if $user === null}
-				<button class="hover:underline" on:click={goToLogin}>Login</button>
-			{/if}
+			<a class="hover:underline" href="https://ben-keys.com">Ben Keys</a>
 		</div>
 	</div>
 </nav>
