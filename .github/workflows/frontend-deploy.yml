@@ -16,14 +16,14 @@ on:
             - '.github/workflows/frontend-deploy.yml'
 
 jobs:
-    build:
+    build-frontend:
         uses: ./.github/workflows/frontend-build.yml
         secrets:
             CLIENT_ID: ${{ secrets.CLIENT_ID }}
 
-    deploy:
+    deploy-frontend:
         name: Deploy frontend
-        needs: build
+        needs: build-frontend
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository

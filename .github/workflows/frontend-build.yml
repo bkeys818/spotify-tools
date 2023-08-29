@@ -20,7 +20,7 @@ on:
                 required: true
 
 jobs:
-    build:
+    build-frontend:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository

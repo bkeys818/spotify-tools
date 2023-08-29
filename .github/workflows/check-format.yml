@@ -7,7 +7,7 @@ on:
         branches: ['main']
 
 jobs:
-    check:
+    check-format:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository

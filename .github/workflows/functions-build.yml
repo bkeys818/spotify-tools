@@ -9,7 +9,7 @@ on:
             - '.github/workflows/functions-build.yml'
 
 jobs:
-    build:
+    build-functions:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
