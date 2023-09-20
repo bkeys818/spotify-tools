@@ -1,4 +1,5 @@
 import type { Response } from 'node-fetch'
+import { debug } from 'firebase-functions/logger'
 
 export const handleRepsonse = async <T>(method: () => Promise<Response>): Promise<T> => {
 	const res = await method()
@@ -6,6 +7,7 @@ export const handleRepsonse = async <T>(method: () => Promise<Response>): Promis
 		if (res.headers.get('content-type')?.startsWith('application/json')) return await res.json()
 		else return true as T
 	} else {
+		debug(new Error(`handleRepsonse caught an error.`))
 		let json: unknown
 		try {
 			json = await res.json()
