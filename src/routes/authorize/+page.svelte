@@ -9,7 +9,8 @@
 		const searchParams = new URLSearchParams(location.search)
 		if (searchParams.has('state')) {
 			const path = getPath(searchParams)
-			const url = new URL(path)
+			const url = new URL(location.href)
+			url.pathname = path
 			searchParams.forEach((key, value) => {
 				url.searchParams.set(key, value)
 			})
