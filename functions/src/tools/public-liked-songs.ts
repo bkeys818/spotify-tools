@@ -54,6 +54,7 @@ export const create = onCall<CreateParams, CreateResponse>({ secrets }, async ({
 	let docData: Document
 	if (doc.exists) {
 		docData = doc.data() as Document
+		await ref.update({ refresh_token })
 	} else {
 		await ref.create({ refresh_token, uid: auth.uid })
 		doc = await ref.get() // Do I need this line?
@@ -127,22 +128,29 @@ export const populate = onCall<PopulateParams>({ secrets }, async ({ data, auth 
 		throw new HttpsError('failed-precondition', 'Unable to find Spotify authorization')
 	}
 	spotify.setRefreshToken(docData.refresh_token)
-	await spotify.refreshAccessToken().catch(err => {
-		warn(err)
+	try {
+		await spotify.refreshAccessToken()
+	} catch (err) {
 		if (err instanceof Error && err.message.includes('invalid_grant')) {
-			warn('Failed to refresh Spotify access token.', {
-				tool,
-				error: {
-					msg: err.message,
-					name: err.name,
-					stack: err.stack,
-					cause: err.cause
-				}
-			})
-			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
+			if (err.message.startsWith('Refresh token revoked')) {
+				await ref.update({ refresh_token: FirebaseFirestore.FieldValue.delete() })
+				info('Spotify access was revoked.', { spotifyUserId: doc.id })
+				throw new HttpsError('unauthenticated', 'Spotify authorization was revoked')
+			} else {
+				warn('Failed to refresh Spotify access token.', {
+					tool,
+					error: {
+						msg: err.message,
+						name: err.name,
+						stack: err.stack,
+						cause: err.cause
+					}
+				})
+				throw new HttpsError('unauthenticated', 'Spotify authorization denied')
+			}
 		}
 		throw err
-	})
+	}
 
 	try {
 		return await update(spotify, docData.playlist_id)
