@@ -33,7 +33,15 @@ export const create = onCall<CreateParams, CreateResponse>({ secrets }, async ({
 	})
 	const { refresh_token } = await spotify.authorizationCodeGrant(data.code).catch(err => {
 		if (err instanceof Error && err.message.includes('invalid_grant')) {
-			warn('Unable to get Spotify refresh token.', { tool, error: err })
+			warn('Unable to get Spotify refresh token.', {
+				tool,
+				error: {
+					msg: err.message,
+					name: err.name,
+					stack: err.stack,
+					cause: err.cause
+				}
+			})
 			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
 		}
 		throw err
@@ -120,8 +128,17 @@ export const populate = onCall<PopulateParams>({ secrets }, async ({ data, auth 
 	}
 	spotify.setRefreshToken(docData.refresh_token)
 	await spotify.refreshAccessToken().catch(err => {
+		warn(err)
 		if (err instanceof Error && err.message.includes('invalid_grant')) {
-			warn('Failed to refresh Spotify access token.', { tool, error: err })
+			warn('Failed to refresh Spotify access token.', {
+				tool,
+				error: {
+					msg: err.message,
+					name: err.name,
+					stack: err.stack,
+					cause: err.cause
+				}
+			})
 			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
 		}
 		throw err
