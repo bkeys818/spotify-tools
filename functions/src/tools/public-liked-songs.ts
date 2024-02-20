@@ -112,12 +112,16 @@ export const populate = onCall<PopulateParams>({ secrets }, async ({ data, auth 
 	}
 	const spotify = new Spotify({
 		clientId: process.env.SPOTIFY_CLIENT_ID,
-		clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-		refreshToken: docData.refresh_token
+		clientSecret: process.env.SPOTIFY_CLIENT_SECRET
 	})
+	if (!docData.refresh_token) {
+		warn("Couldn't find Spotify refresh token.")
+		throw new HttpsError('failed-precondition', 'Unable to find Spotify authorization')
+	}
+	spotify.setRefreshToken(docData.refresh_token)
 	await spotify.refreshAccessToken().catch(err => {
 		if (err instanceof Error && err.message.includes('invalid_grant')) {
-			warn('Unable to get Spotify refresh token.', { tool, error: err })
+			warn('Failed to refresh Spotify access token.', { tool, error: err })
 			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
 		}
 		throw err
