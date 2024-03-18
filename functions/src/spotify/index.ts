@@ -1,5 +1,6 @@
-import { handleRepsonse } from './error'
+import { handleError } from './error'
 import fetch, { BodyInit } from 'node-fetch'
+import { debug } from 'firebase-functions/logger'
 
 export default class Spotify {
 	private credentials: Credentials
@@ -11,20 +12,28 @@ export default class Spotify {
 		this.credentials = credentials
 	}
 
-	private authRequest<T>(params: Record<string, string>): Promise<T> {
+	private async authRequest<T>(params: Record<string, string>): Promise<T> {
 		const { clientId, clientSecret } = this.credentials
 		if (!clientId || !clientSecret) throw new Error('Missing credentials')
-		return handleRepsonse<T>(() =>
-			fetch('https://accounts.spotify.com/api/token', {
-				headers: {
-					Authorization:
-						'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64'),
-					'Content-Type': 'application/x-www-form-urlencoded'
-				},
-				method: 'POST',
-				body: new URLSearchParams(params).toString()
-			})
-		)
+		const url = 'https://accounts.spotify.com/api/token'
+		const res = await fetch(url, {
+			headers: {
+				Authorization:
+					'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64'),
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			method: 'POST',
+			body: new URLSearchParams(params).toString()
+		})
+		if (res.status < 300) {
+			if (res.headers.get('content-type')?.startsWith('application/json'))
+				return await res.json()
+			else return true as T
+		} else {
+			const error = handleError(res)
+			debug(error, { context: { url, method: 'POST', params } })
+			throw error
+		}
 	}
 
 	private async request<T>(
@@ -45,20 +54,27 @@ export default class Spotify {
 		if (!this.credentials.accessToken)
 			throw new Error('Missing access token. Please authenticate first.')
 		let url = 'https://api.spotify.com/v1/' + endpoint
-		let body: BodyInit
+		let body: BodyInit | undefined
 		if (method == 'GET' && params) {
 			for (const key in params) if (params[key]) params[key] = params[key]?.toString()
 			url += '?' + new URLSearchParams(params as Record<string, string>).toString()
 		} else if (params) {
 			body = JSON.stringify(params)
 		}
-		return await handleRepsonse<T>(() =>
-			fetch(url, {
-				headers: { Authorization: 'Bearer ' + this.credentials.accessToken },
-				method,
-				body
-			})
-		)
+		const res = await fetch(url, {
+			headers: { Authorization: 'Bearer ' + this.credentials.accessToken },
+			method,
+			body
+		})
+		if (res.status < 300) {
+			if (res.headers.get('content-type')?.startsWith('application/json'))
+				return await res.json()
+			else return true as T
+		} else {
+			const error = handleError(res)
+			debug(error, { context: { url, method, params } })
+			throw error
+		}
 	}
 
 	private async getAll<T>(endpoint: string, params?: Record<string, Primative>): Promise<T[]> {
