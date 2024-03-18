@@ -3,7 +3,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler'
 import { error, warn, info } from 'firebase-functions/logger'
 import { db } from '../init'
 import Spotify from '../spotify'
-import { forEvery } from '../utils'
+import { forEvery, formatError } from '../utils'
 import { secrets } from '../env'
 
 const tool = 'public-liked-songs'
@@ -35,12 +35,7 @@ export const create = onCall<CreateParams, CreateResponse>({ secrets }, async ({
 		if (err instanceof Error && err.message.includes('invalid_grant')) {
 			warn('Unable to get Spotify refresh token.', {
 				tool,
-				error: {
-					msg: err.message,
-					name: err.name,
-					stack: err.stack,
-					cause: err.cause
-				}
+				error: formatError(err)
 			})
 			throw new HttpsError('unauthenticated', 'Spotify authorization denied')
 		}
@@ -139,12 +134,7 @@ export const populate = onCall<PopulateParams>({ secrets }, async ({ data, auth 
 			} else {
 				warn('Failed to refresh Spotify access token.', {
 					tool,
-					error: {
-						msg: err.message,
-						name: err.name,
-						stack: err.stack,
-						cause: err.cause
-					}
+					error: formatError(err)
 				})
 				throw new HttpsError('unauthenticated', 'Spotify authorization denied')
 			}
@@ -158,7 +148,7 @@ export const populate = onCall<PopulateParams>({ secrets }, async ({ data, auth 
 		const msg = 'Failed to populate playlist.'
 		error(msg, {
 			tool,
-			error: err,
+			error: formatError(err),
 			spotifyUserId: doc.id,
 			firebaseUid: docData.uid
 		})
@@ -187,7 +177,7 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 			} catch (err) {
 				return error('Unable to sync playlist', {
 					tool,
-					error: err,
+					error: formatError(err),
 					spotifyUserId: doc.id,
 					firebaseUid: data.uid
 				})

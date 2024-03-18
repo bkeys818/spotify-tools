@@ -7,3 +7,20 @@ export async function forEvery<T>(
 		await method(items.slice(i, i + limit))
 	}
 }
+
+export function formatError(err: unknown) {
+	if (err instanceof Error) {
+		return {
+			msg: err.message,
+			name: err.name,
+			stack: err.stack,
+			cause: err.cause
+		}
+	}
+	if (typeof err == 'object') {
+		return {
+			json: JSON.stringify(err),
+			obj: err
+		}
+	} else return err
+}
