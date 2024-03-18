@@ -30,7 +30,7 @@ export default class Spotify {
 				return await res.json()
 			else return true as T
 		} else {
-			const error = handleError(res)
+			const error = await handleError(res)
 			debug(error, { context: { url, method: 'POST', params } })
 			throw error
 		}
@@ -71,7 +71,7 @@ export default class Spotify {
 				return await res.json()
 			else return true as T
 		} else {
-			const error = handleError(res)
+			const error = await handleError(res)
 			debug(error, { context: { url, method, params } })
 			throw error
 		}
