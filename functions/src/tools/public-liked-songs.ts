@@ -218,6 +218,8 @@ function name(userName = 'User') {
 	return userName + "'s Liked Songs"
 }
 function description() {
-	const date = new Date().toLocaleDateString('en-US')
-	return `Created at "https://spotify-tools/benkeys.com".\nLast updated on ${date}.`
+	const now = new Date()
+	const time = now.toLocaleTimeString('en-US')
+	const date = now.toLocaleDateString('en-US')
+	return `Created at "https://spotify-tools/benkeys.com". Last updated on ${time} ${date}.`
 }
