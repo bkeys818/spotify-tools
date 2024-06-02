@@ -8,7 +8,7 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"command": "nvm use && yarn build",
+			"command": "nvm use && npm run build",
 			"problemMatcher": ["$tsc"],
 			"options": {
 				"cwd": "functions"
