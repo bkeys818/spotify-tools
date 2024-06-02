@@ -39,24 +39,24 @@ export default class Spotify {
 	private async request<T>(
 		endpoint: string,
 		method: 'GET',
-		params?: Record<string, Primative>
+		params?: Record<string, JsonPrimative>
 	): Promise<T>
 	private async request<T>(
 		endpoint: string,
 		method: 'POST' | 'PUT' | 'DELETE',
-		params?: Record<string, Primative | Primative[]>
+		params?: JsonObject
 	): Promise<T>
 	private async request<T>(
 		endpoint: string,
 		method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-		params?: Record<string, Primative | Primative[]>
+		params?: JsonObject
 	): Promise<T> {
 		if (!this.credentials.accessToken)
 			throw new Error('Missing access token. Please authenticate first.')
 		let url = 'https://api.spotify.com/v1/' + endpoint
 		let body: BodyInit | undefined
 		if (method == 'GET' && params) {
-			for (const key in params) if (params[key]) params[key] = params[key]?.toString()
+			for (const key in params) if (params[key]) params[key] = params[key]!.toString()
 			url += '?' + new URLSearchParams(params as Record<string, string>).toString()
 		} else if (params) {
 			body = JSON.stringify(params)
@@ -77,7 +77,10 @@ export default class Spotify {
 		}
 	}
 
-	private async getAll<T>(endpoint: string, params?: Record<string, Primative>): Promise<T[]> {
+	private async getAll<T>(
+		endpoint: string,
+		params?: Record<string, JsonPrimative>
+	): Promise<T[]> {
 		const limit = 50
 		const { items, total } = await this.request<SpotifyApi.PagingObject<T>>(endpoint, 'GET', {
 			limit,
@@ -166,7 +169,7 @@ export default class Spotify {
 		return this.request<SpotifyApi.PlaylistSnapshotResponse>(
 			`playlists/${playlistId}/tracks`,
 			'DELETE',
-			{ uris }
+			{ tracks: uris.map(uri => ({ uri })) }
 		)
 	}
 
@@ -177,7 +180,11 @@ export default class Spotify {
 	}
 }
 
-type Primative = string | number | boolean | undefined
+export type JsonPrimative = string | number | boolean | null
+export type JsonArray = Json[]
+export type JsonObject = { [key: string]: JsonPrimative | JsonArray | JsonObject }
+export type JsonComposite = JsonArray | JsonObject
+export type Json = JsonPrimative | JsonComposite
 
 interface Credentials {
 	accessToken?: string | undefined
