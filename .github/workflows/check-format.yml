@@ -12,11 +12,15 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v3
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
+            - name: Use specified Node version
+              uses: actions/setup-node@v3
               with:
-                  version: ^8.6.9
+                  node-version-file: '.nvmrc'
+            - name: Instal Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                bun-version-file: '.bun-version'
             - name: Install dependencies
-              run: pnpm install
+              run: bun install
             - name: Run ESLint
-              run: pnpm lint
+              run: bun lint

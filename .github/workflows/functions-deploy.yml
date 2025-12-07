@@ -6,6 +6,7 @@ on:
         paths:
             - 'functions/**'
             - 'firebase.*'
+            - 'bun.lock'
             - '.github/workflows/functions-deploy.yml'
 
 jobs:
@@ -24,11 +25,9 @@ jobs:
             - name: Use specified Node version
               uses: actions/setup-node@v3
               with:
-                  node-version-file: 'functions/.nvmrc'
+                  node-version-file: '.nvmrc'
             - name: Install dependencies
-              run: |
-                  yarn --cwd ./functions/
-                  rm ./functions/pnpm-lock.yaml
+              run: bun install --filter functions
             - name: Get commit message
               run: |
                   MSG="${{ github.event.head_commit.message }}"

@@ -6,6 +6,7 @@ on:
         paths:
             - 'functions/**'
             - 'firebase.*'
+            - 'bun.lock'
             - '.github/workflows/functions-build.yml'
 
 jobs:
@@ -17,11 +18,11 @@ jobs:
             - name: Use specified Node version
               uses: actions/setup-node@v3
               with:
-                  node-version-file: 'functions/.nvmrc'
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
+                  node-version-file: '.nvmrc'
+            - name: Instal Bun
+              uses: oven-sh/setup-bun@v2
               with:
-                  version: ^8.6.9
+                bun-version-file: '.bun-version'
             - name: Install dependencies
               run: pnpm  --C ./functions/ install
             - name: Build
