@@ -7,7 +7,10 @@
 		"format": "prettier --write --plugin-search-dir=. .",
 		"deploy": "npm run build && firebase deploy --only hosting -P prod"
 	},
-	"workspaces": ["frontend", "functions"],
+	"workspaces": [
+		"frontend",
+		"functions"
+	],
 	"devDependencies": {
 		"@eslint/js": "^9.39.1",
 		"eslint": "^9.39.1",
