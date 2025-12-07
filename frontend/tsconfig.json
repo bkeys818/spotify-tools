@@ -12,7 +12,7 @@
 		"paths": {
 			"$lib": ["src/lib"],
 			"$lib/*": ["src/lib/*"],
-			"@functions/*": ["functions/src/*"]
+			"@functions/*": ["..functions/src/*"]
 		},
 		"types": ["spotify-api"]
 	}

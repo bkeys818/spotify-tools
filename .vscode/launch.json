@@ -9,7 +9,7 @@
 			"request": "launch",
 			"name": "Launch Chrome against localhost",
 			"url": "http://localhost:3000/spotify",
-			"webRoot": "${workspaceFolder}/src"
+			"webRoot": "${workspaceFolder}/frontend/src"
 		},
 		{
 			"name": "Launch Firebase Functions Emulator",

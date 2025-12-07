@@ -43,10 +43,10 @@ jobs:
                   fail_on_empty: true
                   envkey_PUBLIC_CLIENT_ID: ${{ secrets.CLIENT_ID }}
             - name: Build
-              run: bun build
+              run: bun build --filter frontend
             - name: Archive compiled files
               if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
               uses: actions/upload-artifact@v3
               with:
                   name: frontend-build
-                  path: build
+                  path: frontend/build
