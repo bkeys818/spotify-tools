@@ -1,3 +1,3 @@
 import { app } from './init'
-app
+app // eslint-disable-line @typescript-eslint/no-unused-expressions
 export * from './tools'

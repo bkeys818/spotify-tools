@@ -20,6 +20,7 @@
 		"@types/spotify-web-api-node": "^5.0.7",
 		"autoprefixer": "^10.4.13",
 		"eslint-plugin-svelte": "^3.13.1",
+		"functions": "workspace:*",
 		"postcss": "^8.4.21",
 		"postcss-import": "^15.1.0",
 		"prettier": "^2.8.2",

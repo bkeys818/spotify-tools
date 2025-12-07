@@ -7,7 +7,7 @@
 
 	let email: string | undefined
 
-	onMount(async () => {
+	onMount(() => {
 		email = getAllCookies().email
 	})
 

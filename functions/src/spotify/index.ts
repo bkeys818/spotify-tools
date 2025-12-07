@@ -27,7 +27,7 @@ export default class Spotify {
 		})
 		if (res.status < 300) {
 			if (res.headers.get('content-type')?.startsWith('application/json'))
-				return await res.json()
+				return (await res.json()) as T
 			else return true as T
 		} else {
 			const error = await handleError(res)
@@ -39,7 +39,7 @@ export default class Spotify {
 	private async request<T>(
 		endpoint: string,
 		method: 'GET',
-		params?: Record<string, JsonPrimative>
+		params?: Record<string, string>
 	): Promise<T>
 	private async request<T>(
 		endpoint: string,
@@ -56,7 +56,6 @@ export default class Spotify {
 		let url = 'https://api.spotify.com/v1/' + endpoint
 		let body: BodyInit | undefined
 		if (method == 'GET' && params) {
-			for (const key in params) if (params[key]) params[key] = params[key]!.toString()
 			url += '?' + new URLSearchParams(params as Record<string, string>).toString()
 		} else if (params) {
 			body = JSON.stringify(params)
@@ -68,7 +67,7 @@ export default class Spotify {
 		})
 		if (res.status < 300) {
 			if (res.headers.get('content-type')?.startsWith('application/json'))
-				return await res.json()
+				return (await res.json()) as T
 			else return true as T
 		} else {
 			const error = await handleError(res)
@@ -77,13 +76,10 @@ export default class Spotify {
 		}
 	}
 
-	private async getAll<T>(
-		endpoint: string,
-		params?: Record<string, JsonPrimative>
-	): Promise<T[]> {
+	private async getAll<T>(endpoint: string, params?: Record<string, string>): Promise<T[]> {
 		const limit = 50
 		const { items, total } = await this.request<SpotifyApi.PagingObject<T>>(endpoint, 'GET', {
-			limit,
+			limit: limit.toString(),
 			fields: 'items,total',
 			...params
 		})
@@ -92,8 +88,8 @@ export default class Spotify {
 		const responses = await Promise.all(
 			reqN.map(i =>
 				this.request<SpotifyApi.PagingObject<T>>(endpoint, 'GET', {
-					limit,
-					offset: limit * i,
+					limit: limit.toString(),
+					offset: (limit * i).toString(),
 					fields: 'items',
 					...params
 				})

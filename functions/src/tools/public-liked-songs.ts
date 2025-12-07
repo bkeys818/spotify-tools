@@ -186,7 +186,7 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 	)
 	for (const job of jobs) {
 		if (job.status == 'rejected')
-			error("Failed while retrieving user's data", { tool, error: job.reason })
+			error("Failed while retrieving user's data", { tool, error: job.reason as unknown })
 	}
 	return
 })

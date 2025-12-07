@@ -4,6 +4,7 @@ import svelte from 'eslint-plugin-svelte'
 import globals from 'globals'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
+import svelteConfig from './frontend/svelte.config.js'
 
 export default defineConfig([
 	globalIgnores([
@@ -11,6 +12,7 @@ export default defineConfig([
 		'**/jest.config.*js',
 		'**/eslint.config.*js',
 		'**/postcss.config.*js',
+		'**/tailwind.config.*js',
 		//  SvelteKit
 		'frontend/build',
 		'frontend/.svelte-kit',
@@ -37,10 +39,22 @@ export default defineConfig([
 		languageOptions: {
 			parserOptions: {
 				projectService: true,
-				extraFileExtensions: ['.svelte'], // Add support for additional file extensions, such as .svelte
-				parser: ts.parser
+				extraFileExtensions: ['.svelte', '.svelte.ts'],
+				parser: ts.parser,
+				svelteFeatures: {
+					experimentalGenerics: true
+				},
+				svelteConfig
 			},
 			globals: globals.browser
+		},
+		rules: {
+			'@typescript-eslint/only-throw-error': 'off',
+			'svelte/no-navigation-without-resolve': 'off',
+			'@typescript-eslint/no-misused-promises': ['error', { checksConditionals: false }],
+			'@typescript-eslint/no-unsafe-member-access': 'off',
+			'@typescript-eslint/no-unsafe-argument': 'off',
+			'@typescript-eslint/no-unsafe-assignment': 'off'
 		}
 	},
 	eslintConfigPrettier
