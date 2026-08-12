@@ -24,7 +24,7 @@ Please ensure any pull request adhere to the following guidelines:
 
 -   Keep descriptions short and simple, but descriptive.
 -   Use [Gitmoji](https://github.com/carloscuesta/gitmoji) for commits.
--   Format your code correctly (`pnpm lint`).
+-   Format your code correctly (`bun lint`).
 
 ## Project Setup
 

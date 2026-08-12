@@ -24,6 +24,6 @@ jobs:
               with:
                   bun-version-file: '.bun-version'
             - name: Install dependencies
-              run: pnpm  --C ./functions/ install
+              run: bun  --filter ./functions install
             - name: Build
-              run: pnpm --C ./functions/ build
+              run: bun --filter ./functions build
