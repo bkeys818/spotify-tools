@@ -11,9 +11,6 @@
 		"deploy": "firebase deploy --only functions -P prod",
 		"logs": "firebase functions:log"
 	},
-	"engines": {
-		"node": "18"
-	},
 	"main": "lib/index.js",
 	"dependencies": {
 		"firebase-admin": "^12.0.0",
