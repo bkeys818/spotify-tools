@@ -4,15 +4,9 @@ on:
     pull_request:
         branches: main
         paths:
-            - 'src/**'
-            - 'public/**'
+            - 'frontend/**'
             - 'firebase.json'
-            - 'svelte.config.js'
-            - 'vite.config.js'
-            - 'postcss.config.cjs'
-            - 'tailwind.config.cjs'
-            - 'tsconfig.json'
-            - 'pnpm-lock.yaml'
+            - 'bun.lock'
             - '.github/workflows/frontend-build.yml'
     workflow_call:
         secrets:
@@ -24,24 +18,29 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
+              uses: actions/checkout@v4
+            - name: Use specified Node version
+              uses: actions/setup-node@v4
               with:
-                  version: ^8.6.9
+                  node-version-file: '.nvmrc'
+            - name: Instal Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version-file: '.bun-version'
             - name: Install dependencies
-              run: pnpm install
+              run: bun install
             - name: Create .env file
               uses: SpicyPizza/create-envfile@v1.3
               with:
+                  directory: frontend
                   file_name: .env.production
                   fail_on_empty: true
                   envkey_PUBLIC_CLIENT_ID: ${{ secrets.CLIENT_ID }}
             - name: Build
-              run: pnpm build
+              run: bun run --filter ./frontend build
             - name: Archive compiled files
               if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: frontend-build
-                  path: build
+                  path: frontend/build

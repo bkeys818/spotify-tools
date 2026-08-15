@@ -7,11 +7,11 @@ export const handleError = async (res: Response): Promise<Error> => {
 	} catch {
 		return new Error(`${res.statusText} (${res.status})`)
 	}
-	if (isObj(json) && hasKeys(json, 'error')) {
-		if (typeof json.error == 'string' && hasKeys(json, 'error_description'))
-			return new Error(`${json.error_description} (${json.error})`)
-		else if (isObj(json.error) && hasKeys(json.error, 'status', 'message')) {
-			return new Error(`${json.error.message} (${json.error.status})`)
+	if (isObj(json) && 'error' in json) {
+		if (typeof json.error == 'string' && 'error_description' in json)
+			return new Error(`${json.error_description as string} (${json.error})`)
+		else if (isObj(json.error) && 'status' in json.error && 'message' in json.error) {
+			return new Error(`${json.error.message as string} (${json.error.status as string})`)
 		}
 	}
 	return new Error(JSON.stringify(json))
@@ -19,9 +19,4 @@ export const handleError = async (res: Response): Promise<Error> => {
 
 function isObj(value: unknown): value is object {
 	return typeof value == 'object' && value !== null
-}
-
-function hasKeys<K extends string>(obj: object, ...keys: K[]): obj is object & Record<K, unknown> {
-	for (const key of keys) if (!(key in obj)) return false
-	return true
 }

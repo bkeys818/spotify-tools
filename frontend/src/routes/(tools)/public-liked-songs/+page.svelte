@@ -26,7 +26,7 @@
 
 	async function create(code: string) {
 		const { data } = await publicLikedSongs.create({ code, origin: location.origin })
-		populate(data.userId)
+		void populate(data.userId)
 		return data.playlistId
 	}
 

@@ -2,12 +2,11 @@
 **/node_modules
 
 # SvelteKit
-/build
-/.svelte-kit
-/package
-.env
-.env.*
-!.env.example
+/frontend/build
+/frontend/.svelte-kit
+/frontend/package
+/frontend/.env
+/frontend/.env.*
 
 # Firebase
 **/secrets.json

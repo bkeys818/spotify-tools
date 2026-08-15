@@ -4,7 +4,7 @@
 	import { parseToken } from '$lib/spotify/auth'
 	import { error } from '@sveltejs/kit'
 
-	onMount(async () => {
+	onMount(() => {
 		// code (response in query) - redirect with code in query
 		const searchParams = new URLSearchParams(location.search)
 		if (searchParams.has('state')) {

@@ -9,7 +9,7 @@
 			"request": "launch",
 			"name": "Launch Chrome against localhost",
 			"url": "http://localhost:3000/spotify",
-			"webRoot": "${workspaceFolder}/src"
+			"webRoot": "${workspaceFolder}/frontend/src"
 		},
 		{
 			"name": "Launch Firebase Functions Emulator",
@@ -22,7 +22,7 @@
 			"sourceMaps": true,
 			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
 			"console": "integratedTerminal",
-			"preLaunchTask": "npm: build - functions"
+			"preLaunchTask": "bun: build - functions"
 		},
 		{
 			"name": "Attach Firebase Functions Emulator",

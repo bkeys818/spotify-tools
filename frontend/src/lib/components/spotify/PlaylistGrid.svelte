@@ -23,7 +23,7 @@
 
 <div class="playlistGrid">
 	{#await playlistsPromise}
-		<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+		<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars svelte/require-each-key -->
 		{#each { length: 8 } as _}
 			<Playlist link={playlistLink} />
 		{/each}

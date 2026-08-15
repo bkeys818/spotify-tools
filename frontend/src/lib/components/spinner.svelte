@@ -3,7 +3,7 @@
 </script>
 
 <div class="spin-ring">
-	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars -->
+	<!-- eslint-disable-next-line @typescript-eslint/no-unused-vars svelte/require-each-key -->
 	{#each Array(4) as _}
 		<div style="--border-width: {borderWidth}px" />
 	{/each}

@@ -5,7 +5,8 @@
 	export let size: 'lg' | 'md' | 'sm' = 'md'
 	export let checked = false
 
-	const sizeClass = size == 'md' ? '' : (`size-${size}` as const)
+	// eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- false positive
+	const sizeClass = size === 'md' ? '' : (`size-${size}` as const)
 </script>
 
 <div class="relative">

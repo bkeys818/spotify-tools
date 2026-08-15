@@ -35,29 +35,29 @@ ms.refreshAccessToken.mockImplementation(() => Promise.resolve())
 
 const user = { id: 'userId', display_name: 'user' } as SpotifyApi.UserObjectPrivate
 
-ms.getMe.mockImplementation(async () => user)
+ms.getMe.mockResolvedValue(user)
 
 const track = { uri: 'spotify:track:trackId' } as SpotifyApi.TrackObjectFull
 const savedTrack = { track } as SpotifyApi.SavedTrackObject
 
-ms.getMySavedTracks.mockImplementation(async () => [savedTrack])
+ms.getMySavedTracks.mockResolvedValue([savedTrack])
 
 const playlist = { name: 'playlist', id: 'playlistId' } as SpotifyApi.PlaylistObjectSimplified
 
-ms.getMyPlaylists.mockImplementation(async () => [playlist])
+ms.getMyPlaylists.mockResolvedValue([playlist])
 
 const fullPlaylist = playlist as SpotifyApi.PlaylistObjectFull
 
-ms.createPlaylist.mockImplementation(async () => fullPlaylist)
+ms.createPlaylist.mockResolvedValue(fullPlaylist)
 
 ms.changePlaylistDetails.mockImplementation(() => Promise.resolve())
 
-ms.getPlaylistTracks.mockImplementation(async () => [{ track }])
+ms.getPlaylistTracks.mockResolvedValue([{ track }])
 
 const playlistSnapshot: SpotifyApi.PlaylistSnapshotResponse = { snapshot_id: 'snapshotId' }
 
-ms.addTracksToPlaylist.mockImplementation(async () => playlistSnapshot)
+ms.addTracksToPlaylist.mockResolvedValue(playlistSnapshot)
 
-ms.removeTracksToPlaylist.mockImplementation(async () => playlistSnapshot)
+ms.removeTracksToPlaylist.mockResolvedValue(playlistSnapshot)
 
-ms.usersFollowPlaylist.mockImplementation(async () => [true])
+ms.usersFollowPlaylist.mockResolvedValue([true])

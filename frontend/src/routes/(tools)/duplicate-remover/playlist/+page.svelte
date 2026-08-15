@@ -147,11 +147,11 @@
 						</p>
 					</div>
 					{#if track.key == selectedGroupKey}
-						{#each track.duplicates as duplicateTrack, index}
+						{#each track.duplicates as duplicateTrack, index (duplicateTrack.key)}
 							<!-- svelte-ignore a11y-click-events-have-key-events -->
 							<div
 								class="row duplicate cursor-pointer !pl-4"
-								transition:fade={{ duration: 400, easing: cubicInOut }}
+								transition:fade|global={{ duration: 400, easing: cubicInOut }}
 								style={`--index: ${index}`}
 								on:click={() => {
 									duplicateTrack.selected = !duplicateTrack.selected

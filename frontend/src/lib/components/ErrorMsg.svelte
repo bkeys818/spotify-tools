@@ -49,9 +49,9 @@
 
 {#if $error}
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<div class="popup" transition:fade={{ duration: 300 }}>
+	<div class="popup" transition:fade|global={{ duration: 300 }}>
 		<div on:click={() => location.reload()} />
-		<div transition:scale={{ duration: 300, delay: 50, start: 0.4, opacity: 0.3 }}>
+		<div transition:scale|global={{ duration: 300, delay: 50, start: 0.4, opacity: 0.3 }}>
 			<h4 class="font-bold text-red-600">{title}</h4>
 			{#if message}
 				<p>{message}</p>

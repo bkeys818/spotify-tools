@@ -38,7 +38,7 @@ describe('create', () => {
 
 		test('find old playlist', async () => {
 			const playlistId = 'somePlaylistId'
-			ms.getMyPlaylists.mockImplementationOnce(async () => [
+			ms.getMyPlaylists.mockResolvedValueOnce([
 				{
 					name: "user's Liked Songs",
 					id: playlistId
@@ -85,7 +85,7 @@ describe('create', () => {
 
 	describe('not-found (404)', () => {
 		test('user unadded playlist', async () => {
-			ms.usersFollowPlaylist.mockImplementationOnce(async () => [false])
+			ms.usersFollowPlaylist.mockResolvedValueOnce([false])
 			try {
 				await create.run({ data, auth, rawRequest })
 				fail('An error should have been thrown.')
@@ -114,10 +114,10 @@ describe('populate', () => {
 		test('update synced playlist', async () => {
 			const savedTrackUris = ['uri1', 'uri3', 'uri4', 'uri5']
 			const playlistTrackUris = ['uri2', 'uri4', 'uri6', 'uri7']
-			ms.getMySavedTracks.mockImplementationOnce(async () =>
+			ms.getMySavedTracks.mockResolvedValueOnce(
 				toTracks<SpotifyApi.SavedTrackObject>(savedTrackUris)
 			)
-			ms.getPlaylistTracks.mockImplementationOnce(async () =>
+			ms.getPlaylistTracks.mockResolvedValueOnce(
 				toTracks<SpotifyApi.PlaylistTrackObject>(playlistTrackUris)
 			)
 			await sync.run({ scheduleTime })
@@ -130,7 +130,7 @@ describe('populate', () => {
 		test('Update are made in order', async () => {
 			const savedTrackUris = Array.from(Array(103).keys()).map(n => n.toString())
 
-			ms.getMySavedTracks.mockImplementationOnce(async () =>
+			ms.getMySavedTracks.mockResolvedValueOnce(
 				toTracks<SpotifyApi.SavedTrackObject>(savedTrackUris)
 			)
 			ms.addTracksToPlaylist
@@ -138,7 +138,7 @@ describe('populate', () => {
 					await new Promise(res => setTimeout(res, 200))
 					return { snapshot_id: 'snapshotId' }
 				})
-				.mockImplementationOnce(async () => ({ snapshot_id: 'snapshotId' }))
+				.mockResolvedValueOnce({ snapshot_id: 'snapshotId' })
 			await sync.run({ scheduleTime })
 			const added = getUris(ms.addTracksToPlaylist.mock.calls)
 			expect(added.reverse()).toEqual(savedTrackUris)
@@ -210,7 +210,7 @@ describe('sync', () => {
 
 		test('user unadded playlist', async () => {
 			await doc.update({ playlist_id: 'playlistId' })
-			ms.usersFollowPlaylist.mockImplementationOnce(async () => [false])
+			ms.usersFollowPlaylist.mockResolvedValueOnce([false])
 			await sync.run({ scheduleTime })
 			expect(ms.getPlaylistTracks).not.toHaveBeenCalled()
 			expect((await doc.get()).exists).toBeFalsy()

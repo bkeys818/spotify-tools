@@ -1,7 +1,7 @@
 import { app } from '.'
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions'
 import { dev } from '$app/environment'
-import type * as Tools from '@functions/tools'
+import type * as Tools from 'functions/src/tools'
 
 const functions = getFunctions(app)
 if (dev) connectFunctionsEmulator(functions, 'localhost', 5001)
