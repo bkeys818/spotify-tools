@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app'
-import { dev } from '$app/environment'
+
+const dev = import.meta.env.DEV
 
 // Firebase configuration
 const firebaseConfig = {

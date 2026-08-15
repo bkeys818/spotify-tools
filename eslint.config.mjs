@@ -1,10 +1,10 @@
 import js from '@eslint/js'
 import ts from 'typescript-eslint'
-import svelte from 'eslint-plugin-svelte'
+import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import eslintConfigPrettier from 'eslint-config-prettier/flat'
-import svelteConfig from './frontend/svelte.config.js'
 
 export default defineConfig([
 	globalIgnores([
@@ -13,12 +13,9 @@ export default defineConfig([
 		'**/eslint.config.*js',
 		'**/postcss.config.*js',
 		'**/tailwind.config.*js',
-		//  SvelteKit
-		'frontend/build',
-		'frontend/.svelte-kit',
-		'frontend/package',
-		'**/svelte.config.*js',
 		'**/vite.config.*js',
+		// Frontend
+		'frontend/build',
 		// Firebase
 		'functions/lib/'
 	]),
@@ -33,24 +30,26 @@ export default defineConfig([
 			globals: globals.node
 		}
 	},
-	...svelte.configs.recommended,
 	{
-		files: ['frontend/**'],
+		files: ['frontend/**/*.{ts,tsx}'],
+		extends: [react.configs.flat.recommended, react.configs.flat['jsx-runtime']],
+		plugins: {
+			'react-hooks': reactHooks
+		},
 		languageOptions: {
 			parserOptions: {
 				projectService: true,
-				extraFileExtensions: ['.svelte', '.svelte.ts'],
 				parser: ts.parser,
-				svelteFeatures: {
-					experimentalGenerics: true
-				},
-				svelteConfig
+				ecmaFeatures: { jsx: true }
 			},
 			globals: globals.browser
 		},
+		settings: {
+			react: { version: 'detect' }
+		},
 		rules: {
+			...reactHooks.configs.recommended.rules,
 			'@typescript-eslint/only-throw-error': 'off',
-			'svelte/no-navigation-without-resolve': 'off',
 			'@typescript-eslint/no-misused-promises': ['error', { checksConditionals: false }],
 			'@typescript-eslint/no-unsafe-member-access': 'off',
 			'@typescript-eslint/no-unsafe-argument': 'off',

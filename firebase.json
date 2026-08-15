@@ -1,7 +1,13 @@
 {
 	"hosting": {
 		"public": "frontend/build",
-		"cleanUrls": true
+		"cleanUrls": true,
+		"rewrites": [
+			{
+				"source": "**",
+				"destination": "/index.html"
+			}
+		]
 	},
 	"firestore": {
 		"rules": "firestore.rules",

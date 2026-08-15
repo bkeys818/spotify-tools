@@ -1,5 +1,6 @@
-import { PUBLIC_CLIENT_ID } from '$env/static/public'
-import { setCookie } from '$lib/cookie'
+import { setCookie } from '@/lib/cookie'
+
+const PUBLIC_CLIENT_ID = import.meta.env.PUBLIC_CLIENT_ID
 
 export function authorize(type: 'code' | 'token', scopes?: string) {
 	const state = createState()

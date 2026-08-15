@@ -1,0 +1,28 @@
+@reference '../../index.css';
+
+.popup {
+	@apply fixed top-16 left-0 bottom-0 right-0;
+	animation: popup-fade 300ms ease both;
+}
+.popup > div:first-child {
+	@apply fixed top-16 left-0 bottom-0 right-0 bg-black opacity-30 -z-10;
+}
+.popup > div:last-child {
+	@apply max-w-md max-h-80 overflow-hidden mx-auto mt-4 md:mt-8 px-4 py-6 rounded-md bg-white z-10 drop-shadow-sm text-center;
+	border: 2px solid var(--color-red-600);
+	animation: popup-scale 300ms 50ms ease both;
+}
+
+/* Replaces Svelte's transition:fade / transition:scale. Enter only — the popup
+   unmounts immediately, as it did before, since dismissing reloads the page. */
+@keyframes popup-fade {
+	from {
+		opacity: 0;
+	}
+}
+@keyframes popup-scale {
+	from {
+		transform: scale(0.4);
+		opacity: 0.3;
+	}
+}
