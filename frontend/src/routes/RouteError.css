@@ -1,0 +1,16 @@
+@reference '../index.css';
+
+/* Same card the old error modal used, minus the fixed-position overlay: route
+   errors replace the route's content rather than floating over it. */
+.error-card {
+	@apply max-w-md mx-auto mt-4 md:mt-8 px-4 py-6 rounded-md bg-white text-center drop-shadow-sm;
+	border: 2px solid var(--color-red-600);
+	animation: error-card-in 300ms ease both;
+}
+
+@keyframes error-card-in {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+}

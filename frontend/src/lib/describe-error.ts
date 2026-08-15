@@ -1,3 +1,4 @@
+import { isRouteErrorResponse } from 'react-router-dom'
 import type { FunctionsErrorCode } from 'firebase/functions'
 
 export interface ErrorDescription {
@@ -17,14 +18,23 @@ function isFirebaseError(error: object): error is FirebaseError {
 }
 
 /**
- * Pure replacement for ErrorMsg's reactive block, which derived its output from
- * the error store while `delete`-ing keys off the very object it was reading.
- * It also tested the store itself rather than the store's value, so the
- * Firebase branch never actually ran.
+ * Normalises whatever reaches a route error element into something renderable.
+ * Handles React Router's error responses, Firebase errors, plain Errors, and
+ * bare objects thrown by the Spotify wrapper.
  */
 export function describeError(err: unknown): ErrorDescription | null {
 	if (err === undefined || err === null) return null
 	if (typeof err === 'string') return { title: 'Error!', message: err }
+
+	// Thrown `Response`s and router 404s arrive in this shape.
+	if (isRouteErrorResponse(err)) {
+		return {
+			title: `${err.status} ${err.statusText}`,
+			message: typeof err.data === 'string' ? err.data : undefined,
+			details: typeof err.data === 'string' ? undefined : JSON.stringify(err.data)
+		}
+	}
+
 	// Strings are handled above, so anything left here is a non-object primitive.
 	if (typeof err !== 'object')
 		return {

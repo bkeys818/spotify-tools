@@ -1,36 +1,69 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { RootLayout } from '@/routes/RootLayout'
-import { ErrorPage } from '@/routes/ErrorPage'
+import { RouteError } from '@/routes/RouteError'
 import { Home } from '@/routes/Home'
-import { Authorize } from '@/routes/authorize/Authorize'
+import * as authorize from '@/routes/authorize/authorize'
 import { LoginLayout } from '@/routes/login/LoginLayout'
-import { Login } from '@/routes/login/Login'
-import { LoginCallback } from '@/routes/login/callback/LoginCallback'
-import { PublicLikedSongs } from '@/routes/tools/public-liked-songs/PublicLikedSongs'
-import { DuplicateRemover } from '@/routes/tools/duplicate-remover/DuplicateRemover'
-import { Playlist } from '@/routes/tools/duplicate-remover/playlist/Playlist'
+import * as login from '@/routes/login/Login'
+import * as loginCallback from '@/routes/login/callback/LoginCallback'
+import * as publicLikedSongs from '@/routes/tools/public-liked-songs/PublicLikedSongs'
+import * as spotifyAuth from '@/routes/tools/duplicate-remover/SpotifyAuthLayout'
+import * as duplicateRemover from '@/routes/tools/duplicate-remover/DuplicateRemover'
+import * as playlist from '@/routes/tools/duplicate-remover/playlist/Playlist'
 
-// Mirrors the old routes/ directory. SvelteKit's `(tools)` group contributed no
-// URL segment and had no layout, so it is only a source folder here.
 export const router = createBrowserRouter([
 	{
 		path: '/',
 		element: <RootLayout />,
-		errorElement: <ErrorPage />,
+		errorElement: <RouteError />,
 		children: [
 			{ index: true, element: <Home /> },
-			{ path: 'authorize', element: <Authorize /> },
+
+			// Pure navigation — no element, the loader always redirects.
+			{ path: 'authorize', loader: authorize.loader },
+
 			{
 				path: 'login',
 				element: <LoginLayout />,
 				children: [
-					{ index: true, element: <Login /> },
-					{ path: 'callback', element: <LoginCallback /> }
+					{ index: true, action: login.action, element: <login.Login /> },
+					{
+						path: 'callback',
+						loader: loginCallback.loader,
+						action: loginCallback.action,
+						element: <loginCallback.LoginCallback />
+					}
 				]
 			},
-			{ path: 'public-liked-songs', element: <PublicLikedSongs /> },
-			{ path: 'duplicate-remover', element: <DuplicateRemover /> },
-			{ path: 'duplicate-remover/playlist', element: <Playlist /> }
+
+			{
+				path: 'public-liked-songs',
+				loader: publicLikedSongs.loader,
+				action: publicLikedSongs.action,
+				shouldRevalidate: publicLikedSongs.shouldRevalidate,
+				element: <publicLikedSongs.PublicLikedSongs />
+			},
+
+			// Layout route gating both children behind a Spotify token, which is
+			// what replaced the AuthSpotify render prop.
+			{
+				path: 'duplicate-remover',
+				loader: spotifyAuth.loader,
+				element: <spotifyAuth.SpotifyAuthLayout />,
+				children: [
+					{
+						index: true,
+						loader: duplicateRemover.loader,
+						element: <duplicateRemover.DuplicateRemover />
+					},
+					{
+						path: 'playlist',
+						loader: playlist.loader,
+						action: playlist.action,
+						element: <playlist.Playlist />
+					}
+				]
+			}
 		]
 	}
 ])

@@ -1,12 +1,11 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useUser } from '@/lib/contexts/user'
+import type { User } from 'firebase/auth'
 
-export function AuthFirebase({ children }: { children: ReactNode }) {
-	const user = useUser()
+/** Gate for routes needing a Firebase session; the user comes from the loader. */
+export function AuthFirebase({ user, children }: { user: User | null; children: ReactNode }) {
 	const { pathname } = useLocation()
 
-	if (user === undefined) return null // still resolving auth state
 	if (user === null) {
 		return (
 			<>

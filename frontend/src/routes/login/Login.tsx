@@ -1,43 +1,33 @@
-import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useActionData, useNavigation, type ActionFunctionArgs } from 'react-router-dom'
 import { sendSignInLinkToEmail } from 'firebase/auth'
 import { auth } from '@/lib/firebase/auth'
 import { setCookie } from '@/lib/cookie'
-import { usePromise } from '@/hooks/usePromise'
+import { requireField } from '@/lib/form'
 import { EmailForm } from '@/lib/components/EmailForm'
 
-export function Login() {
-	const [searchParams] = useSearchParams()
-	const [submittedEmail, setSubmittedEmail] = useState<string | null>(null)
+export async function action({ request }: ActionFunctionArgs) {
+	const email = requireField(await request.formData(), 'email')
 
-	const { status, error } = usePromise(
-		submittedEmail
-			? async () => {
-					const url = new URL(location.origin + location.pathname + '/callback')
-					const redirect = searchParams.get('redirect')
-					if (redirect) url.searchParams.set('state', redirect)
-					await sendSignInLinkToEmail(auth, submittedEmail, {
-						url: url.href,
-						handleCodeInApp: true
-					})
-					setCookie('email', submittedEmail)
-				}
-			: null,
-		[submittedEmail]
-	)
+	const url = new URL(location.origin + '/login/callback')
+	const redirect = new URL(request.url).searchParams.get('redirect')
+	if (redirect) url.searchParams.set('state', redirect)
+
+	await sendSignInLinkToEmail(auth, email, { url: url.href, handleCodeInApp: true })
+	setCookie('email', email)
+
+	return { email }
+}
+
+export function Login() {
+	const sent = useActionData<typeof action>()
+	const navigation = useNavigation()
+	const sending = navigation.state === 'submitting'
 
 	return (
 		<>
-			<EmailForm onSubmit={setSubmittedEmail} disabled={submittedEmail !== null} />
+			<EmailForm disabled={sending || sent !== undefined} />
 
-			{submittedEmail && status === 'fulfilled' && (
-				<p className="mt-4 text-center">Sign in link sent to {submittedEmail}.</p>
-			)}
-			{submittedEmail && status === 'rejected' && (
-				<p className="mt-4 text-center">
-					Something went wrong: {error instanceof Error ? error.message : String(error)}
-				</p>
-			)}
+			{sent && <p className="mt-4 text-center">Sign in link sent to {sent.email}.</p>}
 		</>
 	)
 }

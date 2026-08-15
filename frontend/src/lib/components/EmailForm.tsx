@@ -1,15 +1,15 @@
 import { useState } from 'react'
+import { Form } from 'react-router-dom'
 
-interface EmailFormProps {
-	onSubmit: (email: string) => void
-	disabled?: boolean
-}
-
-export function EmailForm({ onSubmit, disabled = false }: EmailFormProps) {
+/**
+ * Posts to whichever route action it is rendered under, so the parent decides
+ * what submitting means rather than passing a callback down.
+ */
+export function EmailForm({ disabled = false }: { disabled?: boolean }) {
 	const [email, setEmail] = useState('')
 
 	return (
-		<form action="javascript:void(0);" className="panel w-fit mx-auto">
+		<Form method="post" className="panel w-fit mx-auto">
 			<div className="mb-6 w-fit mx-auto">
 				<label
 					htmlFor="email"
@@ -19,6 +19,7 @@ export function EmailForm({ onSubmit, disabled = false }: EmailFormProps) {
 				</label>
 				<input
 					id="email"
+					name="email"
 					type="email"
 					value={email}
 					onChange={event => setEmail(event.target.value)}
@@ -26,13 +27,9 @@ export function EmailForm({ onSubmit, disabled = false }: EmailFormProps) {
 					className="shadow-sm appearance-none border rounded-sm py-2 px-3 text-spotify-gray-600 leading-tight focus:outline-hidden"
 				/>
 			</div>
-			<button
-				onClick={() => onSubmit(email)}
-				disabled={disabled || !email}
-				className="btn-secondary w-full"
-			>
+			<button type="submit" disabled={disabled || !email} className="btn-secondary w-full">
 				Login
 			</button>
-		</form>
+		</Form>
 	)
 }

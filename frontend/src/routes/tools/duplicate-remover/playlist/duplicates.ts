@@ -52,6 +52,43 @@ function artistMatch(a: TrackObj, b: TrackObj) {
 
 const SELECTIONS_KEY = 'selected_duplicates'
 
+export interface RemovalPlan {
+	/** Track URIs to delete, in playlist order. */
+	uris: string[]
+	/** Exact duplicates that must be re-added, with their post-deletion index. */
+	reAdds: { uri: string; position: number }[]
+}
+
+/**
+ * Works out what a removal actually entails.
+ *
+ * Deleting by URI removes *every* copy of that track, so any exact duplicate
+ * that was not selected has to be added back afterwards at its shifted index —
+ * which is what the position arithmetic here is for.
+ *
+ * Pure and computed from freshly fetched tracks, so nothing patches client
+ * state: React Router revalidates the loader once the action resolves.
+ */
+export function planRemoval(tracks: DuplicateTrack[], selected: Set<string>): RemovalPlan {
+	const uris: string[] = []
+	const reAdds: RemovalPlan['reAdds'] = []
+	let removedSoFar = 0
+
+	for (const track of tracks) {
+		if (selected.has(track.key)) {
+			removedSoFar++
+			uris.push(track.uri)
+			continue
+		}
+		const position = track.index - removedSoFar
+		for (const duplicate of track.duplicates)
+			if (selected.has(duplicate.key) && track.id == duplicate.id)
+				reAdds.push({ uri: track.uri, position })
+	}
+
+	return { uris, reAdds }
+}
+
 export function readSelections(): Set<string> {
 	const stored = sessionStorage.getItem(SELECTIONS_KEY)
 	// `''.split(',')` yields `['']`, so the old store round-tripped an empty

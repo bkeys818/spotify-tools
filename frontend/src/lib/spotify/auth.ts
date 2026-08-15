@@ -28,14 +28,6 @@ function createState(length = 18) {
 	return str
 }
 
-export function parseCode() {
-	const params = new URLSearchParams(location.search.slice(1))
-	history.replaceState({}, document.title, location.pathname)
-	const error = params.get('error')
-	if (error) throw authError(error)
-	return params.get('code')
-}
-
 export function parseToken(params: URLSearchParams): AccessTokenResponse {
 	const error = params.get('error')
 	if (error) throw authError(error)

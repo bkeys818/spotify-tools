@@ -1,9 +1,10 @@
-import { getAllCookies, setTokenCookie } from './cookie'
+import { getAllCookies } from './cookie'
 
 /**
- * Framework-free half of what used to live in `createTokenStore`. Reads the
- * implicit-grant access token back out of the path-scoped cookies written by
- * `/authorize`, returning null when there isn't a usable one.
+ * Reads the implicit-grant access token back out of the path-scoped cookies
+ * written by `/authorize`, returning null when there isn't a usable one.
+ *
+ * Synchronous, which is what lets route loaders call it directly.
  */
 export function readToken() {
 	const { access_token, auth_expiration } = getAllCookies()
@@ -15,6 +16,14 @@ export function readToken() {
 	return { accessToken: access_token, expiresIn }
 }
 
-export function writeToken(path: string, accessToken: string, expiresIn: number) {
-	setTokenCookie(path, accessToken, expiresIn)
+/**
+ * For loaders and actions running underneath `SpotifyAuthLayout`, which only
+ * renders its `<Outlet/>` when a token exists. Throwing here is a genuine
+ * invariant break (expired between the layout loader and this one), so it
+ * surfaces on the route error element.
+ */
+export function requireToken() {
+	const token = readToken()
+	if (!token) throw new Error('Spotify authorization expired. Reload to sign in again.')
+	return token.accessToken
 }

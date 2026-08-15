@@ -1,43 +1,31 @@
-import { getMe, getMyPlaylists } from '@/lib/spotify'
-import { useError } from '@/lib/contexts/error'
-import { usePromise } from '@/hooks/usePromise'
 import { PlaylistPreview } from './PlaylistPreview'
 import './PlaylistGrid.css'
 
 type Playlist = SpotifyApi.PlaylistObjectSimplified
 
 interface PlaylistGridProps {
-	token: string
-	playlistLink?: (playlist: Playlist) => string
+	playlists: Playlist[]
+	link?: (playlist: Playlist) => string
 }
 
-export function PlaylistGrid({ token, playlistLink }: PlaylistGridProps) {
-	const { setError } = useError()
-
-	const { status, data } = usePromise(async () => {
-		try {
-			const { id } = await getMe(token)
-			const playlists = await getMyPlaylists(token)
-			return playlists.filter(p => p.owner.id === id && p.tracks.total > 0)
-		} catch (err) {
-			setError(err)
-			return [] as Playlist[]
-		}
-	}, [token])
-
+/** Purely presentational — the route loader does the fetching. */
+export function PlaylistGrid({ playlists, link }: PlaylistGridProps) {
 	return (
 		<div className="playlistGrid">
-			{status === 'pending'
-				? Array.from({ length: 8 }, (_, i) => (
-						<PlaylistPreview key={i} link={playlistLink} />
-					))
-				: data?.map(playlist => (
-						<PlaylistPreview
-							key={playlist.id}
-							playlist={playlist}
-							link={playlistLink}
-						/>
-					))}
+			{playlists.map(playlist => (
+				<PlaylistPreview key={playlist.id} playlist={playlist} link={link} />
+			))}
+		</div>
+	)
+}
+
+/** Suspense fallback: the same eight placeholder cards as before. */
+export function PlaylistGridSkeleton() {
+	return (
+		<div className="playlistGrid">
+			{Array.from({ length: 8 }, (_, i) => (
+				<PlaylistPreview key={i} />
+			))}
 		</div>
 	)
 }

@@ -11,7 +11,7 @@ bun install                              # install all workspaces
 bun lint                                 # prettier --check + eslint (whole repo)
 bun run format                           # prettier --write
 
-bun run --filter ./frontend dev          # vite dev on :5050
+bun run --filter ./frontend start        # vite dev on :5050
 bun run --filter ./frontend build        # vite build -> frontend/build
 bun run --filter ./frontend check        # tsc --noEmit (the only frontend type check)
 
@@ -39,7 +39,7 @@ Deploys normally happen from GitHub Actions on push to `main` (`frontend-deploy.
 
 Two halves that share one Spotify integration but implement it twice, for different token flows:
 
-- **`frontend/`** — React 19 + Vite, React Router (`createBrowserRouter` in `src/App.tsx`), Tailwind 4. A client-only SPA: there is no server side and no prerendering, so every route does its work in the browser. `src/lib/spotify/` is a browser fetch wrapper using an _implicit-grant access token_ held in a cookie.
+- **`frontend/`** — React 19 + Vite, React Router 7 in **data mode** (`createBrowserRouter` in `src/App.tsx`), Tailwind 4. A client-only SPA: there is no server side and no prerendering, so every route does its work in the browser. `src/lib/spotify/` is a browser fetch wrapper using an _implicit-grant access token_ held in a cookie.
 - **`functions/`** — Firebase Functions v2 (CommonJS, `tsc` to `functions/lib`). `src/spotify/index.ts` is a self-contained class using `node-fetch` and the _authorization-code refresh token_ stored in Firestore. It exists so scheduled jobs can act on a user's account without the browser.
 
 ### Callable function wiring
@@ -50,10 +50,10 @@ Two halves that share one Spotify integration but implement it twice, for differ
 
 Two independent logins, both required for `public-liked-songs`:
 
-1. **Firebase** — passwordless email link (`/login` → `/login/callback`), gated in the UI by `AuthFirebase.tsx` / the `UserProvider` context.
+1. **Firebase** — passwordless email link (`/login` → `/login/callback`), both driven by route actions. Loaders that need a session `await waitForUser()` from `lib/firebase/auth.ts`, since `auth.currentUser` is null until Firebase restores the session; `AuthFirebase.tsx` then renders the login prompt when that returns null.
 2. **Spotify** — `AuthSpotifyButton` stores the current path in a `directed_from` cookie plus a random `state` cookie, then sends the user to Spotify with `redirect_uri = origin + '/authorize'`. `/authorize` is a shared trampoline: it validates `state`, then either forwards the `code` query back to `directed_from` (authorization-code flow, for tools that need server-side refresh tokens) or stores the hash access token in a path-scoped cookie and redirects (implicit flow, for browser-only tools like `duplicate-remover`).
 
-Cookie keys and their scopes/lifetimes live in `frontend/src/lib/cookie.ts`; `lib/token.ts` reads them back and the `useSpotifyToken(path)` hook holds the result. That hook is deliberately per-`<AuthSpotify>` instance rather than global state — the Spotify token is scoped to the subtree that asked for it.
+Cookie keys and their scopes/lifetimes live in `frontend/src/lib/cookie.ts`; `lib/token.ts` reads them back. `readToken()` is synchronous precisely so loaders can call it — `/duplicate-remover` is a layout route whose loader gates both children behind a token, and `requireToken()` is the loader-side assertion beneath it. Parent and child loaders run in parallel, so children read the cookie themselves rather than depending on the layout's data.
 
 ### Firestore model
 
@@ -73,5 +73,6 @@ Spotify credentials come from Cloud Secret Manager via `functions/src/env.ts` (`
 
 - Prettier: tabs (width 4), no semicolons, single quotes, `printWidth: 100`, `arrowParens: 'avoid'`. ESLint runs `recommendedTypeChecked` with `projectService`, so new files must be inside a tsconfig's `include`.
 - Commit messages use [Gitmoji](https://github.com/carloscuesta/gitmoji) (`🩹 Fix ...`, `🎨 Format code`).
-- Adding a tool means touching five places: `functions/src/tools/<tool>.ts` + its export in `tools/index.ts`, a callable wrapper in `frontend/src/lib/firebase/functions.ts`, a component under `frontend/src/routes/tools/<tool>/`, a route entry in `frontend/src/App.tsx`, and an entry in `routes/tools/info.json` (title/description consumed by `ToolHeader`).
+- Adding a tool means touching five places: `functions/src/tools/<tool>.ts` + its export in `tools/index.ts`, a callable wrapper in `frontend/src/lib/firebase/functions.ts`, a route module under `frontend/src/routes/tools/<tool>/`, a route entry in `frontend/src/App.tsx`, and an entry in `routes/tools/info.json` (title/description consumed by `ToolHeader`).
+- Route modules export `loader` / `action` alongside their component, and `App.tsx` wires them up with `import * as`. Fetching belongs in a loader, mutations in an action, and failures are `throw`n rather than caught into state — the root `errorElement` (`routes/RouteError.tsx`) is the single error surface. Loaders return **unawaited** promises for slow work, which components unwrap with React 19's `use()` inside a `<Suspense>` boundary; that is what keeps the skeleton and spinner states.
 - Tailwind 4 is configured in CSS, not JS: the custom palette lives in an `@theme` block in `src/index.css`. There is no `tailwind.config.cjs` or `postcss.config.cjs` — `@tailwindcss/vite` replaces the PostCSS chain. Component stylesheets that use `@apply` must start with `@reference '<relative path>/index.css'`.

@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router-dom'
 import { signInWithEmailLink, isSignInWithEmailLink } from 'firebase/auth'
 import { auth } from '@/lib/firebase/auth'
 import { getAllCookies } from '@/lib/cookie'
-import { usePromise } from '@/hooks/usePromise'
-import { useOneShotEffect } from '@/hooks/useOneShotEffect'
+import { requireField } from '@/lib/form'
 import { EmailForm } from '@/lib/components/EmailForm'
 
 class AccessError extends Error {
@@ -15,37 +14,37 @@ class AccessError extends Error {
 	}
 }
 
+async function completeSignIn(email: string, url: string) {
+	if (!isSignInWithEmailLink(auth, url))
+		throw new AccessError(`Url isn't a valid "sign in with email link".`)
+
+	await signInWithEmailLink(auth, email, url)
+
+	// The link carries the originating page through as `state`.
+	const state = new URL(url).searchParams.get('state')
+	return redirect(state ?? '/')
+}
+
+/** Signs in straight away when the address is still in the cookie. */
+export function loader({ request }: LoaderFunctionArgs) {
+	const { email } = getAllCookies()
+	if (!email) return null
+	return completeSignIn(email, request.url)
+}
+
+/** Otherwise the visitor re-enters it and we sign in from the submission. */
+export async function action({ request }: ActionFunctionArgs) {
+	const email = requireField(await request.formData(), 'email')
+	return completeSignIn(email, request.url)
+}
+
 export function LoginCallback() {
-	const [email, setEmail] = useState<string | undefined>(undefined)
-
-	useOneShotEffect(() => {
-		setEmail(getAllCookies().email)
-	})
-
-	const { status, error } = usePromise(
-		email
-			? async () => {
-					const url = location.href
-					if (!isSignInWithEmailLink(auth, url))
-						throw new AccessError(`Url isn't a valid "sign in with email link".`)
-					await signInWithEmailLink(auth, email, url)
-					const state = new URLSearchParams(location.search.slice(1)).get('state')
-					location.href = state ?? '/'
-				}
-			: null,
-		[email]
+	// Reached only when the loader found no cookie; a successful sign-in
+	// redirects, so there is nothing to render for the happy path.
+	return (
+		<>
+			<EmailForm />
+			<p className="mt-4 text-center">Just making sure it&apos;s it you!</p>
+		</>
 	)
-
-	if (!email) {
-		return (
-			<>
-				<EmailForm onSubmit={setEmail} />
-				<p className="mt-4 text-center">Just making sure it&apos;s it you!</p>
-			</>
-		)
-	}
-	if (status === 'rejected') {
-		return <p>Something went wrong: {error instanceof Error ? error.message : String(error)}</p>
-	}
-	return null
 }
