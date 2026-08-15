@@ -4,14 +4,8 @@ on:
     pull_request:
         branches: main
         paths:
-            - 'src/**'
-            - 'public/**'
+            - 'frontend/**'
             - 'firebase.json'
-            - 'svelte.config.js'
-            - 'vite.config.js'
-            - 'postcss.config.cjs'
-            - 'tailwind.config.cjs'
-            - 'tsconfig.json'
             - 'bun.lock'
             - '.github/workflows/frontend-build.yml'
     workflow_call:
@@ -24,9 +18,9 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
             - name: Use specified Node version
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version-file: '.nvmrc'
             - name: Instal Bun
@@ -43,10 +37,10 @@ jobs:
                   fail_on_empty: true
                   envkey_PUBLIC_CLIENT_ID: ${{ secrets.CLIENT_ID }}
             - name: Build
-              run: bun run build --filter frontend
+              run: bun run --filter ./frontend build
             - name: Archive compiled files
               if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: frontend-build
                   path: frontend/build

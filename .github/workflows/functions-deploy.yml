@@ -21,13 +21,19 @@ jobs:
         needs: build-functions
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
             - name: Use specified Node version
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version-file: '.nvmrc'
+            - name: Install Bun
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version-file: '.bun-version'
             - name: Install dependencies
-              run: bun install --filter functions
+              run: bun install --filter ./functions
+            - name: Build
+              run: bun run --filter ./functions build
             - name: Get commit message
               run: |
                   MSG="${{ github.event.head_commit.message }}"

@@ -7,8 +7,7 @@
 	},
 	"scripts": {
 		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
-		"format": "prettier --write --plugin-search-dir=. .",
-		"deploy": "bun run build && firebase deploy --only hosting -P prod"
+		"format": "prettier --write --plugin-search-dir=. ."
 	},
 	"workspaces": [
 		"frontend",

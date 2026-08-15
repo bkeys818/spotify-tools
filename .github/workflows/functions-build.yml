@@ -14,9 +14,9 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
             - name: Use specified Node version
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version-file: '.nvmrc'
             - name: Instal Bun
@@ -24,6 +24,6 @@ jobs:
               with:
                   bun-version-file: '.bun-version'
             - name: Install dependencies
-              run: bun  --filter ./functions install
+              run: bun install --filter ./functions
             - name: Build
-              run: bun --filter ./functions build
+              run: bun run --filter ./functions build

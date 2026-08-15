@@ -6,9 +6,9 @@ pnpm-lock.yaml
 .pnpm-store
 
 # SvelteKit
-/build
-/.svelte-kit
-/package
+/frontend/build
+/frontend/.svelte-kit
+/frontend/package
 
 # Firebase
 **/*-debug.log

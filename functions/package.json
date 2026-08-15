@@ -8,7 +8,7 @@
 		"shell-prep": "bun run build && firebase emulators:start --only firestore,pubsub -P dev",
 		"shell": "bun run build && firebase functions:shell -P dev --inspect-functions",
 		"test": "jest --silent",
-		"deploy": "firebase deploy --only functions -P prod",
+		"deploy": "bun run build && firebase deploy --only functions -P prod",
 		"logs": "firebase functions:log"
 	},
 	"main": "lib/index.js",
