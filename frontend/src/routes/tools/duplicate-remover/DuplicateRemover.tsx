@@ -17,7 +17,7 @@ async function getOwnedPlaylists(token: string) {
 
 export function loader() {
 	// Not awaited: the grid renders skeleton cards inside Suspense meanwhile.
-	return { playlists: getOwnedPlaylists(requireToken()) }
+	return { playlists: getOwnedPlaylists(requireToken()!) }
 }
 
 const playlistLink = ({ name, id, images }: Playlist) =>
