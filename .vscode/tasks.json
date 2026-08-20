@@ -2,13 +2,13 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "npm: build - functions",
+			"label": "bun: build - functions",
 			"type": "shell",
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"command": "nvm use && npm run build",
+			"command": "nvm use && bun run build",
 			"problemMatcher": ["$tsc"],
 			"options": {
 				"cwd": "functions"

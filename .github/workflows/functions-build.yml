@@ -6,6 +6,7 @@ on:
         paths:
             - 'functions/**'
             - 'firebase.*'
+            - 'bun.lock'
             - '.github/workflows/functions-build.yml'
 
 jobs:
@@ -13,16 +14,16 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
             - name: Use specified Node version
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
-                  node-version-file: 'functions/.nvmrc'
-            - name: Install pnpm
-              uses: pnpm/action-setup@v2
+                  node-version-file: '.nvmrc'
+            - name: Instal Bun
+              uses: oven-sh/setup-bun@v2
               with:
-                  version: ^8.6.9
+                  bun-version-file: '.bun-version'
             - name: Install dependencies
-              run: pnpm  --C ./functions/ install
+              run: bun install --filter ./functions
             - name: Build
-              run: pnpm --C ./functions/ build
+              run: bun run --filter ./functions build

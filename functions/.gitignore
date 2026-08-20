@@ -2,3 +2,4 @@ lib/
 typings/
 serviceAccountKey.json
 coverage/
+.secret.local

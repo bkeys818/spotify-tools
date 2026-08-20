@@ -29,6 +29,6 @@ If applicable, add screenshots to help explain your problem.
 
 (_Replace the following information_)
 
--   Device [e.g. MacPro (Intel)]
--   OS & Version [e.g. macOS Ventura (13.4.1)]
--   Browser & Version [e.g. Safari 16.5.1]
+- Device [e.g. MacPro (Intel)]
+- OS & Version [e.g. macOS Ventura (13.4.1)]
+- Browser & Version [e.g. Safari 16.5.1]

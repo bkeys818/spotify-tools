@@ -3,10 +3,9 @@
 	"compilerOptions": {
 		"noEmit": true,
 		"typeRoots": [
-			"../node_modules/@types",
-			"../node_modules/jest-environment-firebase-functions"
+			"../../node_modules/@types/",
+			"../../node_modules/jest-environment-firebase-functions/"
 		],
-		"types": ["spotify-api", "jest", "dist"],
 		"paths": {
 			"src/*": ["../src/*"],
 			"src": ["../src"]

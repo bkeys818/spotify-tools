@@ -1,13 +1,11 @@
 .DS_Store
 **/node_modules
+.claude/skills
 
-# SvelteKit
-/build
-/.svelte-kit
-/package
-.env
-.env.*
-!.env.example
+# Frontend
+/frontend/build
+/frontend/.env
+/frontend/.env.*
 
 # Firebase
 **/secrets.json

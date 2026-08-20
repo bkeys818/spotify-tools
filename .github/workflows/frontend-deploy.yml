@@ -4,15 +4,9 @@ on:
     push:
         branches: main
         paths:
-            - 'src/**'
-            - 'public/**'
+            - 'frontend/**'
             - 'firebase.json'
-            - 'svelte.config.js'
-            - 'vite.config.js'
-            - 'postcss.config.cjs'
-            - 'tailwind.config.cjs'
-            - 'tsconfig.json'
-            - 'pnpm-lock.yaml'
+            - 'bun.lock'
             - '.github/workflows/frontend-deploy.yml'
 
 jobs:
@@ -27,12 +21,16 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
+            - name: Use specified Node version
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
             - name: Download artifact
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   name: frontend-build
-                  path: build
+                  path: frontend/build
             - name: Get commit message
               run: |
                   MSG="${{ github.event.head_commit.message }}"

@@ -2,44 +2,26 @@
 	"name": "spotify-tools",
 	"version": "0.0.1",
 	"license": "MIT",
+	"engines": {
+		"node": "22"
+	},
 	"scripts": {
-		"preinstall": "npx only-allow pnpm",
-		"dev": "vite dev --port 5050 --host",
-		"build": "vite build",
-		"preview": "vite preview",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --check --plugin-search-dir=. . && eslint .",
-		"format": "prettier --write --plugin-search-dir=. .",
-		"deploy": "npm run build && firebase deploy --only hosting -P prod"
+		"lint": "prettier --check . && eslint .",
+		"format": "prettier --write ."
 	},
+	"workspaces": [
+		"frontend",
+		"functions"
+	],
 	"devDependencies": {
-		"@sveltejs/adapter-static": "1.0.1",
-		"@sveltejs/kit": "1.0.11",
-		"@types/cookie": "^0.5.1",
-		"@types/spotify-web-api-node": "^5.0.7",
-		"@typescript-eslint/eslint-plugin": "^5.48.1",
-		"@typescript-eslint/parser": "^5.48.1",
-		"autoprefixer": "^10.4.13",
-		"eslint": "^8.31.0",
-		"eslint-config-prettier": "^8.6.0",
-		"eslint-plugin-svelte": "^2.32.4",
-		"postcss": "^8.4.21",
-		"postcss-import": "^15.1.0",
-		"prettier": "^2.8.2",
-		"prettier-plugin-svelte": "^2.9.0",
-		"svelte": "^3.55.0",
-		"svelte-check": "^3.0.2",
-		"svelte-preprocess": "^5.0.0",
-		"tailwindcss": "^3.2.4",
-		"tslib": "^2.4.1",
-		"typescript": "^4.9.4",
-		"vite": "^4.0.4"
-	},
-	"type": "module",
-	"dependencies": {
-		"@types/spotify-api": "^0.0.22",
-		"cookie": "^0.5.0",
-		"firebase": "^9.9.0"
+		"@eslint/js": "^9.39.1",
+		"eslint": "^9.39.1",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-react": "^7.37.5",
+		"eslint-plugin-react-hooks": "^7.1.1",
+		"globals": "^16.5.0",
+		"prettier": "^3.6.2",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.48.1"
 	}
 }
