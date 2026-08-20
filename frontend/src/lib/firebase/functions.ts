@@ -17,8 +17,8 @@ export const publicLikedSongs = {
 		'publicLikedSongs',
 		'create'
 	>,
-	populate: httpsCallable(functions, 'publicLikedSongs-populate') satisfies HttpsCallable<
-		'publicLikedSongs',
-		'populate'
-	>
+	// The server retries on Spotify 429s, which can outlast the 70s client default.
+	populate: httpsCallable(functions, 'publicLikedSongs-populate', {
+		timeout: 300_000
+	}) satisfies HttpsCallable<'publicLikedSongs', 'populate'>
 }

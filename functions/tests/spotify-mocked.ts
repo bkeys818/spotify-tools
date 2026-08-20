@@ -11,9 +11,9 @@ const ms: jest.Mocked<PublicSpotify> = {
 	getMyPlaylists: jest.fn(),
 	createPlaylist: jest.fn(),
 	changePlaylistDetails: jest.fn(),
-	getPlaylistTracks: jest.fn(),
-	addTracksToPlaylist: jest.fn(),
-	removeTracksToPlaylist: jest.fn(),
+	getPlaylistItems: jest.fn(),
+	addItemsToPlaylist: jest.fn(),
+	removeItemsToPlaylist: jest.fn(),
 	usersFollowPlaylist: jest.fn()
 }
 
@@ -52,12 +52,12 @@ ms.createPlaylist.mockResolvedValue(fullPlaylist)
 
 ms.changePlaylistDetails.mockImplementation(() => Promise.resolve())
 
-ms.getPlaylistTracks.mockResolvedValue([{ track }])
+ms.getPlaylistItems.mockResolvedValue([{ item: track }])
 
 const playlistSnapshot: SpotifyApi.PlaylistSnapshotResponse = { snapshot_id: 'snapshotId' }
 
-ms.addTracksToPlaylist.mockResolvedValue(playlistSnapshot)
+ms.addItemsToPlaylist.mockResolvedValue(playlistSnapshot)
 
-ms.removeTracksToPlaylist.mockResolvedValue(playlistSnapshot)
+ms.removeItemsToPlaylist.mockResolvedValue(playlistSnapshot)
 
 ms.usersFollowPlaylist.mockResolvedValue([true])

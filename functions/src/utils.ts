@@ -8,6 +8,31 @@ export async function forEvery<T>(
 	}
 }
 
+/**
+ * Runs `method` over `items` with at most `limit` in flight at once.
+ * Results keep the order of `items`, not the order they finished in.
+ */
+export async function mapWithConcurrency<T, R>(
+	items: T[],
+	limit: number,
+	method: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+	const results = new Array<R>(items.length)
+	let cursor = 0
+	const worker = async () => {
+		while (cursor < items.length) {
+			const index = cursor++
+			results[index] = await method(items[index], index)
+		}
+	}
+	await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
+	return results
+}
+
+export function sleep(ms: number) {
+	return new Promise<void>(resolve => setTimeout(resolve, ms))
+}
+
 export function formatError(err: unknown) {
 	if (err instanceof Error) {
 		return {
