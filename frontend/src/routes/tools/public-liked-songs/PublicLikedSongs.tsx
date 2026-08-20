@@ -115,8 +115,7 @@ type CreateResult = { playlistId: string; userId: string }
 
 function Playlist({ promise }: { promise: Promise<CreateResult | null> }) {
 	const result = use(promise)
-	if (!result)
-		return <Authorize note="That Spotify authorization expired. Please try again." />
+	if (!result) return <Authorize note="That Spotify authorization expired. Please try again." />
 	return <SyncedPlaylist {...result} />
 }
 
