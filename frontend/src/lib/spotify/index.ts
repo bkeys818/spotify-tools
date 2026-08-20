@@ -8,31 +8,31 @@ export function getMyPlaylists(token: string) {
 	return getAll<SpotifyApi.PlaylistObjectSimplified>('me/playlists', token)
 }
 
-type FilteredTrack = Pick<
+type FilteredItem = Pick<
 	SpotifyApi.TrackObjectFull,
 	'id' | 'uri' | 'name' | 'is_local' | 'duration_ms' | 'type'
 > & {
 	album: Pick<SpotifyApi.TrackObjectFull['album'], 'id' | 'name' | 'images'>
 	artists: Pick<SpotifyApi.TrackObjectFull['album']['artists'][number], 'id' | 'name'>[]
 }
-export type TrackObj = FilteredTrack & { index: number }
-export async function getPlaylistTracks(token: string, playlistId: string) {
-	const items = await getAll<{ track: FilteredTrack | null }>(
-		`playlists/${playlistId}/tracks`,
+export type TrackObj = FilteredItem & { index: number }
+export async function getPlaylistItems(token: string, playlistId: string) {
+	const items = await getAll<{ item: FilteredItem | null }>(
+		`playlists/${playlistId}/items`,
 		token,
 		{
-			fields: 'total,items.track(album(id,name,artists,images),artists(id,name),id,uri,name,is_local,duration_ms,type)'
+			fields: 'total,items.item(album(id,name,artists,images),artists(id,name),id,uri,name,is_local,duration_ms,type)'
 		}
 	)
 	return items
-		.filter((item): item is { track: FilteredTrack } => item.track?.type == 'track')
-		.map<TrackObj>((item, index) => ({ index, ...item.track }))
+		.filter((item): item is { item: FilteredItem } => item.item?.type == 'track')
+		.map<TrackObj>((item, index) => ({ index, ...item.item }))
 }
 
-export function removeTracksFromPlaylist(token: string, playlistId: string, uris: string[]) {
+export function removeItemsFromPlaylist(token: string, playlistId: string, uris: string[]) {
 	return forEvery(uris, 100, uris =>
 		request<SpotifyApi.PlaylistSnapshotResponse>(
-			`playlists/${playlistId}/tracks`,
+			`playlists/${playlistId}/items`,
 			'DELETE',
 			token,
 			{ uris }
@@ -40,7 +40,7 @@ export function removeTracksFromPlaylist(token: string, playlistId: string, uris
 	)
 }
 
-export function addTracksToPlaylist(
+export function addItemsToPlaylist(
 	token: string,
 	playlistId: string,
 	uris: string[],
@@ -48,7 +48,7 @@ export function addTracksToPlaylist(
 ) {
 	return forEvery(uris, 100, (uris, i) =>
 		request<SpotifyApi.PlaylistSnapshotResponse>(
-			`playlists/${playlistId}/tracks`,
+			`playlists/${playlistId}/items`,
 			'POST',
 			token,
 			{ uris, position: position + i }

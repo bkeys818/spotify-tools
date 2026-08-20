@@ -7,7 +7,7 @@ import {
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs
 } from 'react-router-dom'
-import { getPlaylistTracks, removeTracksFromPlaylist, addTracksToPlaylist } from '@/lib/spotify'
+import { getPlaylistItems, removeItemsFromPlaylist, addItemsToPlaylist } from '@/lib/spotify'
 import { requireToken } from '@/lib/token'
 import { CheckBox } from '@/lib/components/CheckBox'
 import { Track } from './Track'
@@ -37,7 +37,7 @@ export function loader({ request }: LoaderFunctionArgs) {
 	return {
 		playlist,
 		// Deferred so the header renders while the tracks load.
-		tracks: getPlaylistTracks(token, playlist.id).then(findDuplicates)
+		tracks: getPlaylistItems(token, playlist.id).then(findDuplicates)
 	}
 }
 
@@ -51,12 +51,12 @@ export async function action({ request }: ActionFunctionArgs) {
 	const token = requireToken()!
 	// Re-read from Spotify rather than trusting client state, which is what
 	// makes the old index-patching unnecessary.
-	const tracks = findDuplicates(await getPlaylistTracks(token, playlist.id))
+	const tracks = findDuplicates(await getPlaylistItems(token, playlist.id))
 	const { uris, reAdds } = planRemoval(tracks, selected)
 
-	await removeTracksFromPlaylist(token, playlist.id, uris)
+	await removeItemsFromPlaylist(token, playlist.id, uris)
 	await Promise.all(
-		reAdds.map(({ uri, position }) => addTracksToPlaylist(token, playlist.id, [uri], position))
+		reAdds.map(({ uri, position }) => addItemsToPlaylist(token, playlist.id, [uri], position))
 	)
 
 	return { removed: uris.length }

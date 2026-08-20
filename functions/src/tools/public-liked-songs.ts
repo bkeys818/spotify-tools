@@ -66,7 +66,7 @@ export const create = onCall<CreateParams, CreateResponse>({ secrets }, async ({
 		}
 		// if playlist doesn't exist
 		if (!docData.playlist_id) {
-			const playlist = await spotify.createPlaylist(user.id, {
+			const playlist = await spotify.createPlaylist({
 				name: playlistName,
 				description: description(),
 				public: true
@@ -76,7 +76,7 @@ export const create = onCall<CreateParams, CreateResponse>({ secrets }, async ({
 		await ref.update({ playlist_id: docData.playlist_id })
 	}
 
-	if (!(await spotify.usersFollowPlaylist(docData.playlist_id, [user.id]))[0]) {
+	if (!(await spotify.usersFollowPlaylist([docData.playlist_id]))[0]) {
 		await ref.delete()
 		info('User deleted synced playlist', { tool })
 		throw new HttpsError(
@@ -170,7 +170,7 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 			try {
 				await spotify.refreshAccessToken()
 				if (data.playlist_id) {
-					if (!(await spotify.usersFollowPlaylist(data.playlist_id, [doc.id]))[0])
+					if (!(await spotify.usersFollowPlaylist([data.playlist_id]))[0])
 						return await ref.delete()
 					else return await update(spotify, data.playlist_id)
 				} else return await ref.delete()
@@ -193,11 +193,11 @@ export const sync = onSchedule({ schedule: '0 0 * * *', secrets }, async () => {
 
 async function update(spotify: Spotify, playlistId: string) {
 	const [playlistTracks, savedTracks] = await Promise.all([
-		spotify.getPlaylistTracks(playlistId),
+		spotify.getPlaylistItems(playlistId),
 		spotify.getMySavedTracks()
 	])
 	const playlistTrackUris = playlistTracks
-		.map(item => item.track?.uri)
+		.map(item => item.item?.uri)
 		.filter((v): v is string => v !== undefined)
 	const savedTrackUris = savedTracks.map(item => item.track.uri)
 
@@ -205,9 +205,9 @@ async function update(spotify: Spotify, playlistId: string) {
 	const addedTrackIds = savedTrackUris.filter(id => !playlistTrackUris.includes(id)).reverse()
 
 	if (removedTrackIds.length > 0)
-		await forEvery(removedTrackIds, 100, ids => spotify.removeTracksToPlaylist(playlistId, ids))
+		await forEvery(removedTrackIds, 100, ids => spotify.removeItemsToPlaylist(playlistId, ids))
 	if (addedTrackIds.length > 0)
-		await forEvery(addedTrackIds, 100, ids => spotify.addTracksToPlaylist(playlistId, ids))
+		await forEvery(addedTrackIds, 100, ids => spotify.addItemsToPlaylist(playlistId, ids))
 
 	await spotify.changePlaylistDetails(playlistId, { description: description() })
 

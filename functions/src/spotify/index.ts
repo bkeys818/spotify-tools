@@ -134,44 +134,40 @@ export default class Spotify {
 		return this.getAll<SpotifyApi.PlaylistObjectSimplified>('me/playlists')
 	}
 
-	createPlaylist(userId: string, details: PlaylistDetails) {
-		return this.request<SpotifyApi.PlaylistObjectFull>(
-			`users/${userId}/playlists`,
-			'POST',
-			details
-		)
+	createPlaylist(details: PlaylistDetails) {
+		return this.request<SpotifyApi.PlaylistObjectFull>(`me/playlists`, 'POST', details)
 	}
 
 	changePlaylistDetails(playlistId: string, details: Partial<PlaylistDetails>) {
 		return this.request<void>('playlists/' + playlistId, 'PUT', details)
 	}
 
-	getPlaylistTracks(playlistId: string) {
-		type SimplifiedPlaylistTrack = { track: { uri: string } | null }
-		return this.getAll<SimplifiedPlaylistTrack>(`playlists/${playlistId}/tracks`, {
-			fields: 'items.track.uri,total'
+	getPlaylistItems(playlistId: string) {
+		type SimplifiedPlaylistItem = { item: { uri: string } | null }
+		return this.getAll<SimplifiedPlaylistItem>(`playlists/${playlistId}/items`, {
+			fields: 'items.item.uri,total'
 		})
 	}
 
-	addTracksToPlaylist(playlistId: string, uris: string[]) {
+	addItemsToPlaylist(playlistId: string, uris: string[]) {
 		return this.request<SpotifyApi.PlaylistSnapshotResponse>(
-			`playlists/${playlistId}/tracks`,
+			`playlists/${playlistId}/items`,
 			'POST',
 			{ uris }
 		)
 	}
 
-	removeTracksToPlaylist(playlistId: string, uris: string[]) {
+	removeItemsToPlaylist(playlistId: string, uris: string[]) {
 		return this.request<SpotifyApi.PlaylistSnapshotResponse>(
-			`playlists/${playlistId}/tracks`,
+			`playlists/${playlistId}/items`,
 			'DELETE',
-			{ tracks: uris.map(uri => ({ uri })) }
+			{ items: uris.map(uri => ({ uri })) }
 		)
 	}
 
-	usersFollowPlaylist(playlistId: string, userIds: string[]) {
-		return this.request<boolean[]>(`playlists/${playlistId}/followers/contains`, 'GET', {
-			ids: userIds.join()
+	usersFollowPlaylist(playlistIds: string[]) {
+		return this.request<boolean[]>(`me/library/contains`, 'GET', {
+			uris: playlistIds.map(id => `spotify:playlist:${id}`).join()
 		})
 	}
 }
