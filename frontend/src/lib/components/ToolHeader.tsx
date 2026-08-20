@@ -1,7 +1,6 @@
-import type { ReactNode } from 'react'
 import type { ToolInfo } from '@/lib/tools'
 
-export function ToolHeader({ info, children }: { info: ToolInfo; children?: ReactNode }) {
+export function ToolHeader({ info }: { info: ToolInfo }) {
 	return (
 		<>
 			<title>{info.title}</title>
@@ -9,7 +8,6 @@ export function ToolHeader({ info, children }: { info: ToolInfo; children?: Reac
 				<h1>{info.title}</h1>
 				<h3>{info.desc}</h3>
 			</header>
-			{children}
 		</>
 	)
 }
