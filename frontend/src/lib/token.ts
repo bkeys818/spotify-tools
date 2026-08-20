@@ -24,6 +24,9 @@ export function readToken() {
  */
 export function requireToken() {
 	const token = readToken()
-	if (!token) throw new Error('Spotify authorization expired. Reload to sign in again.')
+	if (!token) {
+		console.warn('Spotify authorization expired.')
+		return null
+	}
 	return token.accessToken
 }

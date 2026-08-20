@@ -33,7 +33,7 @@ export function loader({ request }: LoaderFunctionArgs) {
 	const playlist = playlistParams(request.url)
 	if (!playlist) return redirect('/duplicate-remover')
 
-	const token = requireToken()
+	const token = requireToken()!
 	return {
 		playlist,
 		// Deferred so the header renders while the tracks load.
@@ -48,7 +48,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	const selected = new Set((await request.formData()).getAll('key').map(String))
 	if (selected.size == 0) return null
 
-	const token = requireToken()
+	const token = requireToken()!
 	// Re-read from Spotify rather than trusting client state, which is what
 	// makes the old index-patching unnecessary.
 	const tracks = findDuplicates(await getPlaylistTracks(token, playlist.id))

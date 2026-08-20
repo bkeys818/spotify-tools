@@ -2,9 +2,12 @@ import { Suspense, use, useEffect } from 'react'
 import {
 	useFetcher,
 	useLoaderData,
+	useNavigate,
+	useSearchParams,
 	type ActionFunctionArgs,
 	type LoaderFunctionArgs
 } from 'react-router-dom'
+import type { FunctionsError } from 'firebase/functions'
 import { publicLikedSongs } from '@/lib/firebase/functions'
 import { waitForUser } from '@/lib/firebase/auth'
 import { requireField } from '@/lib/form'
@@ -20,12 +23,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const code = new URL(request.url).searchParams.get('code')
 	if (!user || !code) return { user, playlist: null }
 
-	// Deferred so the spinner shows while the callable runs.
-	const playlist = publicLikedSongs
-		.create({ code, origin: location.origin })
-		.then(result => result.data)
+	// Deferred so the spinner shows while the callable runs. A code Spotify has
+	// already spent — or let expire — resolves to null rather than rejecting:
+	// the Firebase session is known good by this point, so `unauthenticated` can
+	// only be the Spotify grant failing, and that is a prompt to authorize
+	// again rather than something for the error boundary.
+	const playlist = publicLikedSongs.create({ code, origin: location.origin }).then(
+		result => result.data,
+		(err: unknown) => {
+			if (isFunctionsError(err) && err.code == 'functions/unauthenticated') return null
+			throw err
+		}
+	)
 
 	return { user, playlist }
+}
+
+function isFunctionsError(err: unknown): err is FunctionsError {
+	return err instanceof Error && 'code' in err
 }
 
 /**
@@ -45,6 +60,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export function PublicLikedSongs() {
 	const { user, playlist } = useLoaderData<typeof loader>()
+	useSpentCode()
 
 	return (
 		<>
@@ -53,10 +69,7 @@ export function PublicLikedSongs() {
 			<div className="my-4 text-center">
 				<AuthFirebase user={user}>
 					{playlist === null ? (
-						<AuthSpotifyButton
-							authType="code"
-							scopes="user-library-read playlist-modify-public"
-						/>
+						<Authorize />
 					) : (
 						<Suspense fallback={<Spinner />}>
 							<Playlist promise={playlist} />
@@ -68,10 +81,46 @@ export function PublicLikedSongs() {
 	)
 }
 
+/**
+ * `shouldRevalidate` only guards this router session; the code has to come out
+ * of the address bar too, or reloading the page — including the full reload
+ * Vite does when the dev server restarts — hands the spent code back to
+ * `create` and Spotify answers `invalid_grant`. Replacing the history entry
+ * rather than pushing keeps the back button off the dead URL as well, and
+ * `shouldRevalidate` stops the navigation from re-running the loader.
+ */
+function useSpentCode() {
+	const [searchParams] = useSearchParams()
+	const navigate = useNavigate()
+	const spent = searchParams.has('code')
+
+	useEffect(() => {
+		if (!spent) return
+		const params = new URLSearchParams(searchParams)
+		params.delete('code')
+		void navigate({ search: params.toString() }, { replace: true })
+	}, [spent, searchParams, navigate])
+}
+
+function Authorize({ note }: { note?: string }) {
+	return (
+		<>
+			{note && <p className="mb-4">{note}</p>}
+			<AuthSpotifyButton authType="code" scopes="user-library-read playlist-modify-public" />
+		</>
+	)
+}
+
 type CreateResult = { playlistId: string; userId: string }
 
-function Playlist({ promise }: { promise: Promise<CreateResult> }) {
-	const { playlistId, userId } = use(promise)
+function Playlist({ promise }: { promise: Promise<CreateResult | null> }) {
+	const result = use(promise)
+	if (!result)
+		return <Authorize note="That Spotify authorization expired. Please try again." />
+	return <SyncedPlaylist {...result} />
+}
+
+function SyncedPlaylist({ playlistId, userId }: CreateResult) {
 	const fetcher = useFetcher<typeof action>()
 
 	// Populating is a side effect of the playlist existing, not of a click, so

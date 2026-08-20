@@ -5,8 +5,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
 	plugins: [react(), tailwindcss()],
-	// Matches SvelteKit's `$env/static/public` convention so .env files and the
-	// `envkey_PUBLIC_CLIENT_ID` step in frontend-build.yml keep working unchanged.
 	envPrefix: 'PUBLIC_',
 	resolve: {
 		alias: {
@@ -19,7 +17,7 @@ export default defineConfig({
 		outDir: 'build'
 	},
 	server: {
-		port: 5050,
-		host: true
+		host: '127.0.0.1', // Only DEV host allowed by Spotify
+		port: 5050
 	}
 })

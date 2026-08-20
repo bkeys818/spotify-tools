@@ -2,10 +2,8 @@ import { app } from '.'
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions'
 import type * as Tools from 'functions/src/tools'
 
-const dev = import.meta.env.DEV
-
 const functions = getFunctions(app)
-if (dev) connectFunctionsEmulator(functions, 'localhost', 5001)
+if (import.meta.env.DEV) connectFunctionsEmulator(functions, '127.0.0.1', 5001)
 
 type Tool = keyof typeof Tools
 type Method<T extends Tool> = keyof (typeof Tools)[T]
