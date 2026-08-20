@@ -6,7 +6,7 @@ test(Spotify.prototype['getAll'].name, async () => {
 	const spy = jest.spyOn(Spotify.prototype, 'request' as keyof Spotify) as unknown as Spy
 	const spotify = new Spotify({})
 	const uris = Array.from(Array(53).keys()).map(n => n.toString())
-	const tracks = uris.map(uri => ({ track: { uri } } as SpotifyApi.PlaylistTrackObject))
+	const tracks = uris.map(uri => ({ track: { uri } }) as SpotifyApi.PlaylistTrackObject)
 	spy.mockImplementationOnce(async () => {
 		await new Promise(res => setTimeout(res, 200))
 		return { items: tracks.slice(0, 50), total: 53 }

@@ -105,7 +105,7 @@ describe('populate', () => {
 			await doc.create({ playlist_id, refresh_token })
 		})
 		function toTracks<T>(uris: string[]): T[] {
-			return uris.map(uri => ({ track: { uri } } as T))
+			return uris.map(uri => ({ track: { uri } }) as T)
 		}
 		function getUris(calls: [string, string[]][]) {
 			return calls.flatMap(([, uris]) => uris)

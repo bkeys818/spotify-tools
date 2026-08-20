@@ -1,5 +1,6 @@
-import { PUBLIC_CLIENT_ID } from '$env/static/public'
-import { setCookie } from '$lib/cookie'
+import { setCookie } from '@/lib/cookie'
+
+const PUBLIC_CLIENT_ID = import.meta.env.PUBLIC_CLIENT_ID
 
 export function authorize(type: 'code' | 'token', scopes?: string) {
 	const state = createState()
@@ -25,14 +26,6 @@ function createState(length = 18) {
 	let str = ''
 	for (let i = 0; i < length; i++) str += chars[Math.floor(Math.random() * chars.length)]
 	return str
-}
-
-export function parseCode() {
-	const params = new URLSearchParams(location.search.slice(1))
-	history.replaceState({}, document.title, location.pathname)
-	const error = params.get('error')
-	if (error) throw authError(error)
-	return params.get('code')
 }
 
 export function parseToken(params: URLSearchParams): AccessTokenResponse {

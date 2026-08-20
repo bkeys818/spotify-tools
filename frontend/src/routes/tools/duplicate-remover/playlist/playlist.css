@@ -1,0 +1,54 @@
+@reference '../../../../index.css';
+
+.row {
+	@apply grid gap-4 items-center rounded-sm bg-inherit hover:bg-slate-50;
+	grid-template-columns: 32px minmax(0, 4fr) minmax(0, 3fr) fit-content(36px);
+	transition: background-color 0.2s ease-in-out;
+	& *:first-child {
+		@apply justify-self-end;
+	}
+}
+
+.track-group {
+	--track-hieght: 3.5rem;
+	@apply relative bg-white overflow-y-hidden;
+	height: var(--track-hieght);
+	transition: height 0.4s ease-in-out;
+
+	.row {
+		height: var(--track-hieght);
+	}
+
+	/* Was `:global(p)` / `:global(img)` — the escape existed only because
+	   Svelte scoped styles to the component by default. */
+	&.disabled .row {
+		@apply cursor-not-allowed hover:bg-inherit;
+		& p,
+		& img {
+			@apply opacity-50;
+		}
+	}
+
+	&.selected {
+		height: calc(var(--track-hieght) * (var(--duplicate-count) + 1));
+		@apply rounded-sm bg-slate-100;
+		.row {
+			@apply hover:bg-slate-200;
+			&:first-child {
+				@apply border-b border-b-neutral-400 rounded-b-none;
+			}
+		}
+		.duplicate {
+			top: calc((var(--index) + 1) * var(--track-hieght));
+			/* Replaces transition:fade with cubicInOut easing. Enter only; the
+			   group's height transition masks the exit. */
+			animation: duplicate-fade 400ms cubic-bezier(0.645, 0.045, 0.355, 1) both;
+		}
+	}
+}
+
+@keyframes duplicate-fade {
+	from {
+		opacity: 0;
+	}
+}

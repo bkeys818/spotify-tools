@@ -1,0 +1,5 @@
+.playlistGrid {
+	display: grid;
+	grid-template: auto / repeat(auto-fill, minmax(max(280px, 25%), 1fr));
+	gap: 16px 24px;
+}

@@ -24,3 +24,5 @@ jobs:
               run: bun install
             - name: Run ESLint
               run: bun lint
+            - name: Type check frontend
+              run: bun run --filter ./frontend check
