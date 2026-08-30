@@ -27,7 +27,7 @@ export function SpotifyAuthLayout() {
 			<>
 				<ToolHeader info={toolInfo[id]} />
 				<div className="my-4 text-center">
-					<AuthSpotifyButton authType="token" scopes={SCOPES} />
+					<AuthSpotifyButton authType="pkce" scopes={SCOPES} />
 				</div>
 			</>
 		)

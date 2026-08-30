@@ -8,7 +8,7 @@ import {
 	type LoaderFunctionArgs
 } from 'react-router-dom'
 import { getPlaylistItems, removeItemsFromPlaylist, addItemsToPlaylist } from '@/lib/spotify'
-import { requireToken } from '@/lib/token'
+import { readToken, requireToken } from '@/lib/token'
 import { CheckBox } from '@/lib/components/CheckBox'
 import { Track } from './Track'
 import {
@@ -33,11 +33,16 @@ export function loader({ request }: LoaderFunctionArgs) {
 	const playlist = playlistParams(request.url)
 	if (!playlist) return redirect('/duplicate-remover')
 
-	const token = requireToken()!
+	// This runs in parallel with the layout's loader, so it also runs on the
+	// navigation where the layout renders its Authorize button instead of the
+	// `<Outlet/>`. Fetching regardless is what sent Spotify `Bearer null`.
+	const token = readToken()
+	if (!token) return { playlist, tracks: Promise.resolve<DuplicateTrack[]>([]) }
+
 	return {
 		playlist,
 		// Deferred so the header renders while the tracks load.
-		tracks: getPlaylistItems(token, playlist.id).then(findDuplicates)
+		tracks: getPlaylistItems(token.accessToken, playlist.id).then(findDuplicates)
 	}
 }
 
@@ -48,7 +53,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	const selected = new Set((await request.formData()).getAll('key').map(String))
 	if (selected.size == 0) return null
 
-	const token = requireToken()!
+	const token = requireToken()
 	// Re-read from Spotify rather than trusting client state, which is what
 	// makes the old index-patching unnecessary.
 	const tracks = findDuplicates(await getPlaylistItems(token, playlist.id))

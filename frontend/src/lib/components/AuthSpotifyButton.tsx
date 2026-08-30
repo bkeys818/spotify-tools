@@ -6,7 +6,7 @@ interface AuthSpotifyButtonProps {
 	scopes?: string
 }
 
-export function AuthSpotifyButton({ authType = 'token', scopes }: AuthSpotifyButtonProps) {
+export function AuthSpotifyButton({ authType = 'pkce', scopes }: AuthSpotifyButtonProps) {
 	return (
 		<>
 			<button
@@ -16,7 +16,7 @@ export function AuthSpotifyButton({ authType = 'token', scopes }: AuthSpotifyBut
 					if (location.search) url += location.search
 					if (location.hash) url += location.hash
 					setCookie('directed_from', url)
-					authorize(authType, scopes)
+					void authorize(authType, scopes)
 				}}
 			>
 				Authorize
