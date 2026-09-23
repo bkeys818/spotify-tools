@@ -48,4 +48,8 @@ You'll also need to add some Spotify credentials.
 
 - Create a [Spotify API project](https://developer.spotify.com/dashboard/login) for development.
 - Create a `.env.development.local` file containing all [`ImportMetaEnv`](https://github.com/bkeys818/spotify-tools/blob/main/src/env.d.ts) properties.
-- Set secrets with [Cloud Secrets](https://firebase.google.com/docs/functions/config-env#secret-manager) for the values listed in [`functions/src/env.ts`](https://github.com/bkeys818/spotify-tools/blob/main/functions/src/env.ts).
+- Set secrets with [Cloud Secrets](https://firebase.google.com/docs/functions/config-env#secret-manager) for the values listed in [`functions/src/env.ts`](https://github.com/bkeys818/spotify-tools/blob/main/functions/src/env.ts). For the emulator, put the same keys in `functions/.secret.local`.
+
+### Reconnect emails
+
+Spotify expires refresh tokens six months after the user authorized, so the nightly sync emails users to reconnect ([`functions/src/reauthorize.ts`](https://github.com/bkeys818/spotify-tools/blob/main/functions/src/reauthorize.ts)). Emails go through [Resend](https://resend.com) from `noreply@benkeys.com`; no mailbox has to exist for that address.

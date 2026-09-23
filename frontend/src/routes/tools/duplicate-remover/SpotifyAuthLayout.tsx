@@ -15,9 +15,9 @@ export function loader() {
  * Replaces the `<AuthSpotify>` render-prop component. Child routes only render
  * once a token exists, so their loaders can `requireToken()` freely.
  *
- * Child loaders read the cookie themselves rather than this loader's data:
+ * Child loaders read the token themselves rather than this loader's data:
  * React Router runs parent and child loaders in parallel, so a child cannot
- * depend on its parent's result, and the read is a synchronous cookie parse.
+ * depend on its parent's result, and the read is a synchronous local storage lookup.
  */
 export function SpotifyAuthLayout() {
 	const { authorized } = useLoaderData<typeof loader>()
@@ -27,7 +27,7 @@ export function SpotifyAuthLayout() {
 			<>
 				<ToolHeader info={toolInfo[id]} />
 				<div className="my-4 text-center">
-					<AuthSpotifyButton authType="token" scopes={SCOPES} />
+					<AuthSpotifyButton authType="pkce" scopes={SCOPES} />
 				</div>
 			</>
 		)

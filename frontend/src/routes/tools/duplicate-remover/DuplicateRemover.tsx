@@ -1,7 +1,7 @@
 import { Suspense, use } from 'react'
 import { useLoaderData } from 'react-router-dom'
 import { getMe, getMyPlaylists } from '@/lib/spotify'
-import { requireToken } from '@/lib/token'
+import { readToken } from '@/lib/token'
 import { toolInfo } from '@/lib/tools'
 import { ToolHeader } from '@/lib/components/ToolHeader'
 import { PlaylistGrid, PlaylistGridSkeleton } from '@/lib/components/spotify/PlaylistGrid'
@@ -16,8 +16,14 @@ async function getOwnedPlaylists(token: string) {
 }
 
 export function loader() {
+	// This runs in parallel with the layout's loader, so it also runs on the
+	// navigation where the layout renders its Authorize button instead of the
+	// `<Outlet/>`. Fetching regardless is what sent Spotify `Bearer null`.
+	const token = readToken()
+	if (!token) return { playlists: Promise.resolve<Playlist[]>([]) }
+
 	// Not awaited: the grid renders skeleton cards inside Suspense meanwhile.
-	return { playlists: getOwnedPlaylists(requireToken()!) }
+	return { playlists: getOwnedPlaylists(token.accessToken) }
 }
 
 const playlistLink = ({ name, id, images }: Playlist) =>

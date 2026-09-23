@@ -1,12 +1,12 @@
 import { authorize } from '@/lib/spotify/auth'
-import { setCookie } from '@/lib/cookie'
+import { setItem } from '@/lib/storage'
 
 interface AuthSpotifyButtonProps {
 	authType?: Parameters<typeof authorize>[0]
 	scopes?: string
 }
 
-export function AuthSpotifyButton({ authType = 'token', scopes }: AuthSpotifyButtonProps) {
+export function AuthSpotifyButton({ authType = 'pkce', scopes }: AuthSpotifyButtonProps) {
 	return (
 		<>
 			<button
@@ -15,8 +15,8 @@ export function AuthSpotifyButton({ authType = 'token', scopes }: AuthSpotifyBut
 					let url = location.pathname
 					if (location.search) url += location.search
 					if (location.hash) url += location.hash
-					setCookie('directed_from', url)
-					authorize(authType, scopes)
+					setItem('directed_from', url)
+					void authorize(authType, scopes)
 				}}
 			>
 				Authorize

@@ -1,7 +1,17 @@
 import ms from '../spotify-mocked'
 import { create, sync, populate } from 'src/tools/public-liked-songs'
+import { sendReauthorizeEmail } from 'src/reauthorize'
 import { db } from 'src/init'
+import { FieldValue, Timestamp } from 'firebase-admin/firestore'
 import { HttpsError, CallableRequest, CallableFunction } from 'firebase-functions/v2/https'
+
+// Only the send is mocked; the expiry date math stays real so the tests
+// exercise it.
+jest.mock('src/reauthorize', () => ({
+	...jest.requireActual<typeof import('src/reauthorize')>('src/reauthorize'),
+	sendReauthorizeEmail: jest.fn().mockResolvedValue(true)
+}))
+const sendEmail = jest.mocked(sendReauthorizeEmail)
 
 afterEach(async () => {
 	if ((await doc.get()).exists) await doc.delete()
@@ -27,7 +37,21 @@ describe('create', () => {
 	describe('new spotify account', () => {
 		test('creates new docuemnt', async () => {
 			await create.run({ data, auth, rawRequest })
-			expect((await doc.get()).exists).toBeTruthy()
+			const snapshot = await doc.get()
+			expect(snapshot.exists).toBeTruthy()
+			expect(snapshot.data()).toMatchObject({ refresh_token, origin, uid: auth.uid })
+			expect(snapshot.data()?.authorized_at).toBeInstanceOf(Timestamp)
+		})
+	})
+
+	describe('existing document', () => {
+		test('re-arms the expiry reminder', async () => {
+			await doc.create({ refresh_token: 'old', playlist_id, reminded_at: Timestamp.now() })
+			await create.run({ data, auth, rawRequest })
+			const saved = (await doc.get()).data()
+			expect(saved).toMatchObject({ refresh_token, playlist_id })
+			expect(saved).not.toHaveProperty('reminded_at')
+			expect(saved?.authorized_at).toBeInstanceOf(Timestamp)
 		})
 	})
 
@@ -171,6 +195,9 @@ describe('populate', () => {
 				expect(err).toBeInstanceOf(HttpsError)
 				expect(err).toHaveProperty('code', 'unauthenticated')
 			}
+			const saved = (await doc.get()).data()
+			expect(saved).not.toHaveProperty('refresh_token')
+			expect(saved).toHaveProperty('playlist_id', playlist_id)
 		})
 	})
 
@@ -215,6 +242,83 @@ describe('sync', () => {
 			await sync.run({ scheduleTime })
 			expect(ms.getPlaylistItems).not.toHaveBeenCalled()
 			expect((await doc.get()).exists).toBeFalsy()
+		})
+	})
+
+	describe('expired token', () => {
+		beforeEach(async () => {
+			await doc.create({ refresh_token, playlist_id, uid: auth.uid, origin })
+		})
+
+		test('drops the token and emails the user', async () => {
+			// Spotify's body for an expired token carries no description.
+			ms.refreshAccessToken.mockRejectedValueOnce(new Error('{"error":"invalid_grant"}'))
+			await sync.run({ scheduleTime })
+			expect(ms.getPlaylistItems).not.toHaveBeenCalled()
+			const saved = (await doc.get()).data()
+			expect(saved).not.toHaveProperty('refresh_token')
+			expect(saved).toHaveProperty('playlist_id', playlist_id)
+			expect(sendEmail).toBeCalledTimes(1)
+			expect(sendEmail).toBeCalledWith(
+				expect.objectContaining({ uid: auth.uid, origin, kind: 'expired' })
+			)
+		})
+
+		test('leaves users waiting to reconnect alone', async () => {
+			await doc.update({ refresh_token: FieldValue.delete() })
+			await sync.run({ scheduleTime })
+			expect(ms.refreshAccessToken).not.toHaveBeenCalled()
+			expect(sendEmail).not.toHaveBeenCalled()
+			expect((await doc.get()).exists).toBeTruthy()
+		})
+	})
+
+	describe('expiry reminder', () => {
+		/** `authorized_at` such that the token expires `days` from now. */
+		function expiringIn(days: number) {
+			const date = new Date()
+			date.setMonth(date.getMonth() - 6)
+			date.setDate(date.getDate() + days)
+			return Timestamp.fromDate(date)
+		}
+
+		beforeEach(async () => {
+			await doc.create({ refresh_token, playlist_id, uid: auth.uid, origin })
+		})
+
+		test('emails once when expiring soon', async () => {
+			await doc.update({ authorized_at: expiringIn(7) })
+			await sync.run({ scheduleTime })
+			expect(sendEmail).toBeCalledTimes(1)
+			expect(sendEmail).toBeCalledWith(
+				expect.objectContaining({ uid: auth.uid, origin, kind: 'expiring' })
+			)
+			expect(sendEmail.mock.calls[0][0].authorizedAt).toBeInstanceOf(Timestamp)
+			expect((await doc.get()).data()?.reminded_at).toBeInstanceOf(Timestamp)
+			expect(ms.getPlaylistItems).toBeCalledTimes(1)
+
+			await sync.run({ scheduleTime })
+			expect(sendEmail).toBeCalledTimes(1)
+		})
+
+		test('no email while the token is fresh', async () => {
+			await doc.update({ authorized_at: Timestamp.now() })
+			await sync.run({ scheduleTime })
+			expect(sendEmail).not.toHaveBeenCalled()
+			expect((await doc.get()).data()).not.toHaveProperty('reminded_at')
+		})
+
+		test('no email without an authorization date', async () => {
+			await sync.run({ scheduleTime })
+			expect(sendEmail).not.toHaveBeenCalled()
+		})
+
+		test('a failed send is retried next run', async () => {
+			await doc.update({ authorized_at: expiringIn(7) })
+			sendEmail.mockRejectedValueOnce(new Error('Failed to send email'))
+			await sync.run({ scheduleTime })
+			expect((await doc.get()).data()).not.toHaveProperty('reminded_at')
+			expect(ms.getPlaylistItems).toBeCalledTimes(1)
 		})
 	})
 })

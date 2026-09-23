@@ -1,7 +1,7 @@
 import { redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from 'react-router-dom'
 import { signInWithEmailLink, isSignInWithEmailLink } from 'firebase/auth'
 import { auth } from '@/lib/firebase/auth'
-import { getAllCookies } from '@/lib/cookie'
+import { getItem } from '@/lib/storage'
 import { requireField } from '@/lib/form'
 import { EmailForm } from '@/lib/components/EmailForm'
 
@@ -25,9 +25,9 @@ async function completeSignIn(email: string, url: string) {
 	return redirect(state ?? '/')
 }
 
-/** Signs in straight away when the address is still in the cookie. */
+/** Signs in straight away when the address is still in local storage. */
 export function loader({ request }: LoaderFunctionArgs) {
-	const { email } = getAllCookies()
+	const email = getItem('email')
 	if (!email) return null
 	return completeSignIn(email, request.url)
 }
@@ -39,7 +39,8 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export function LoginCallback() {
-	// Reached only when the loader found no cookie; a successful sign-in
+	// Reached only when the loader found no stored email (e.g. the link was
+	// opened in another browser or on another device); a successful sign-in
 	// redirects, so there is nothing to render for the happy path.
 	return (
 		<>
