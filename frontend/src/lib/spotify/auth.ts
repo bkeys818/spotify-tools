@@ -1,4 +1,4 @@
-import { setCookie } from '@/lib/cookie'
+import { setItem } from '@/lib/storage'
 
 const PUBLIC_CLIENT_ID = import.meta.env.PUBLIC_CLIENT_ID
 
@@ -16,7 +16,7 @@ const redirectUri = () => location.origin + '/authorize'
  */
 export async function authorize(type: 'code' | 'pkce', scopes?: string) {
 	const state = createState()
-	setCookie('state', state)
+	setItem('state', state)
 	const params = new URLSearchParams({
 		response_type: 'code',
 		client_id: PUBLIC_CLIENT_ID,
@@ -26,7 +26,7 @@ export async function authorize(type: 'code' | 'pkce', scopes?: string) {
 	if (scopes) params.set('scope', scopes)
 	if (type == 'pkce') {
 		const verifier = createState(64)
-		setCookie('code_verifier', verifier)
+		setItem('code_verifier', verifier)
 		params.set('code_challenge_method', 'S256')
 		params.set('code_challenge', await createChallenge(verifier))
 	}

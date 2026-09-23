@@ -1,19 +1,13 @@
-import { getAllCookies } from './cookie'
+import { getToken } from './storage'
 
 /**
- * Reads the access token back out of the cookies written by `/authorize`,
+ * Reads the access token back out of the local storage written by `/authorize`,
  * returning null when there isn't a usable one.
  *
  * Synchronous, which is what lets route loaders call it directly.
  */
 export function readToken() {
-	const { access_token, auth_expiration } = getAllCookies()
-	if (!access_token || !auth_expiration) return null
-	const expiresIn = parseInt(auth_expiration) - ((Date.now() / 1000) | 0)
-	// The Svelte version tested `if (access_token && expires_in)`, which is
-	// truthy for an already-expired (negative) token.
-	if (!Number.isFinite(expiresIn) || expiresIn <= 0) return null
-	return { accessToken: access_token, expiresIn }
+	return getToken() ?? null
 }
 
 /**

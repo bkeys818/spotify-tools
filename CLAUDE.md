@@ -39,7 +39,7 @@ Deploys normally happen from GitHub Actions on push to `main` (`frontend-deploy.
 
 Two halves that share one Spotify integration but implement it twice, for different token flows:
 
-- **`frontend/`** — React 19 + Vite, React Router 7 in **data mode** (`createBrowserRouter` in `src/App.tsx`), Tailwind 4. A client-only SPA: there is no server side and no prerendering, so every route does its work in the browser. `src/lib/spotify/` is a browser fetch wrapper using an _implicit-grant access token_ held in a cookie.
+- **`frontend/`** — React 19 + Vite, React Router 7 in **data mode** (`createBrowserRouter` in `src/App.tsx`), Tailwind 4. A client-only SPA: there is no server side and no prerendering, so every route does its work in the browser. `src/lib/spotify/` is a browser fetch wrapper using a _PKCE access token_ held in local storage.
 - **`functions/`** — Firebase Functions v2 (CommonJS, `tsc` to `functions/lib`). `src/spotify/index.ts` is a self-contained class using `node-fetch` and the _authorization-code refresh token_ stored in Firestore. It exists so scheduled jobs can act on a user's account without the browser.
 
 ### Callable function wiring
@@ -51,9 +51,9 @@ Two halves that share one Spotify integration but implement it twice, for differ
 Two independent logins, both required for `public-liked-songs`:
 
 1. **Firebase** — passwordless email link (`/login` → `/login/callback`), both driven by route actions. Loaders that need a session `await waitForUser()` from `lib/firebase/auth.ts`, since `auth.currentUser` is null until Firebase restores the session; `AuthFirebase.tsx` then renders the login prompt when that returns null.
-2. **Spotify** — `AuthSpotifyButton` stores the current path in a `directed_from` cookie plus a random `state` cookie, then sends the user to Spotify with `redirect_uri = origin + '/authorize'`. `/authorize` is a shared trampoline: it validates `state`, then either forwards the `code` query back to `directed_from` (authorization-code flow, for tools that need server-side refresh tokens) or stores the hash access token in a path-scoped cookie and redirects (implicit flow, for browser-only tools like `duplicate-remover`).
+2. **Spotify** — `AuthSpotifyButton` stores the current path as `directed_from` plus a random `state` in local storage, then sends the user to Spotify with `redirect_uri = origin + '/authorize'`. `/authorize` is a shared trampoline: it validates `state`, then either forwards the `code` query back to `directed_from` (authorization-code flow, for tools that need server-side refresh tokens) or, when a `code_verifier` is stored, redeems the code in the browser, stores the access token in local storage and redirects (PKCE flow, for browser-only tools like `duplicate-remover`).
 
-Cookie keys and their scopes/lifetimes live in `frontend/src/lib/cookie.ts`; `lib/token.ts` reads them back. `readToken()` is synchronous precisely so loaders can call it — `/duplicate-remover` is a layout route whose loader gates both children behind a token, and `requireToken()` is the loader-side assertion beneath it. Parent and child loaders run in parallel, so children read the cookie themselves rather than depending on the layout's data.
+Local storage keys and their lifetimes live in `frontend/src/lib/storage.ts` (entries carry their own expiry, since local storage has none); `lib/token.ts` reads the token back. `readToken()` is synchronous precisely so loaders can call it — `/duplicate-remover` is a layout route whose loader gates both children behind a token, and `requireToken()` is the loader-side assertion beneath it. Parent and child loaders run in parallel, so children read the token themselves rather than depending on the layout's data.
 
 ### Firestore model
 

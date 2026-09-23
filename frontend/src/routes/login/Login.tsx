@@ -1,7 +1,7 @@
 import { useActionData, useNavigation, type ActionFunctionArgs } from 'react-router-dom'
 import { sendSignInLinkToEmail } from 'firebase/auth'
 import { auth } from '@/lib/firebase/auth'
-import { setCookie } from '@/lib/cookie'
+import { setItem } from '@/lib/storage'
 import { requireField } from '@/lib/form'
 import { EmailForm } from '@/lib/components/EmailForm'
 
@@ -13,7 +13,7 @@ export async function action({ request }: ActionFunctionArgs) {
 	if (redirect) url.searchParams.set('state', redirect)
 
 	await sendSignInLinkToEmail(auth, email, { url: url.href, handleCodeInApp: true })
-	setCookie('email', email)
+	setItem('email', email)
 
 	return { email }
 }
