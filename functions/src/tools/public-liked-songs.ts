@@ -1,21 +1,47 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { onSchedule } from 'firebase-functions/v2/scheduler'
 import { error, warn, info } from 'firebase-functions/logger'
+import { FieldValue, type DocumentReference, type Timestamp } from 'firebase-admin/firestore'
 import { db } from '../init'
 import Spotify from '../spotify'
 import { forEvery, formatError, mapWithConcurrency } from '../utils'
 import { SpotifyError } from '../spotify/error'
-import { secrets } from '../env'
+import { spotifySecrets, emailSecrets } from '../env'
+import { isExpiringSoon, sendReauthorizeEmail } from '../reauthorize'
 
 const tool = 'public-liked-songs'
 
 /** Users synced at once. Spotify rate limits per app, so this is a shared budget. */
 const USER_CONCURRENCY = 2
 
+/** Reconnect link for documents written before `origin` was stored. */
+const SITE_FALLBACK = 'https://ben-keys-spotify-tools.web.app'
+
 type Document = {
-	refresh_token: string
+	/** Absent once Spotify rejects it: the user has to reconnect before anything else happens. */
+	refresh_token?: string
 	playlist_id?: string
 	uid: string
+	/** Where the user authorized from, so the reconnect email links to the same deployment. */
+	origin?: string
+	/** Start of Spotify's six-month clock; see `reauthorize.ts`. */
+	authorized_at?: Timestamp
+	/** The pre-expiry email has gone out for this authorization. */
+	reminded_at?: Timestamp
+}
+
+/** Spotify's answer for an expired or revoked refresh token (and a spent auth code). */
+function isInvalidGrant(err: unknown): err is Error {
+	return err instanceof Error && err.message.includes('invalid_grant')
+}
+
+/**
+ * Drops just the token. `playlist_id` and `uid` stay, so reconnecting through
+ * `create` picks the same playlist back up.
+ */
+async function expireToken(ref: DocumentReference, spotifyUserId: string) {
+	await ref.update({ refresh_token: FieldValue.delete() })
+	info('Spotify authorization expired.', { tool, spotifyUserId })
 }
 
 type CreateParams = {
@@ -28,7 +54,7 @@ type CreateResponse = Promise<{
 }>
 
 export const create = onCall<CreateParams, CreateResponse>(
-	{ secrets, maxInstances: 3 },
+	{ secrets: spotifySecrets, maxInstances: 3 },
 	async ({ data, auth }) => {
 		if (!auth) throw new HttpsError('unauthenticated', 'User must be authenticated.')
 
@@ -38,7 +64,7 @@ export const create = onCall<CreateParams, CreateResponse>(
 			redirectUri: data.origin + '/authorize'
 		})
 		const { refresh_token } = await spotify.authorizationCodeGrant(data.code).catch(err => {
-			if (err instanceof Error && err.message.includes('invalid_grant')) {
+			if (isInvalidGrant(err)) {
 				warn('Unable to get Spotify refresh token.', {
 					tool,
 					error: formatError(err)
@@ -52,12 +78,18 @@ export const create = onCall<CreateParams, CreateResponse>(
 		const ref = db.collection(tool).doc(user.id)
 		let doc = await ref.get()
 
+		// A fresh grant restarts Spotify's expiry clock, so the reminder is re-armed too.
+		const authorization = {
+			refresh_token,
+			origin: data.origin,
+			authorized_at: FieldValue.serverTimestamp()
+		}
 		let docData: Document
 		if (doc.exists) {
 			docData = doc.data() as Document
-			await ref.update({ refresh_token })
+			await ref.update({ ...authorization, reminded_at: FieldValue.delete() })
 		} else {
-			await ref.create({ refresh_token, uid: auth.uid })
+			await ref.create({ ...authorization, uid: auth.uid })
 			doc = await ref.get() // Do I need this line?
 			docData = doc.data() as Document
 		}
@@ -101,7 +133,7 @@ type PopulateParams = {
 }
 
 export const populate = onCall<PopulateParams>(
-	{ secrets, timeoutSeconds: 300, maxInstances: 3 },
+	{ secrets: spotifySecrets, timeoutSeconds: 300, maxInstances: 3 },
 	async ({ data, auth }) => {
 		if (!auth) throw new HttpsError('unauthenticated', 'User must be authenticated.')
 		const ref = db.doc(tool + '/' + data.userId)
@@ -135,18 +167,9 @@ export const populate = onCall<PopulateParams>(
 		try {
 			await spotify.refreshAccessToken()
 		} catch (err) {
-			if (err instanceof Error && err.message.includes('invalid_grant')) {
-				if (err.message.startsWith('Refresh token revoked')) {
-					await ref.update({ refresh_token: FirebaseFirestore.FieldValue.delete() })
-					info('Spotify access was revoked.', { spotifyUserId: doc.id })
-					throw new HttpsError('unauthenticated', 'Spotify authorization was revoked')
-				} else {
-					warn('Failed to refresh Spotify access token.', {
-						tool,
-						error: formatError(err)
-					})
-					throw new HttpsError('unauthenticated', 'Spotify authorization denied')
-				}
+			if (isInvalidGrant(err)) {
+				await expireToken(ref, doc.id)
+				throw new HttpsError('unauthenticated', 'Spotify authorization expired')
 			}
 			throw err
 		}
@@ -167,7 +190,12 @@ export const populate = onCall<PopulateParams>(
 )
 
 export const sync = onSchedule(
-	{ schedule: '0 0 * * *', secrets, timeoutSeconds: 540, maxInstances: 1 },
+	{
+		schedule: '0 0 * * *',
+		secrets: [...spotifySecrets, ...emailSecrets],
+		timeoutSeconds: 540,
+		maxInstances: 1
+	},
 	async () => {
 		const docRefs = await db.collection(tool).listDocuments()
 		let rateLimited = 0
@@ -178,15 +206,33 @@ export const sync = onSchedule(
 			try {
 				const doc = await ref.get()
 				data = doc.data() as Document
+				// Already asked to reconnect; nothing to do until they do.
+				if (!data.refresh_token) return
 				const spotify = new Spotify({
 					clientId: process.env.SPOTIFY_CLIENT_ID,
 					clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 					refreshToken: data.refresh_token
 				})
-				await spotify.refreshAccessToken()
+				try {
+					await spotify.refreshAccessToken()
+				} catch (err) {
+					if (!isInvalidGrant(err)) throw err
+					// Token first, then email: a failed send is logged once
+					// rather than retried against a dead token every night.
+					await expireToken(ref, ref.id)
+					return await sendReauthorizeEmail({
+						uid: data.uid,
+						tool,
+						origin: data.origin ?? SITE_FALLBACK,
+						kind: 'expired'
+					})
+				}
 				if (!data.playlist_id) return await ref.delete()
 				if (!(await spotify.usersFollowPlaylist([data.playlist_id]))[0])
 					return await ref.delete()
+				// Before the sync itself, so a rate-limited night doesn't also
+				// swallow the reminder.
+				await remind(ref, data)
 				return await update(spotify, data.playlist_id)
 			} catch (err) {
 				if (err instanceof SpotifyError && err.status == 429) rateLimited++
@@ -208,6 +254,33 @@ export const sync = onSchedule(
 		return
 	}
 )
+
+/**
+ * Sends the pre-expiry email once per authorization. Documents from before
+ * `authorized_at` was recorded never qualify: their clock is unknowable, so
+ * they only hear about it once the token is actually dead.
+ */
+async function remind(ref: DocumentReference, data: Document) {
+	if (!data.authorized_at || data.reminded_at || !isExpiringSoon(data.authorized_at)) return
+	try {
+		const sent = await sendReauthorizeEmail({
+			uid: data.uid,
+			tool,
+			origin: data.origin ?? SITE_FALLBACK,
+			kind: 'expiring',
+			authorizedAt: data.authorized_at
+		})
+		if (sent) await ref.update({ reminded_at: FieldValue.serverTimestamp() })
+	} catch (err) {
+		// Leaves `reminded_at` unset so tomorrow's run tries again.
+		error('Failed to send reauthorize reminder.', {
+			tool,
+			error: formatError(err),
+			spotifyUserId: ref.id,
+			firebaseUid: data.uid
+		})
+	}
+}
 
 async function update(spotify: Spotify, playlistId: string) {
 	// Sequential, not Promise.all: each of these is itself a paginated fan-out,
