@@ -15,7 +15,7 @@ const tool = 'public-liked-songs'
 const USER_CONCURRENCY = 2
 
 /** Reconnect link for documents written before `origin` was stored. */
-const SITE_FALLBACK = 'https://ben-keys-spotify-tools.web.app'
+const SITE_FALLBACK = 'https://ben-keys.com'
 
 type Document = {
 	/** Absent once Spotify rejects it: the user has to reconnect before anything else happens. */
